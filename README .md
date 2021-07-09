@@ -1,0 +1,1 @@
+Pay My Buddy application  that allows payments to be made
