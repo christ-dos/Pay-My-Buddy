@@ -5,25 +5,30 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Table(name="user")
 @Data
+@Builder
 public class User {
     @Id
-    @Column(name="email")
+    @Column(name = "email")
     private String email;
 
-    @Column(name="mot_passe")
+    @Column(name = "password")
     private String password;
 
-    @Column(name="solde_compte")
-    private Double accountBalance;
+    @Column(name = "first_name")
+    private String firstName;
 
-    @Column(name="numero_compte_bancaire")
-    private Integer bankAccountNumber;
+    @Column(name = "last_name")
+    private String lastName;
 
-    @Column(name="amis_email")
-    private String friendEmail;
+    @Column(name="balance")
+    private Double balance;
+
+    @Column(name="account_bank")
+    private Integer accountBank;
 }

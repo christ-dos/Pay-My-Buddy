@@ -20,9 +20,11 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		Iterable<User> users = userService.getUsers();
-		users.forEach(user -> System.out.println(user.getEmail()));
-		//System.out.println("Hello World");
+		System.out.println("Hello World !");
+		//Iterable<User> users = userService.getUsers();
+		//users.forEach(user -> System.out.println(user.getEmail()));
+
+
 	}
 }
 
