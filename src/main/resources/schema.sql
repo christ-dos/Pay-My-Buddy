@@ -1,4 +1,9 @@
 
+DROP DATABASE IF EXISTS paymybuddy;
+
+CREATE DATABASE paymybuddy;
+
+USE paymybuddy;
 
 CREATE TABLE IF NOT EXISTS user (
                 email VARCHAR(100) NOT NULL,
@@ -11,8 +16,8 @@ CREATE TABLE IF NOT EXISTS user (
 );
 
 INSERT INTO  user(email, password, first_name, last_name, balance, account_bank)
-       VALUES('tela@email.fr', 'monpassword', 'Stella', 'Durant', 20.50, 000251),
-	     ('dada@email.fr', 'password', 'Daminen', 'Sanchez', 3.50, 000255),
+       VALUES('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 000251),
+	     ('dada@email.fr', 'monpassword', 'Daminen', 'Sanchez', 3.50, 000255),
 	     ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 22.80, 0003598),
 	     ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 18.98, 0002598),
 	     ('roro@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 0007836)

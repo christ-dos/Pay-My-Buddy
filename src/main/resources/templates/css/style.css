@@ -1,0 +1,85 @@
+body{
+	margin: auto;
+	font-size: 1.2em
+}
+.green{
+	background-color:rgb(128,255,0); 
+}
+.gray{
+	background-color:rgb(196,196,196); 
+}
+.desabled{
+	color:rgb(192,192,192);
+}
+
+.blue-backg{
+	background-color: blue;
+}
+
+.rounded{
+	width: 180px;
+	height: 40px;
+	border-radius: 8px;
+	border:none;
+	padding: 6px;
+}
+
+.police1{
+	font-size: 1.2em;
+}
+
+.bold{ 
+font-weight: bold; 
+}
+
+/************** navBar****************/
+.navbar-nav>.nav-item>.nav-link>span:active {
+	color: rgb(130,192,255);
+}
+
+.align-nav {
+    display: flex;
+    justify-content: space-between;
+    flex: 1 1 auto;
+    padding: 0px;
+}
+
+#logo{
+	padding:2px;
+	vertical-align: center;
+	margin-left: 4px;
+}
+
+/************Items Select A Connection, input number and btn Pay*********/
+#formSelect{
+	width: 220px;
+}
+
+#btnPay{
+	width: 170px
+}
+#howmuch{
+	text-align: right;
+	font-size: 1.1em
+}
+/* ************table*********/
+table{
+	font-size: 0.6em
+	border-collapse: collapse;
+	border: 2px solid black;
+}
+
+.borderless td, .borderless th {
+    border: none;
+    text-align: center
+}
+
+
+
+
+
+
+
+
+
+
