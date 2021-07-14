@@ -50,9 +50,14 @@ font-weight: bold;
 	margin-left: 4px;
 }
 
-/************Items Select A Connection, input number and btn Pay*********/
+/************Items Select Add Connection, input number and btn Pay*********/
 #formSelect{
 	width: 220px;
+}
+
+#btnAddConnection{
+	width: 220px;
+	font-size: 0.9em;
 }
 
 #btnPay{

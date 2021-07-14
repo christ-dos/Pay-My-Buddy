@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-public class TransactionController {
+public class UserController {
 
     @RequestMapping("/login")
     public ModelAndView getFriendList(){
