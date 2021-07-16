@@ -5,25 +5,24 @@ CREATE DATABASE paymybuddy;
 
 USE paymybuddy;
 
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE  user (
                 email VARCHAR(100) NOT NULL,
                 password VARCHAR(30) NOT NULL,
                 first_name VARCHAR(30) NOT NULL,
                 last_name VARCHAR(30) NOT NULL,
                 balance DECIMAL(8,2),
-                account_bank SMALLINT NOT NULL,
+                account_bank INTEGER(6) NOT NULL,
                 PRIMARY KEY (email)
 );
 
 INSERT INTO  user(email, password, first_name, last_name, balance, account_bank)
-       VALUES('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 000251),
-	     ('dada@email.fr', 'monpassword', 'Daminen', 'Sanchez', 3.50, 000255),
-	     ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 22.80, 0003598),
-	     ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 18.98, 0002598),
-	     ('roro@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 0007836)
+       VALUES('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
+	     ('dada@email.fr', 'monpassword', 'Daminen', 'Sanchez', 3.50, 255896),
+	     ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 22.80, 359840),
+	     ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 18.98, 259873),
+	     ('lili@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 783600)
 ;
 
-DROP TABLE IF EXISTS transaction;
 CREATE TABLE transaction (
                 id TINYINT AUTO_INCREMENT NOT NULL,
                 date DATETIME NOT NULL,
@@ -55,19 +54,19 @@ CREATE TABLE friend (
 );
 
 
-ALTER TABLE friend ADD CONSTRAINT utilisateur_amis_fk
+ALTER TABLE friend ADD CONSTRAINT user_friend_fk
 FOREIGN KEY (user_email)
 REFERENCES user (email)
 ON DELETE NO ACTION
-ON UPDATE NO ACTION;
+ON UPDATE CASCADE;
 
-ALTER TABLE friend ADD CONSTRAINT utilisateur_amis_fk1
+ALTER TABLE friend ADD CONSTRAINT user_friend_fk1
 FOREIGN KEY (friend_email)
 REFERENCES user (email)
 ON DELETE NO ACTION
-ON UPDATE NO ACTION;
+ON UPDATE CASCADE ;
 
-ALTER TABLE transfer ADD CONSTRAINT utilisateur_transaction_bancaire_fk
+ALTER TABLE transfer ADD CONSTRAINT user_transfer_fk
 FOREIGN KEY (user_email)
 REFERENCES user (email)
 ON DELETE NO ACTION

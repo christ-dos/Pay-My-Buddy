@@ -1,17 +1,25 @@
 package com.openclassrooms.paymybuddy.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name="user")
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @Column(name = "email")
@@ -31,4 +39,28 @@ public class User {
 
     @Column(name="account_bank")
     private Integer accountBank;
+
+    @ManyToMany(
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+    )
+    @JoinTable(
+            name = "friend",
+            joinColumns = @JoinColumn(name="user_email", referencedColumnName = "email"),
+            inverseJoinColumns = @JoinColumn(name = "friend_email", referencedColumnName = "email")
+    )
+    private Set<User> friends = new HashSet<>();
+
+    @ManyToMany(mappedBy = "friends")
+    private Set<User> users = new HashSet<>();
+
+    public User(String email, String password, String firstName, String lastName, Double balance, Integer accountBank) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.balance = balance;
+        this.accountBank = accountBank;
+    }
+
 }
