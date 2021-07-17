@@ -20,12 +20,10 @@ public class UserService implements IUserService {
     @Autowired
     private IUserRepository userRepository;
 
-
-    @Override
-    public User addUser(String email) {
-        return null;
-    }
-
+    /**
+     * Method that get list of users
+     * @return An Iterable of User
+     */
     @Override
     public Iterable<User> getUsers(){
         log.info("UserService: Display list of Users");
