@@ -78,7 +78,7 @@
 	</div>
 	<section>
 	<!--************* Add Connection******************-->
-		<div class="container col-sm-8 col-md-8 col-lg-8 p-2">
+		<div class="container col-8 p-2">
 			<div class="row justify-content-between" >
 				<div class="col">
 					<h5 class="police1">Send Money</h5>
@@ -91,11 +91,10 @@
 				</div>
 			</div>
 		<!--<div>-->
-		<!--<div class="container d-flex justify-content-center col-8 gray">-->
-
+		<div class="container d-flex justify-content-center align-items-center gray">
 			<!--********Item select A Connection***********-->
-			<div class="row pb-3 pt-4 gray justify-content-center">
-				<div class="col-sm-8 col-md-8 col-lg-2">
+			<div class="row col-8  pb-4 pt-4 ">
+				<div class="col">
 					<select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="formSelect">
 					  <option selected>Select A Connection</option>
 					  <option value="1">One</option>
@@ -104,21 +103,21 @@
 					</select>
 				</div>
 				<!--*************Input Number**************-->
-				<div class="col-sm-8 col-md-8 col-lg-2 gray">
+				<div class="col d-flex px-3 mb-3">
 					<input type="number" id="howmuch" step="1" placeholder="0€" min="0"  max="1000000">
 				</div>
 				<!--**************Bouton Pay******************-->
-				<div class="col-sm-8 col-md-8 col-lg-2 pl-0 gray" >
+				<div class="col " >
 					<button type="button" class="btn btn-success btn-sm text-light rounded bold" id="btnPay">Pay
 					</button>
 				</div>
 			</div>
-		<!--</div>-->
+		</div>
 		<!--<div class="container col-8">-->
 			<h5>My Transactions</h5>
 			<!-- ***************Table******************-->
 			<table class="table table-condensed table-striped borderless mb-0">
-			  <thead class="thead-light green text-light bold ">
+			  <thead class="thead-light btn-success text-light bold ">
 				<tr>
 				  <th scope="col" class=" pt-4 pb-4">Connections</th>
 				  <th scope="col" class=" pt-4 pb-4">Description</th>

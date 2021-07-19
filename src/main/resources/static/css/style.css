@@ -2,12 +2,11 @@ body{
 	margin: auto;
 	font-size: 1.2em
 }
-.green{
-	background-color:#5c881d;
-}
+
 .gray{
 	background-color:rgba(196,196,196,0.2);
 }
+
 .desabled{
 	color:rgb(196,196,196);
 }

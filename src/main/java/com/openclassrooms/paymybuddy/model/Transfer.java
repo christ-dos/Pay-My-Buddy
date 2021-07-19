@@ -11,7 +11,6 @@ import java.util.Date;
 @Entity
 @Data
 @Builder
-@NoArgsConstructor
 public class Transfer {
 
     @Id
