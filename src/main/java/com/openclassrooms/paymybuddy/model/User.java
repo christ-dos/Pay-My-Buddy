@@ -15,17 +15,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Entity
-@Table(name="user")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
     @Id
-    @Column(name = "email")
     private String email;
 
-    @Column(name = "password")
     private String password;
 
     @Column(name = "first_name")
@@ -34,7 +31,6 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name="balance")
     private Double balance;
 
     @Column(name="account_bank")
@@ -53,14 +49,5 @@ public class User {
 
     @ManyToMany(mappedBy = "friends")
     private Set<User> users = new HashSet<>();
-
-    public User(String email, String password, String firstName, String lastName, Double balance, Integer accountBank) {
-        this.email = email;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.balance = balance;
-        this.accountBank = accountBank;
-    }
 
 }

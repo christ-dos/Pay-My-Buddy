@@ -26,10 +26,9 @@ INSERT INTO  user(email, password, first_name, last_name, balance, account_bank)
 CREATE TABLE transaction (
                 id TINYINT AUTO_INCREMENT NOT NULL,
                 date DATETIME NOT NULL,
-                type VARCHAR(10) NOT NULL,
                 amount DECIMAL(8,8) NOT NULL,
                 description VARCHAR(300),
-                cost DECIMAL(8,8) NOT NULL,
+                fees DECIMAL(8,8) NOT NULL,
                 emitter_email VARCHAR(100) NOT NULL,
                 receiver_email VARCHAR(100) NOT NULL,
                 PRIMARY KEY (id)

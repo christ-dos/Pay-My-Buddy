@@ -12,13 +12,15 @@ import java.util.Optional;
 
 
 @Service
-@Builder
 @Slf4j
-@AllArgsConstructor
 public class UserService implements IUserService {
 
+    private final IUserRepository userRepository;
+
     @Autowired
-    private IUserRepository userRepository;
+    public UserService(IUserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /**
      * Method that get list of users

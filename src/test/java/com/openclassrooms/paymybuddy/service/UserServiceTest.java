@@ -3,6 +3,7 @@ package com.openclassrooms.paymybuddy.service;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import org.assertj.core.util.Arrays;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,6 +28,7 @@ public class UserServiceTest {
     @Mock
     Map<String, String> friendListMock;
 
+    @BeforeEach
     public void setPerTest(){
         userListMock = new HashSet<>();
         friendListMock = new HashMap<>();
@@ -40,10 +42,11 @@ public class UserServiceTest {
                 .firstName("Antonio").lastName("Banderas")
                 .balance(16.25).accountBank(6921489)
                 .build());
+
         friendListMock.put("lili@email.fr" , "belo@email.fr");
         friendListMock.put("lucitano@email.fr" , "kikine@email.fr");
-        userServiceTest = UserService.builder()
-                .userRepository(userRepositoryMock).build();
+
+        userServiceTest = new UserService(userRepositoryMock);
     }
 
     @Test
@@ -54,5 +57,6 @@ public class UserServiceTest {
         //WHEN
         userServiceTest.addFriendUser(userEmail,friendEmail);
         //THEN
+
     }
 }
