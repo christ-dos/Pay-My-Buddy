@@ -13,6 +13,7 @@ import com.openclassrooms.paymybuddy.service.IUserService;
 
 @RestController
 public class UserController {
+
     @Autowired
     private IUserService userService;
 
@@ -37,7 +38,7 @@ public class UserController {
     }
 
     @GetMapping(value = "/friend")
-    public void addingFriendListUser(@Param("userEmail") String userEmail,@Param("friendEmail") String friendEmail){
+    public void addingFriendListUser(@Param("userEmail") String userEmail ,@Param("friendEmail") String friendEmail){
         userService.addFriendUser(userEmail, friendEmail);
     }
 }
