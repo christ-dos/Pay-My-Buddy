@@ -18,7 +18,10 @@ public class UserController {
 
     @RequestMapping(value="/login")
     public ModelAndView getFriendList(){
-
+        return new ModelAndView();
+    }
+    @RequestMapping(value="/addfriend")
+    public ModelAndView addFriendList(){
         return new ModelAndView();
     }
 
