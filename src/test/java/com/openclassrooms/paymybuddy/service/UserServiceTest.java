@@ -9,11 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -54,12 +52,15 @@ public class UserServiceTest {
     @Test
     public void addFriendUserTest_whenFriendAddedIsRomyVandermeerche_thenSetShouldContainThreeElements(){
         //GIVEN
-        String userEmail = "lili@email.fr";
-        String friendEmail = "dada@email.fr";
+        String userEmail = "kikine@email.fr";
+        String friendEmail = "luciole@email.fr";
+        Optional<User> optionalUser = Optional.of(new User("luciole@email.fr", "monpassword", "Lucinda", "Delasalle", 50.00, 256942, null, null));
+        when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(optionalUser);
         doNothing().when(userRepositoryMock).saveFriend(isA(String.class), isA(String.class));
         //WHEN
         userServiceTest.addFriendUser(userEmail,friendEmail);
         //THEN
         verify(userRepositoryMock, times(1)).saveFriend(userEmail, friendEmail);
+        //assertEquals(3, friendListMock.size());
     }
 }

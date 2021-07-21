@@ -1,42 +1,58 @@
 package com.openclassrooms.paymybuddy.controller;
 
-import org.apache.maven.model.Model;
+import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.IUserService;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.HashMap;
 import java.util.Map;
 
 
+
 @RestController
+@Slf4j
 public class UserController {
-    private static String userEmail = "lili@email.fr";
+
+    private final static String userEmail = "dada@email.fr";
 
     @Autowired
-    private IUserService userService;
-
+    private IUserService userService ;
 
 
     @RequestMapping(value="/login")
     public ModelAndView getFriendList(){
         return new ModelAndView();
     }
+
     @GetMapping("/addfriend")
-    public ModelAndView addingFriendListUser(){
+    public ModelAndView showAddFriendView(){
         String viewName = "addfriend";
         Map<String,Object> model = new HashMap<>();
         model.put("user", new User());
-       // userService.addFriendUser(userEmail, friendEmail);
-        return new ModelAndView(viewName,model);
+        log.info("The View addfriend displaying");
+        return new ModelAndView(viewName, model);
     }
+
+    @PostMapping("/addfriend")
+    public ModelAndView submitAddFriend(@ModelAttribute("friends") String friendEmail){
+
+        userService.addFriendUser(userEmail, friendEmail);
+        log.info("form submitted");
+        RedirectView redirectView = new RedirectView();
+        redirectView.setUrl("/addfriend");
+
+        return new ModelAndView(redirectView);
+    }
+
 
    /* @GetMapping(value = "/user")
     public Optional<User> getUserByEmail(@RequestParam String email){

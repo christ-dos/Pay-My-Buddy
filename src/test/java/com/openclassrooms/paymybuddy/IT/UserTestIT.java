@@ -7,12 +7,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MockMvcBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import javax.jws.WebService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@WebService
 @AutoConfigureMockMvc
 public class UserTestIT {
 
@@ -24,7 +29,7 @@ public class UserTestIT {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/friend")).andExpect(status().isOk())
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")).andExpect(status().isOk())
         .andDo(print());
 
 

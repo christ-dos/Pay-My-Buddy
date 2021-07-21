@@ -13,7 +13,8 @@ CREATE TABLE  user (
                 balance DECIMAL(8,2),
                 account_bank INTEGER(6) NOT NULL,
                 PRIMARY KEY (email)
-);
+)
+ENGINE = innoDB;
 
 INSERT INTO  user(email, password, first_name, last_name, balance, account_bank)
        VALUES('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
@@ -32,7 +33,8 @@ CREATE TABLE transaction (
                 emitter_email VARCHAR(100) NOT NULL,
                 receiver_email VARCHAR(100) NOT NULL,
                 PRIMARY KEY (id)
-);
+)
+ENGINE = innoDB;
 
 
 CREATE TABLE transfer (
@@ -43,14 +45,16 @@ CREATE TABLE transfer (
                 description VARCHAR(300),
                 user_email VARCHAR(100) NOT NULL,
                 PRIMARY KEY (id)
-);
+)
+ENGINE = innoDB;
 
 
 CREATE TABLE friend (
                 user_email VARCHAR(100) NOT NULL,
                 friend_email VARCHAR(100) NOT NULL,
                 PRIMARY KEY (user_email, friend_email)
-);
+)
+ENGINE = innoDB;
 
 
 ALTER TABLE friend ADD CONSTRAINT user_friend_fk

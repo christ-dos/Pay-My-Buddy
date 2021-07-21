@@ -8,8 +8,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.openclassrooms.paymybuddy.service.IUserService;
+;import javax.transaction.Transactional;
 
-import javax.transaction.Transactional;
 
 @SpringBootApplication
 public class PayMyBuddyApplication implements CommandLineRunner {
@@ -25,10 +25,11 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 	}
 
 	@Override
-	@Transactional
+	//@Transactional
 	public void run(String... args) throws Exception {
 
 		System.out.println("Hello World !");
+
 		//Optional<User> user = userService.getUserByEmail("tela@email.fr");
 		//Iterable<User> users = userService.getUsers();
 		//users.forEach(user1 -> System.out.println(user1));
