@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" >
   <head>
     <!-- **********Required meta tags ****************-->
     <meta charset="utf-8">
@@ -79,11 +79,11 @@
 	<!--************* Add Connection******************-->
 		<div class="container col-8 p-2">
 			<div class="row justify-content-between" >
-				<div class="col">
+				<div class="col-sm-12 col-md-2 col-lg-2">
 					<h5 class="police1">Send Money</h5>
 				</div>
 				<!--********Bouton Add Connection**********-->
-				<div class="col d-flex justify-content-end">
+				<div class="col-sm-12 col-md-2 col-lg-2 d-flex justify-content-end">
 					<!--Input which look like a button-->
 					<input class=" btn-primary rounded text-light bold text-center " type=button
 						   onclick=window.location.href="http://localhost:9090/addfriend"; value="Add Connection" id="btnAddConnection"/>
@@ -91,25 +91,27 @@
 			</div>
 		<div class="container d-flex justify-content-center align-items-center gray py-3 mb-3">
 			<!--********Item select A Connection***********-->
-			<div class="row col-8 pb-4 pt-4 ">
-				<div class="col">
-					<select class="form-select form-select mb-3" aria-label=".form-select-sm example" id="formSelect">
-					  <option selected>Select A Connection</option>
-					  <option value="1">One</option>
-					  <option value="2">Two</option>
-					  <option value="3">Three</option>
-					</select>
+			<form class="form-inline justify-content-center">
+				<div class="row justify-content-center form-group pb-4 pt-4 ">
+					<div class="col">
+						<select class="form-select mb-3" aria-label=".form-select-sm" id="formSelect">
+						  <option selected>Select A Connection</option>
+						  <option value="1">One</option>
+						  <option value="2">Two</option>
+						  <option value="3">Three</option>
+						</select>
+					</div>
+					<!--*************Input Number**************-->
+					<div class="col d-flex px-3 mb-3">
+						<input type="number" id="howmuch" step="1" placeholder="0€" min="0"  max="1000000">
+					</div>
+					<!--**************Bouton Pay******************-->
+					<div class="col" >
+						<button type="button" class="btn btn-success btn-sm text-light rounded bold" id="btnPay">Pay
+						</button>
+					</div>
 				</div>
-				<!--*************Input Number**************-->
-				<div class="col d-flex px-3 mb-3">
-					<input type="number" id="howmuch" step="1" placeholder="0€" min="0"  max="1000000">
-				</div>
-				<!--**************Bouton Pay******************-->
-				<div class="col " >
-					<button type="button" class="btn btn-success btn-sm text-light rounded bold" id="btnPay">Pay
-					</button>
-				</div>
-			</div>
+			</form>
 		</div>
 			<h5>My Transactions</h5>
 			<!-- ***************Table******************-->

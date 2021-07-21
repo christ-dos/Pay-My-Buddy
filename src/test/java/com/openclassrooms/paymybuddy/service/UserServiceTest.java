@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -52,11 +54,12 @@ public class UserServiceTest {
     @Test
     public void addFriendUserTest_whenFriendAddedIsRomyVandermeerche_thenSetShouldContainThreeElements(){
         //GIVEN
-        String userEmail = "kikine@email.fr";
-        String friendEmail = "luciole@email.fr";
+        String userEmail = "lili@email.fr";
+        String friendEmail = "dada@email.fr";
+        doNothing().when(userRepositoryMock).saveFriend(isA(String.class), isA(String.class));
         //WHEN
         userServiceTest.addFriendUser(userEmail,friendEmail);
         //THEN
-
+        verify(userRepositoryMock, times(1)).saveFriend(userEmail, friendEmail);
     }
 }
