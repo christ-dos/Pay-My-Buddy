@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDate;
@@ -58,7 +59,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
      * @return a response entity with the message :"Person not found", and the code
      *         HttpStatus 404
      */
-    @ExceptionHandler(UserNotFoundException.class)
+   /* @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
 
         Map<String, Object> body = new LinkedHashMap<>();
@@ -66,5 +67,13 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         body.put("message", "User not found, you should input an email that exist in database");
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }*/
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ModelAndView catchUserNotFoundException(UserNotFoundException ex) {
+
+        ModelAndView model = new ModelAndView("error");
+        model.addObject("errorMessage", ex.getMessage());
+        return model;
     }
 }

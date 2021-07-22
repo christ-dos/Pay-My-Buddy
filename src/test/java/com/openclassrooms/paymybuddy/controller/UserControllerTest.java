@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.UserService;
@@ -22,6 +23,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.RequestEntity.post;
@@ -29,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-@ExtendWith(MockitoExtension.class)
+@RunWith(SpringRunner.class)
 public class UserControllerTest {
     @Autowired
     private MockMvc mockMvcUser;
@@ -56,20 +60,46 @@ public class UserControllerTest {
     }
 
     @Test
-    public void submitAddFriendTest() throws Exception{
+    public void submitAddFriendTest_whenUserExist_thenRedirectIntoaddfrienrUrl() throws Exception{
         //GIVEN
         String friendEmail = "luciole@email.fr";
         String userEmail = "kikine@email.fr";
+        Optional<User> optionalUser = Optional.of(new User("luciole@email.fr", "monpassword", "Lucinda", "Delasalle", 50.00, 256942, null, null));
+        doNothing().when(userRepositoryMock).saveFriend(userEmail,friendEmail);
+        when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(optionalUser);
+
         //WHEN
         //THEN
             mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                    .param("userEmail",userEmail)
-                    .param("friendEmail",friendEmail)
+                    .content(friendEmail).header("friendEmail", "wiwi@email.fr")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().is3xxRedirection())
-                    .andExpect(redirectedUrl("/addfriend"))
+                    .andExpect(redirectedUrlTemplate("/addfriend"))
                     .andDo(print());
+        verify(userServiceMock, times(1)).addFriendUser(anyString(), anyString());
+    }
+
+    @Test
+    public void submitAddFriendTest_whenUserNotExist_thenThrowsUserNotFoundException() throws Exception{
+        //GIVEN
+        String friendEmailNotExist = "wiwi@email.fr";
+        String userEmail = "kikine@email.fr";
+        Optional<User> optionalUser = Optional.of(new User("wiwi@email.fr", "monpassword", "Lucinda", "Delasalle", 50.00, 256942, null, null));
+        doNothing().when(userRepositoryMock).saveFriend(userEmail,friendEmailNotExist);
+        when(userRepositoryMock.findByEmail(friendEmailNotExist)).thenReturn(optionalUser);
+
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
+                .content(friendEmailNotExist).header("friendEmail", "wiwi@email.fr")
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().is3xxRedirection())
+                .andExpect( jsonPath("$.message",
+                        is("User not found")))
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
+                .andExpect(result -> assertEquals("User not found", result.getResolvedException().getMessage()))
+                .andDo(print());
         verify(userServiceMock, times(1)).addFriendUser(anyString(), anyString());
     }
 }

@@ -47,7 +47,7 @@ public class UserService implements IUserService {
         Optional<User> userToAdded = getUserByEmail(friendEmail);
         if(!userToAdded.isPresent()){
             log.error("UserService: User not found with email: " + friendEmail);
-            throw new UserNotFoundException("Service: User not found");
+            throw new UserNotFoundException("User not found, please enter a valid email");
         }
         log.debug("Service: User added with email: " + friendEmail);
         userRepository.saveFriend(userEmail, friendEmail);

@@ -13,6 +13,7 @@ import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +45,8 @@ public class UserController {
     }
 
     @PostMapping(value = "/addfriend")
-    public ModelAndView submitAddFriend(@ModelAttribute("friends") String friendEmail){
+    public ModelAndView submitAddFriend(@Valid @ModelAttribute("friends") String friendEmail){
+        String viewName = "addfriend";
         userService.addFriendUser(userEmail, friendEmail);
         log.info("form submitted");
         RedirectView redirectView = new RedirectView();
@@ -52,6 +54,7 @@ public class UserController {
 
         return new ModelAndView(redirectView);
     }
+
 
 
    /* @GetMapping(value = "/user")
