@@ -39,12 +39,12 @@ public class UserController {
         Map<String,Object> model = new HashMap<>();
         model.put("user", new User());
         log.info("The View addfriend displaying");
+
         return new ModelAndView(viewName, model);
     }
 
-    @PostMapping("/addfriend")
+    @PostMapping(value = "/addfriend")
     public ModelAndView submitAddFriend(@ModelAttribute("friends") String friendEmail){
-
         userService.addFriendUser(userEmail, friendEmail);
         log.info("form submitted");
         RedirectView redirectView = new RedirectView();
@@ -64,8 +64,4 @@ public class UserController {
     public Iterable<User> getUserList(){
         return userService.getUsers();
     }
-
-//    @GetMapping(value = "/friend"){
-//
-//    }
 }
