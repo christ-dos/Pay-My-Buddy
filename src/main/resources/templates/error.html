@@ -6,6 +6,7 @@
 </head>
 <body>
     <h1>Oups! An Error be Occurred </h1>
-    <div th:text="${errorMessage}">An Error be occurred:</div>
+    <div th:text ="'An Error be occurred: ' + ${errorMessage}">
+    </div>
 </body>
 </html>

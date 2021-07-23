@@ -9,11 +9,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface IUserRepository extends CrudRepository<User, Integer> {
 
-    public Optional<User>findByEmail(String email);
+    public User findByEmail(String Email);
 
     @Modifying
     @Transactional
@@ -22,5 +23,7 @@ public interface IUserRepository extends CrudRepository<User, Integer> {
 
     @Query(value = "SELECT * FROM user WHERE email=?", nativeQuery = true)
     public User getUser(String email);
+
+    //public Iterable<User> findUserBy
 
 }

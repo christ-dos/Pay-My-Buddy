@@ -1,5 +1,6 @@
 package com.openclassrooms.paymybuddy.controller;
 
+import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-
 @RestController
 @Slf4j
 public class UserController {
@@ -26,18 +26,18 @@ public class UserController {
     private final static String userEmail = "dada@email.fr";
 
     @Autowired
-    private IUserService userService ;
+    private IUserService userService;
 
 
-    @RequestMapping(value="/login")
-    public ModelAndView getFriendList(){
+    @RequestMapping(value = "/login")
+    public ModelAndView getFriendList() {
         return new ModelAndView();
     }
 
     @GetMapping("/addfriend")
-    public ModelAndView showAddFriendView(){
+    public ModelAndView showAddFriendView() {
         String viewName = "addfriend";
-        Map<String,Object> model = new HashMap<>();
+        Map<String, Object> model = new HashMap<>();
         model.put("user", new User());
         log.info("The View addfriend displaying");
 
@@ -45,16 +45,17 @@ public class UserController {
     }
 
     @PostMapping(value = "/addfriend")
-    public ModelAndView submitAddFriend(@Valid @ModelAttribute("friends") String friendEmail){
+    public ModelAndView submitAddFriend(@Valid @ModelAttribute("friends") String friendEmail) {
+
         String viewName = "addfriend";
         userService.addFriendUser(userEmail, friendEmail);
-        log.info("form submitted");
+
         RedirectView redirectView = new RedirectView();
         redirectView.setUrl("/addfriend");
+        log.info("form submitted");
 
         return new ModelAndView(redirectView);
     }
-
 
 
    /* @GetMapping(value = "/user")
@@ -64,7 +65,7 @@ public class UserController {
     }*/
 
     @GetMapping(value = "/users")
-    public Iterable<User> getUserList(){
+    public Iterable<User> getUserList() {
         return userService.getUsers();
     }
 }

@@ -1,14 +1,12 @@
 package com.openclassrooms.paymybuddy;
 
-import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.IUserService;
-;import javax.transaction.Transactional;
 
 
 @SpringBootApplication
@@ -43,6 +41,10 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //		userService.addFriendUser("lili@email.fr","dada@email.fr" );
 		//System.out.println(user1);
 		//userService.addFriendUser("tela@email.fr","roro@email.fr");
+
+		/*User user = new User();
+		Set<User> userFriends = user.getFriends();
+		userFriends.forEach(friend->System.out.println("liste:" + friend));*/
 	}
 }
 

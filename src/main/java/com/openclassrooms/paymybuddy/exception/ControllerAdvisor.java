@@ -59,15 +59,15 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
      * @return a response entity with the message :"Person not found", and the code
      *         HttpStatus 404
      */
-   /* @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", "User not found, you should input an email that exist in database");
-
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }*/
+//    @ExceptionHandler(UserNotFoundException.class)
+//    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
+//
+//        Map<String, Object> body = new LinkedHashMap<>();
+//        body.put("timestamp", LocalDateTime.now());
+//        body.put("message", "User not found, you should input an email that exist in database");
+//
+//        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+//    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ModelAndView catchUserNotFoundException(UserNotFoundException ex) {
@@ -76,4 +76,14 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         model.addObject("errorMessage", ex.getMessage());
         return model;
     }
+
+    @ExceptionHandler(FriendAlreadyExistException.class)
+    public ModelAndView catchFriendAlreadyExistException(FriendAlreadyExistException ex) {
+
+        ModelAndView model = new ModelAndView("error");
+        model.addObject("errorMessage", ex.getMessage());
+        return model;
+    }
+
+
 }
