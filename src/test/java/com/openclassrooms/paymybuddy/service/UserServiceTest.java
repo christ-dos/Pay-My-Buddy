@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.exception.FriendAlreadyExistException;
+import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,43 +32,63 @@ public class UserServiceTest {
 
     @BeforeEach
     public void setPerTest() {
-        userListMock = new HashSet<>();
-        friendListMock = new HashMap<>();
-        userListMock.add(User.builder()
-                .email("kikine@email.fr").password("password59")
-                .firstName("laetitia").lastName("Debus")
-                .balance(56.56).accountBank(896572)
-                .build());
-        userListMock.add(User.builder()
-                .email("luciole@email.fr").password("passpassword59")
-                .firstName("Antonio").lastName("Banderas")
-                .balance(16.25).accountBank(6921489)
-                .build());
-
-        friendListMock.put("lili@email.fr", "belo@email.fr");
-        friendListMock.put("lucitano@email.fr", "kikine@email.fr");
+//        userListMock = new HashSet<>();
+//        friendListMock = new HashMap<>();
+//        userListMock.add(User.builder()
+//                .email("kikine@email.fr").password("password59")
+//                .firstName("laetitia").lastName("Debus")
+//                .balance(56.56).accountBank(896572)
+//                .build());
+//        userListMock.add(User.builder()
+//                .email("luciole@email.fr").password("passpassword59")
+//                .firstName("Antonio").lastName("Banderas")
+//                .balance(16.25).accountBank(6921489)
+//                .build());
+//
+//        friendListMock.put("lili@email.fr", "belo@email.fr");
+//        friendListMock.put("lucitano@email.fr", "kikine@email.fr");
 
         userServiceTest = new UserService(userRepositoryMock);
     }
 
     @Test
-    public void addFriendUserTest_whenFriendAddedLucindaDelasalleExist_thenSetShouldContainThreeElements() {
+    public void addFriendUserTest_whenFriendAddedLucindaDelasalleExist_thenVerifyAddFriendIsCalled() {
         //GIVEN
         String userEmail = "kikine@email.fr";
         String friendEmail = "luciole@email.fr";
-        User friend = new User(
-                "luciole@email.fr", "monpassword", "Lucinda", "Delasalle", 50.00,
-                256942, null, null);
 
-        User user = new User("kikine@email.fr", "monTropToppassword", "Christine",
-                "Deldalle", 30.50, 170974,
-                new HashSet<>(Arrays.asList(new User(
-                        "sara@email.fr", "1234", "François", "Dujardin", 10.00,
-                        694281, null, null),
-                        new User(
-                        "balade@email.fr", "5689", "Albert", "Martin", 16.00,
-                        894762, null, null))), null);
-
+        User friend = User.builder()
+                .email("luciole@email.fr")
+                .password("monpassword")
+                .firstName("Lucinda")
+                .lastName("Delasalle")
+                .balance(50.00)
+                .accountBank(256942)
+                .build();
+        User user = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(30.50)
+                .accountBank(170974)
+                .friends(
+                        new HashSet<>(Arrays.asList(
+                                User.builder()
+                                .email("sara@email.fr")
+                                .password("1234")
+                                .firstName("François")
+                                .lastName("Dujardin")
+                                .balance(10.50)
+                                .accountBank(694281).build(),
+                                User.builder()
+                                .email("balade@email.fr")
+                                .password("5689")
+                                .firstName("Albert")
+                                .lastName("Martin")
+                                .balance(16.00)
+                                .accountBank(894762).build())))
+                .build();
         doNothing().when(userRepositoryMock).saveFriend(isA(String.class), isA(String.class));
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(friend);
         when(userRepositoryMock.findByEmail(userEmail)).thenReturn(user);
@@ -75,33 +96,17 @@ public class UserServiceTest {
         userServiceTest.addFriendUser(userEmail, friendEmail);
         //THEN
         verify(userRepositoryMock, times(1)).saveFriend(userEmail, friendEmail);
-        //assertEquals(3, friendListMock.size());
     }
 
     @Test
-    public void addFriendUserTest_whenFriendToAddAlreadyExist_thenThrowsFriendAlreadyExistException() {
+    public void addFriendUserTest_whenFriendToAddNotFound_thenThrowsUserNotFoundException() {
         //GIVEN
         String userEmail = "kikine@email.fr";
-        String friendEmail = "sara@email.fr";
-        User friend = new User(
-                "sara@email.fr", "monpassword", "Lucinda", "Delasalle", 50.00,
-                256942, null, null);
-
-        User user = new User("kikine@email.fr", "monTropToppassword", "Christine",
-                "Deldalle", 30.50, 170974,
-                new HashSet<>(Arrays.asList(new User(
-                                "sara@email.fr", "1234", "François", "Dujardin", 10.00,
-                                694281, null, null),
-                        new User(
-                                "balade@email.fr", "5689", "Albert", "Martin", 16.00,
-                                894762, null, null))), null);
-
-        when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(friend);
-        when(userRepositoryMock.findByEmail(userEmail)).thenReturn(user);
+        String friendEmail = null;
         //WHEN
         //THEN
         verify(userRepositoryMock, times(0)).saveFriend(userEmail, friendEmail);
-        assertThrows(FriendAlreadyExistException.class,
+        assertThrows(UserNotFoundException.class,
                 () -> userServiceTest.addFriendUser(userEmail, friendEmail));
     }
 }

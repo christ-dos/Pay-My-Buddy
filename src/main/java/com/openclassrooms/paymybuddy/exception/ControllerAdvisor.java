@@ -76,14 +76,14 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         model.addObject("errorMessage", ex.getMessage());
         return model;
     }
-
-    @ExceptionHandler(FriendAlreadyExistException.class)
-    public ModelAndView catchFriendAlreadyExistException(FriendAlreadyExistException ex) {
-
-        ModelAndView model = new ModelAndView("error");
-        model.addObject("errorMessage", ex.getMessage());
-        return model;
-    }
+//
+//    @ExceptionHandler(FriendAlreadyExistException.class)
+//    public ModelAndView catchFriendAlreadyExistException(FriendAlreadyExistException ex) {
+//
+//        ModelAndView model = new ModelAndView("error");
+//        model.addObject("errorMessage", ex.getMessage());
+//        return model;
+//    }
 
 
 }

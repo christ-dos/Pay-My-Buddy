@@ -6,6 +6,7 @@ import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,10 +19,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -84,38 +88,20 @@ public class UserTestIT {
         User user = new User(
                 "wiwi@email.fr", "monSuperpassword",
                 "Wiliam", "Delarue", 10.00, 920476, null, null);
+        doThrow(
+                new UserNotFoundException("User not found, please enter a email valid")).when(userService).addFriendUser(isA(String.class),isA(String.class));
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
                 .content(friendEmailNotExist)
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is3xxRedirection())
-                //.andExpect(jsonPath("$.message",
-                 //       is("User not found")))
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
-                .andExpect(result -> assertEquals("User not found", result.getResolvedException().getMessage()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"))
+                .andExpect( model().attribute("errorMessage", is("User not found, please enter a email valid"))
+                )
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof UserNotFoundException))
+                .andExpect(result -> Assertions.assertEquals("User not found, please enter a email valid", result.getResolvedException().getMessage()))
                 .andDo(print());
     }
-
-    @Test
-    public void saveFriendTest_whenEmailAlreadyExist_thenThrowsUserFriendAlreadyExistException() throws Exception {
-        //GIVEN
-        String friendEmailAlreadyExist = "wiwi@email.fr";
-//        User user = new User(
-//                "wiwi@email.fr", "monSuperpassword",
-//                "Wiliam", "Delarue", 10.00, 920476, null, null);
-        //WHEN
-        //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .content(friendEmailAlreadyExist)
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().is3xxRedirection())
-                //.andExpect(jsonPath("$.message",
-                //       is("User not found")))
-                .andExpect(result -> assertTrue(result.getResolvedException() instanceof FriendAlreadyExistException))
-                .andExpect(result -> assertEquals("User not found", result.getResolvedException().getMessage()))
-                .andDo(print());
-    }
-
 
 }
