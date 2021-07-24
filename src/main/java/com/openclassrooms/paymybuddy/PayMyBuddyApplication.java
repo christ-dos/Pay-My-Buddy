@@ -1,5 +1,7 @@
 package com.openclassrooms.paymybuddy;
 
+import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.IFriendList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -7,6 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.IUserService;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Set;
 
 
 @SpringBootApplication
@@ -23,7 +28,7 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 	}
 
 	@Override
-	//@Transactional
+	@Transactional
 	public void run(String... args) throws Exception {
 
 		System.out.println("Hello World !");
@@ -38,13 +43,14 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //		System.out.println(user1.getFirstName());
 //		User user2 = userRepo.getUser("tela@email.fr");
 //		System.out.println(user2.getFirstName());
-//		userService.addFriendUser("lili@email.fr","dada@email.fr" );
+		userService.addFriendUser("lili@email.fr","dada@email.fr" );
 		//System.out.println(user1);
-		//userService.addFriendUser("tela@email.fr","roro@email.fr");
+		userService.addFriendUser("lili@email.fr","luluM@email.fr");
+		//Optional<User> userByEmail = userRepo.findUserByEmail("lili@email.fr");
+		//System.out.println(userByEmail.get());
+		Set<IFriendList> listUser = userService.getFriendListByEmail("lili@email.fr");
+		listUser.forEach(user -> System.out.println(user.getEmail()));
 
-		/*User user = new User();
-		Set<User> userFriends = user.getFriends();
-		userFriends.forEach(friend->System.out.println("liste:" + friend));*/
 	}
 }
 

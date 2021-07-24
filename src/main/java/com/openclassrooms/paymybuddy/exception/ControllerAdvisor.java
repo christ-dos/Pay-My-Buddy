@@ -10,6 +10,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -76,14 +77,14 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
         model.addObject("errorMessage", ex.getMessage());
         return model;
     }
-//
-//    @ExceptionHandler(FriendAlreadyExistException.class)
-//    public ModelAndView catchFriendAlreadyExistException(FriendAlreadyExistException ex) {
-//
-//        ModelAndView model = new ModelAndView("error");
-//        model.addObject("errorMessage", ex.getMessage());
-//        return model;
-//    }
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public ModelAndView catchSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
+
+        ModelAndView model = new ModelAndView("error");
+        model.addObject("errorMessage", "Impossible to add user in your list, because is already present");
+        return model;
+    }
 
 
 }

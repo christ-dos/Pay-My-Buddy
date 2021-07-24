@@ -39,7 +39,7 @@ public class User {
 
     @ManyToMany(
             cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
+            fetch = FetchType.EAGER
     )
     @JoinTable(
             name = "friend",

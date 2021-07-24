@@ -3,6 +3,7 @@ package com.openclassrooms.paymybuddy.controller;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.UserService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +16,7 @@ import com.openclassrooms.paymybuddy.service.IUserService;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.validation.Valid;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,12 +46,13 @@ public class UserController {
         return new ModelAndView(viewName, model);
     }
 
+    @SneakyThrows
     @PostMapping(value = "/addfriend")
-    public ModelAndView submitAddFriend(@Valid @ModelAttribute("friends") String friendEmail) {
+    public ModelAndView submitAddFriend(@Valid @ModelAttribute("friends") String friendEmail)  {
 
         String viewName = "addfriend";
-        userService.addFriendUser(userEmail, friendEmail);
 
+        userService.addFriendUser(userEmail, friendEmail);
         RedirectView redirectView = new RedirectView();
         redirectView.setUrl("/addfriend");
         log.info("form submitted");
