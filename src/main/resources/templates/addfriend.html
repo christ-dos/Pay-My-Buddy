@@ -99,20 +99,10 @@
       </tr>
       </thead>
       <tbody>
-      <tr>
-        <td>lili@email.fr</td>
-        <td>Lili</td>
-        <td>Mendez</td>
-      </tr>
-      <tr>
-        <td>Clara@email.com</td>
-        <td>Clara</td>
-        <td>Torez</td>
-      </tr>
-      <tr>
-        <td>Smith@email.fr</td>
-        <td>Smith</td>
-        <td>Delgado</td>
+      <tr th:each="friendLists: ${friendLists}">
+        <td th:text="${friendLists.email}">lili@email.fr</td>
+        <td th:text="${friendLists.firstName}">Lili</td>
+        <td th:text="${friendLists.lastName}">Mendez</td>
       </tr>
       </tbody>
     </table>

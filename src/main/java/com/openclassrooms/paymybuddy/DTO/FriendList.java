@@ -1,8 +1,14 @@
 package com.openclassrooms.paymybuddy.DTO;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class FriendList implements IFriendList {
 
     private String email;
@@ -22,7 +28,8 @@ public class FriendList implements IFriendList {
     }
 
     @Override
-    public String getlastName() {
+    public String getLastName() {
         return lastName;
     }
+
 }

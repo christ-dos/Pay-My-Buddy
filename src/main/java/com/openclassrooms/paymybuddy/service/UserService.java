@@ -1,6 +1,5 @@
 package com.openclassrooms.paymybuddy.service;
 
-import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
@@ -14,6 +13,7 @@ import java.util.Set;
 
 /**
  * Class Service that manage User entity
+ *
  * @author Christine Duarte
  */
 @Service
@@ -30,26 +30,26 @@ public class UserService implements IUserService {
 
     /**
      * Method that get list of users
+     *
      * @return An Iterable of User
      */
     @Override
-    public Iterable<User> getUsers(){
+    public Iterable<User> getUsers() {
         log.info("UserService: Display list of Users");
         return userRepository.findAll();
     }
 
     /**
      * Method which add a User friend to the table friend
-     * @param friendEmail  email of the friend that will be added to the list
-     * @param userEmail Email of the user which want added a friend to the list
      *
+     * @param friendEmail email of the friend that will be added to the list
+     * @param userEmail   Email of the user which want added a friend to the list
      * @throws UserNotFoundException if the user is not found in the database
      */
     @Override
     public void addFriendUser(String userEmail, String friendEmail) throws SQLIntegrityConstraintViolationException {
         User friendToAdded = getUserByEmail(friendEmail);
-        User user = getUserByEmail(userEmail);
-        if(friendToAdded == null){
+        if (friendToAdded == null) {
             log.error("UserService: User not found with email: " + friendEmail);
             throw new UserNotFoundException("User not found, please enter a email valid");
         }
@@ -62,19 +62,26 @@ public class UserService implements IUserService {
      *
      * @param email item unique that permit identify the user
      * @return A user
-     *
      * @throws UserNotFoundException if the user is not found in the database
      */
-    private User getUserByEmail(String email){
-        if(email != null) {
+    private User getUserByEmail(String email) {
+        if (email != null) {
             log.debug("UserService: user found with email: " + email);
             return userRepository.findByEmail(email);
         }
         log.error("UserService: User not found with email: " + email);
         throw new UserNotFoundException("User not exist");
     }
+
+    /**
+     * Method which get list of friend recorded by a user
+     *
+     * @param userEmail A String containing the email of the user which want added a friend in his list
+     * @return A set of {@link IFriendList} a DTO model
+     * to displaying the email, first name and last name of the friend added
+     */
     @Override
-    public Set<IFriendList> getFriendListByEmail(String userEmail){
+    public Set<IFriendList> getFriendListByEmail(String userEmail) {
 
         return userRepository.findFriendListByEmail(userEmail);
     }

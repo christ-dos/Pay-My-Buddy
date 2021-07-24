@@ -33,14 +33,8 @@ public class UserServiceTest {
     @Mock
     private User friend;
 
-
     private Set<IFriendList> friendListMock;
 
-//    @Mock
-//    Set<User> userListMock;
-//
-//    @Mock
-//    Map<String, String> friendListMock;
 
     @BeforeEach
     public void setPerTest() {
@@ -79,19 +73,52 @@ public class UserServiceTest {
 
         userServiceTest = new UserService(userRepositoryMock);
     }
+    @Test
+    public void getUserstest_thenReturnListWithTwo(){
+        //GIVEN
+        Set<User>usersSetMock = new HashSet<>(Arrays.asList(
+                User.builder()
+                        .email("vanessa@email.fr").firstName("Vanessa")
+                        .lastName("Paradis").password("vava2020")
+                        .balance(15.58).accountBank(897235)
+                        .build(),
+                User.builder()
+                        .email("kelly@email.fr").firstName("Kelly")
+                        .lastName("Minogue").password("kiki89")
+                        .balance(55.58).accountBank(890365)
+                        .build(),
+                User.builder()
+                        .email("beber@email.fr").firstName("Justine")
+                        .lastName("Biber").password("bebe2896")
+                        .balance(85.98).accountBank(100358)
+                        .build()));
+        int count = 0;
+        when(userRepositoryMock.findAll()).thenReturn(usersSetMock);
+        //WHEN
+        Iterable<User> usersIterable= userServiceTest.getUsers();
+        Iterator it = usersIterable.iterator();
+        //method that count the iterable
+        while (it.hasNext()) {
+            it.next();
+            count++;
+        }
+        //THEN
+        //set contain 3 elements
+        assertEquals(3,count);
+        assertEquals(usersSetMock,usersIterable);
 
+    }
     @Test
     public void addFriendUserTest_whenFriendAddedLucindaDelasalleExist_thenVerifyAddFriendIsCalled() throws SQLIntegrityConstraintViolationException {
         //GIVEN
         String userEmail = "kikine@email.fr";
         String friendEmail = "luciole@email.fr";
 
-
         doNothing().when(userRepositoryMock).saveFriend(isA(String.class), isA(String.class));
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(friend);
-        when(userRepositoryMock.findByEmail(userEmail)).thenReturn(user);
         //WHEN
         userServiceTest.addFriendUser(userEmail, friendEmail);
+
         //THEN
         verify(userRepositoryMock, times(1)).saveFriend(userEmail, friendEmail);
     }
@@ -109,11 +136,11 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getFriendListByEmailTest_whenUserEmailIsKikin_thenReturnListFriend(){
+    public void getFriendListByEmailTest_whenUserEmailIsKikine_thenReturnListFriend() {
         //GIVEN
         FriendList friend1 = new FriendList();
         FriendList friend2 = new FriendList();
-       friendListMock = new HashSet<IFriendList>();
+        friendListMock = new HashSet<IFriendList>();
 
         friend1.setEmail("sara@email.fr");
         friend1.setFirstName("François");
@@ -125,18 +152,13 @@ public class UserServiceTest {
 
         friendListMock.add(friend1);
         friendListMock.add(friend2);
-
-        friendListMock.forEach(x->System.out.println(x.toString()));
-
         String userEmail = "kikine@email.fr";
         when(userRepositoryMock.findFriendListByEmail(isA(String.class))).thenReturn(friendListMock);
         //WHEN
         Set<IFriendList> resultListFriend = userServiceTest.getFriendListByEmail(userEmail);
         //THEN
         assertEquals(2, resultListFriend.size());
-        assertEquals("amartin@email.fr", friendListMock.iterator().next().getEmail());
-        assertEquals("Albert", friendListMock.iterator().next().getFirstName());
-        assertEquals("Martin", friendListMock.iterator().next().getlastName());
+        assertEquals(friendListMock, resultListFriend);
 
     }
 }

@@ -4,11 +4,11 @@ import javax.persistence.Column;
 
 public  interface  IFriendList {
 
-    public String getEmail();
+    String getEmail();
 
-    public String getFirstName();
+    String getFirstName();
 
-    public String getlastName();
+    String getLastName();
 
 
 }

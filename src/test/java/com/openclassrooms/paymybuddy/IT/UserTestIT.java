@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -88,7 +89,7 @@ public class UserTestIT {
         User user = new User(
                 "wiwi@email.fr", "monSuperpassword",
                 "Wiliam", "Delarue", 10.00, 920476, null, null);
-        doThrow(
+      doThrow(
                 new UserNotFoundException("User not found, please enter a email valid")).when(userService).addFriendUser(isA(String.class),isA(String.class));
         //WHEN
         //THEN

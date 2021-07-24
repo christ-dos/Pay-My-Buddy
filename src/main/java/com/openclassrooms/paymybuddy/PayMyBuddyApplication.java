@@ -43,13 +43,13 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //		System.out.println(user1.getFirstName());
 //		User user2 = userRepo.getUser("tela@email.fr");
 //		System.out.println(user2.getFirstName());
-		userService.addFriendUser("lili@email.fr","dada@email.fr" );
+		userService.addFriendUser("dada@email.fr","lili@email.fr" );
 		//System.out.println(user1);
-		userService.addFriendUser("lili@email.fr","luluM@email.fr");
+		userService.addFriendUser("dada@email.fr","luluM@email.fr");
 		//Optional<User> userByEmail = userRepo.findUserByEmail("lili@email.fr");
 		//System.out.println(userByEmail.get());
-		Set<IFriendList> listUser = userService.getFriendListByEmail("lili@email.fr");
-		listUser.forEach(user -> System.out.println(user.getEmail()));
+		//Set<IFriendList> listUser = userService.getFriendListByEmail("lili@email.fr");
+		//listUser.forEach(user -> System.out.println(user.getEmail()));
 
 	}
 }

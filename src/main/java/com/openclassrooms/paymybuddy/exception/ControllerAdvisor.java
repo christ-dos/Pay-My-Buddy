@@ -82,7 +82,7 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
     public ModelAndView catchSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
 
         ModelAndView model = new ModelAndView("error");
-        model.addObject("errorMessage", "Impossible to add user in your list, because is already present");
+        model.addObject("errorMessage", "Impossible to add friend in your list, because is already present");
         return model;
     }
 

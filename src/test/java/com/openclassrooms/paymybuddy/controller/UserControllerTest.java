@@ -1,15 +1,18 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.openclassrooms.paymybuddy.exception.FriendAlreadyExistException;
+import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.IFriendList;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.UserService;
+import org.hamcrest.collection.IsArray;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -17,17 +20,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.RequestEntity.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -61,6 +63,58 @@ public class UserControllerTest {
     }
 
     @Test
+    public void showAddFriendViewTest_whenUrlIsAddfriend_thenReturnTwoModelsAndStatusOk() throws Exception{
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/addfriend"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("addfriend"))
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("friendLists"))
+                .andExpect(model().attribute("user",new User()))
+                .andDo(print());
+    }
+
+    @Test
+    public void showAddFriendViewTest_whenUrlIsAddfriendWithUserEmailKikine_thenReturnModelDisplayingListFriendsUserKikine() throws Exception{
+        //GIVEN
+        Set<IFriendList> friendSetMock;
+        FriendList friend1 = new FriendList();
+        FriendList friend2 = new FriendList();
+        friendSetMock = new HashSet<>();
+
+        friend1.setEmail("sara@email.fr");
+        friend1.setFirstName("François");
+        friend1.setLastName("Dujardin");
+
+        friend2.setEmail("amartin@email.fr");
+        friend2.setFirstName("Albert");
+        friend2.setLastName("Martin");
+
+        friendSetMock.add(friend1);
+        friendSetMock.add(friend2);
+        String userEmail = "kikine@email.fr";
+
+        List <IFriendList> friendLists = new ArrayList<>(
+                Arrays.asList(new FriendList("atb@email.fr","Bela","Doblado"),
+                        new FriendList("frans@email.fr","Francisco","Cruzeiro"),
+                        new FriendList("hleleu@email.fr","Helena","delemarle")));
+
+        when(userRepositoryMock.findFriendListByEmail(isA(String.class))).thenReturn(friendSetMock);
+        when(userServiceMock.getFriendListByEmail(userEmail)).thenCallRealMethod();
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.get("/addfriend").content(userEmail)
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(view().name("addfriend"))
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("friendLists"))
+                .andDo(print());
+    }
+
+    @Test
     public void submitAddFriendTest_whenUserExist_thenRedirectIntoAddFriendUrl() throws Exception{
         //GIVEN
         String friendEmail = "luciole@email.fr";
@@ -70,7 +124,6 @@ public class UserControllerTest {
                 "Delasalle", 50.00, 256942, null, null);
         doNothing().when(userRepositoryMock).saveFriend(userEmail,friendEmail);
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(friend);
-
         //WHEN
         //THEN
             mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
