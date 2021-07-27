@@ -11,12 +11,6 @@ body{
 	color:rgb(196,196,196);
 }
 
-
-
-.police1{
-	font-size: 1.2em;
-}
-
 .bold{ 
 font-weight: bold; 
 }
@@ -42,7 +36,6 @@ font-weight: bold;
 /************Items Select Add Connection, input number and btn Pay*********/
 #howmuch{
 	text-align: right;
-	font-size: 1.1em
 }
 /* ************table*********/
 table{

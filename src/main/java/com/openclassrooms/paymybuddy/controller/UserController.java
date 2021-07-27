@@ -2,32 +2,27 @@ package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
-import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
-import com.openclassrooms.paymybuddy.repository.IUserRepository;
-import com.openclassrooms.paymybuddy.service.UserService;
-import lombok.*;
+import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.service.IUserService;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 
-@RestController
+@Controller
 @Slf4j
-public class UserController {
+public class UserController implements WebMvcConfigurer {
 
     private final static String userEmail = "dada@email.fr";
     private List<IFriendList> friendLists = new ArrayList<>();
@@ -35,60 +30,70 @@ public class UserController {
     @Autowired
     private IUserService userService;
 
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addViewController("/results").setViewName("results");
+    }
 
     @GetMapping("/login")
-    public ModelAndView showViewLogin() {
-        String viewName = "login";
+    public ModelAndView showLoginView() {
         log.info("The View login displaying");
         return new ModelAndView();
     }
 
+
     @GetMapping("/index")
     public ModelAndView showViewIndex(Model model) {
-        IFriendList friend1 =  new FriendList("christ@email.fr","christ","dodo");
-        IFriendList friend2 =  new FriendList("sylvie@email.fr","sylvie","duddu");
-        friendLists.add(friend1);
-        friendLists.add(friend2);
-
-        String viewName = "index";
-//        Map<String, Object> model = new HashMap<>();
-       // Set<IFriendList> friendSetByUser = userService.getFriendListByEmail(userEmail);
-       // friendLists = friendSetByUser.stream().collect(Collectors.toList());
-
         //model.addAttribute("transaction", new TransDTO());
-        model.addAttribute("friendLists", friendLists);
+        model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
 
         log.info("The View index displaying");
         return new ModelAndView();
     }
 
-    @GetMapping("/addfriend")
-    public ModelAndView showAddFriendView() {
-        String viewName = "addfriend";
 
-        Map<String, Object> model = new HashMap<>();
-        Set<IFriendList> friendSetByUser = userService.getFriendListByEmail(userEmail);
-        friendLists = friendSetByUser.stream().collect(Collectors.toList());
 
-        model.put("user", new User());
-        model.put("friendLists", friendLists);
+//        @PostMapping(value = "/addfriend")
+//    public ModelAndView submitAddFriend(@ModelAttribute("email") @Valid String friendEmail, BindingResult result, Model model) {
+//        if(result.hasFieldErrors()){
+//            return new ModelAndView();
+//        }
+//        model.addAttribute("user", new User());
+//        model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+//        userService.addFriendUser(userEmail, friendEmail);
+//        RedirectView redirectView = new RedirectView();
+//        redirectView.setUrl("/addfriend");
+//        log.info("form submitted");
+//
+//        return new ModelAndView(redirectView);
+//    }
 
-        log.info("The View addfriend displaying");
+    @GetMapping({"/addfriend"})
+    public String showAddFriendView(@ModelAttribute("friendList") FriendList friendList, Model model) {
+        model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
 
-        return new ModelAndView(viewName, model);
+        return "addfriend";
     }
 
-
-    @SneakyThrows
     @PostMapping(value = "/addfriend")
-    public ModelAndView submitAddFriend(@Valid @ModelAttribute("friends") String friendEmail, BindingResult result) {
-        String viewName = "addfriend";
-        userService.addFriendUser(userEmail, friendEmail);
-        RedirectView redirectView = new RedirectView();
-        redirectView.setUrl("/addfriend");
+    public String submitAddFriend(@Valid FriendList friendList, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            return "addfriend";
+        }
+        if (result.hasGlobalErrors()) {
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            return "addfriend";
+        }
+//        try {
+        userService.addFriendUser(userEmail, friendList.getEmail());
+        model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+//        } catch (UserNotFoundException ex) {
+//            model.addAttribute("userNotFound", ex.getMessage());
+//        }
         log.info("form submitted");
 
-        return new ModelAndView(redirectView);
+        return "redirect:/addfriend";
     }
 
 

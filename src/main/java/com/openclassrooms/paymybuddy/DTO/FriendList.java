@@ -4,16 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Objects;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class FriendList implements IFriendList {
 
+    @NotEmpty(message= "Friend email cannot be empty")
     private String email;
 
+
     private String firstName;
+
 
     private String lastName;
 

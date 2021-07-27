@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <!-- ************Bootstrap CSS ******************-->
@@ -7,6 +7,12 @@
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/css/style.css">
     <title>Add Friend</title>
+    <style>
+        .error {
+            color: red;
+            font-size: 0.8em;
+        }
+    </style>
 </head>
 <body>
 <!-- **************************Navigation bar ***********************************-->
@@ -72,16 +78,21 @@
             <!--********Bouton New Transaction **********-->
                 <!--Input which look like a button-->
                 <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary btn.block text-light bold text-center " type=button
-                       onclick=window.location.href="http://localhost:9090/"; value="New Transaction"
+                       onclick=window.location.href="http://localhost:9090/index"; value="New Transaction"
                        id="btnAddConnection"/>
         </div>
         <div class="container gray  p-5">
             <!--*************Input Email****************-->
-            <form action="#" method="post" th:action="@{/addfriend}" th:object="${user}">
+            <form action="#" method="post" th:action="@{/addfriend}" th:object="${friendList}">
 
                 <div class="row justify-content-center">
+                    <div th:if="${#fields.hasGlobalErrors()}">
+                        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Global errors</p>
+                    </div>
                     <div class="col-12 col-md-6 col-lg-3 m-2">
-                        <input th:field="*{friends}" class="form-control col-12 col-md-9 col-lg-9" type="email" placeholder="Email"/>
+                        <input th:field="*{email}" class="form-control col-12 col-md-9 col-lg-9" type="email" placeholder="Email"/>
+                        <span class="col-12 col-md-12 col-lg-12 m-2"th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
+                              th:errorclass="error">mon span</span>
                     </div>
                     <!--**************Bouton Add******************-->
                     <button type="submit" class="col-12 col-md-3 col-lg-2 m-2 btn btn-success btn-block text-light bold " id="btnAdd">Add

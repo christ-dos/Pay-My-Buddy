@@ -47,7 +47,7 @@ public class UserService implements IUserService {
      * @throws UserNotFoundException if the user is not found in the database
      */
     @Override
-    public void addFriendUser(String userEmail, String friendEmail) throws SQLIntegrityConstraintViolationException {
+    public void addFriendUser(String userEmail, String friendEmail)  {
         User friendToAdded = getUserByEmail(friendEmail);
         if (friendToAdded == null) {
             log.error("UserService: User not found with email: " + friendEmail);

@@ -1,6 +1,11 @@
 package com.openclassrooms.paymybuddy.model;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +27,7 @@ import java.util.stream.Stream;
 @NoArgsConstructor
 public class User {
     @Id
+    @NotBlank(message="User's email cannot be blank")
     private String email;
 
     private String password;
@@ -29,9 +35,11 @@ public class User {
     @Column(name = "first_name")
     private String firstName;
 
+
     @Column(name = "last_name")
     private String lastName;
 
+    @Min(value=0, message="User's balance cannot be negative")
     private Double balance;
 
     @Column(name="account_bank")

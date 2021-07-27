@@ -25,41 +25,41 @@ import java.util.stream.Collectors;
  * @author christine Duarte
  *
  */
-@ControllerAdvice
+//@ControllerAdvice
 public class ControllerAdvisor extends ResponseEntityExceptionHandler {
-    /**
-     * Method that return a message when an argument of the request is not valid
-     *
-     * @param ex      - the exception handle
-     * @param request - a web request
-     * @return a response entity with the message : containing the error, and the
-     *         code HttpStatus 400
-     *
-     */
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                  HttpHeaders headers, HttpStatus status, WebRequest request) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDate.now());
-        body.put("status", status.value());
-
-        List<String> errors = ex.getBindingResult().getFieldErrors().stream().map(x -> x.getDefaultMessage())
-                .collect(Collectors.toList());
-
-        body.put("errors", errors);
-
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-    }
-
-    /**
-     * Method that return a message when a UserNotFoundException is thrown when a
-     * user is not found in the database
-     *
-     * @param ex      - the exception handle
-     * @param request - a web request
-     * @return a response entity with the message :"Person not found", and the code
-     *         HttpStatus 404
-     */
+//    /**
+//     * Method that return a message when an argument of the request is not valid
+//     *
+//     * @param ex      - the exception handle
+//     * @param request - a web request
+//     * @return a response entity with the message : containing the error, and the
+//     *         code HttpStatus 400
+//     *
+//     */
+//    @Override
+//    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+//                                                                  HttpHeaders headers, HttpStatus status, WebRequest request) {
+//        Map<String, Object> body = new LinkedHashMap<>();
+//        body.put("timestamp", LocalDate.now());
+//        body.put("status", status.value());
+//
+//        List<String> errors = ex.getBindingResult().getFieldErrors().stream().map(x -> x.getDefaultMessage())
+//                .collect(Collectors.toList());
+//
+//        body.put("errors", errors);
+//
+//        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+//    }
+//
+//    /**
+//     * Method that return a message when a UserNotFoundException is thrown when a
+//     * user is not found in the database
+//     *
+//     * @param ex      - the exception handle
+//     * @param request - a web request
+//     * @return a response entity with the message :"Person not found", and the code
+//     *         HttpStatus 404
+//     */
 //    @ExceptionHandler(UserNotFoundException.class)
 //    public ResponseEntity<Object> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
 //
@@ -69,22 +69,22 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
 //
 //        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
 //    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ModelAndView catchUserNotFoundException(UserNotFoundException ex) {
-
-        ModelAndView model = new ModelAndView("error");
-        model.addObject("errorMessage", ex.getMessage());
-        return model;
-    }
-
-    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    public ModelAndView catchSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
-
-        ModelAndView model = new ModelAndView("error");
-        model.addObject("errorMessage", "Impossible to add friend in your list, because is already present");
-        return model;
-    }
+//
+//    @ExceptionHandler(UserNotFoundException.class)
+//    public ModelAndView catchUserNotFoundException(UserNotFoundException ex) {
+//
+//        ModelAndView model = new ModelAndView("error");
+//        model.addObject("errorMessage", ex.getMessage());
+//        return model;
+//    }
+//
+//    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+//    public ModelAndView catchSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
+//
+//        ModelAndView model = new ModelAndView("error");
+//        model.addObject("errorMessage", "Impossible to add friend in your list, because is already present");
+//        return model;
+//    }
 
 
 }

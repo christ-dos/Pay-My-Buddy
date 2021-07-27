@@ -9,7 +9,7 @@ import java.util.Set;
 public interface IUserService {
     Iterable<User> getUsers();
 
-    void addFriendUser(String userEmail, String FriendEmail) throws SQLIntegrityConstraintViolationException;
+    void addFriendUser(String userEmail, String FriendEmail);
 
 
     Set<IFriendList> getFriendListByEmail(String userEmail);

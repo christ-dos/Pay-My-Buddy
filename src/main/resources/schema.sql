@@ -8,8 +8,8 @@ USE paymybuddy;
 CREATE TABLE  user (
                 email VARCHAR(100) NOT NULL,
                 password VARCHAR(30) NOT NULL,
-                first_name VARCHAR(30) NOT NULL,
-                last_name VARCHAR(30) NOT NULL,
+                first_name VARCHAR(100) NOT NULL,
+                last_name VARCHAR(100) NOT NULL,
                 balance DECIMAL(8,2),
                 account_bank INTEGER(6) NOT NULL,
                 PRIMARY KEY (email)
