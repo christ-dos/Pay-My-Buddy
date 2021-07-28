@@ -1,27 +1,24 @@
 package com.openclassrooms.paymybuddy.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
+import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.IFriendList;
+import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.IFriendList;
-import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -34,53 +31,50 @@ public class UserServiceTest {
     @Mock
     private User user;
 
-    @Mock
-    private User friend;
-
-    private Set<IFriendList> friendListMock;
-
 
     @BeforeEach
     public void setPerTest() {
-        friend = User.builder()
-                .email("luciole@email.fr")
-                .password("monpassword")
-                .firstName("Lucinda")
-                .lastName("Delasalle")
-                .balance(50.00)
-                .accountBank(256942)
-                .build();
-        user = User.builder()
-                .email("kikine@email.fr")
-                .password("monTropToppassword")
-                .firstName("Christine")
-                .lastName("Deldalle")
-                .balance(30.50)
-                .accountBank(170974)
-                .friends(
-                        new HashSet<>(Arrays.asList(
-                                User.builder()
-                                        .email("sara@email.fr")
-                                        .password("1234")
-                                        .firstName("François")
-                                        .lastName("Dujardin")
-                                        .balance(10.50)
-                                        .accountBank(694281).build(),
-                                User.builder()
-                                        .email("balade@email.fr")
-                                        .password("5689")
-                                        .firstName("Albert")
-                                        .lastName("Martin")
-                                        .balance(16.00)
-                                        .accountBank(894762).build())))
-                .build();
+//       User friend = User.builder()
+//                .email("luciole@email.fr")
+//                .password("monpassword")
+//                .firstName("Lucinda")
+//                .lastName("Delasalle")
+//                .balance(50.00)
+//                .accountBank(256942)
+//                .build();
+//        user = new User();
+//        user = User.builder()
+//                .email("kikine@email.fr")
+//                .password("monTropToppassword")
+//                .firstName("Christine")
+//                .lastName("Deldalle")
+//                .balance(30.50)
+//                .accountBank(170974)
+//                .friends(
+//                        new HashSet<>(Arrays.asList(
+//                                User.builder()
+//                                        .email("sara@email.fr")
+//                                        .password("1234")
+//                                        .firstName("François")
+//                                        .lastName("Dujardin")
+//                                        .balance(10.50)
+//                                        .accountBank(694281).build(),
+//                                User.builder()
+//                                        .email("balade@email.fr")
+//                                        .password("5689")
+//                                        .firstName("Albert")
+//                                        .lastName("Martin")
+//                                        .balance(16.00)
+//                                        .accountBank(894762).build())))
+//                .build();
 
         userServiceTest = new UserService(userRepositoryMock);
     }
+
     @Test
-    public void getUserstest_thenReturnListWithTwoElements(){
+    public void getUserstest_thenReturnListWithTwoElements() {
         //GIVEN
-        Set<User>usersSetMock = new HashSet<>(Arrays.asList(
+        Set<User> usersSetMock = new HashSet<>(Arrays.asList(
                 User.builder()
                         .email("vanessa@email.fr").firstName("Vanessa")
                         .lastName("Paradis").password("vava2020")
@@ -99,7 +93,7 @@ public class UserServiceTest {
         int count = 0;
         when(userRepositoryMock.findAll()).thenReturn(usersSetMock);
         //WHEN
-        Iterable<User> usersIterable= userServiceTest.getUsers();
+        Iterable<User> usersIterable = userServiceTest.getUsers();
         Iterator<User> it = usersIterable.iterator();
         //method that count the iterable
         while (it.hasNext()) {
@@ -108,12 +102,13 @@ public class UserServiceTest {
         }
         //THEN
         //set contain 3 elements
-        assertEquals(3,count);
-        assertEquals(usersSetMock,usersIterable);
+        assertEquals(3, count);
+        assertEquals(usersSetMock, usersIterable);
 
     }
+
     @Test
-    public void addFriendUserTest_whenFriendAddedLucindaDelasalleExist_thenVerifyAddFriendIsCalled()  {
+    public void addFriendUserTest_whenFriendAddedLucindaDelasalleExist_thenVerifyAddFriendIsCalled() {
         //GIVEN
         String userEmail = "kikine@email.fr";
         String friendEmail = "luciole@email.fr";
@@ -131,7 +126,7 @@ public class UserServiceTest {
         //GIVEN
         FriendList friend1 = new FriendList();
         FriendList friend2 = new FriendList();
-        friendListMock = new HashSet<IFriendList>();
+        Set<IFriendList> friendListMock = new HashSet<>();
 
         friend1.setEmail("sara@email.fr");
         friend1.setFirstName("François");
@@ -152,4 +147,39 @@ public class UserServiceTest {
         assertEquals(friendListMock, resultListFriend);
 
     }
-}
+
+    @Test
+    public void getUserByEmailTest_whenUserIsKikineAndExistInDB_thenReturnUserKikine() {
+        //GIVEN
+        String userEmail = "kikine@email.fr";
+        User user = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(30.50)
+                .accountBank(170974).build();
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(user);
+        //WHEN
+        User userResult = userServiceTest.getUserByEmail(user.getEmail());
+        //THEN
+        assertEquals(userEmail,userResult.getEmail());
+        assertEquals("monTropToppassword",userResult.getPassword());
+        assertEquals("Christine",userResult.getFirstName());
+        assertEquals("Deldalle",userResult.getLastName());
+
+    }
+
+    @Test
+    public void getUserByEmailTest_whenUserNotExistInDB_thenReturnUserNull() {
+        //GIVEN
+        String userEmail = "lisa@email.fr";
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
+        //WHEN
+        User userResult = userServiceTest.getUserByEmail(userEmail);
+        //THEN
+        assertNull(userResult);
+
+    }
+
+    }
