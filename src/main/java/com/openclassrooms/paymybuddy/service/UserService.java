@@ -1,7 +1,6 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
-import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -43,15 +42,10 @@ public class UserService implements IUserService {
      *
      * @param friendEmail email of the friend that will be added to the list
      * @param userEmail   Email of the user which want added a friend to the list
-     * @throws UserNotFoundException if the user is not found in the database
      */
     @Override
     public void addFriendUser(String userEmail, String friendEmail) {
-//        User friendToAdded = getUserByEmail(friendEmail);
-////        if (friendToAdded == null) {
-////            log.error("UserService: User not found with email: " + friendEmail);
-////            throw new UserNotFoundException("User not found, please enter a email valid");
-////        }
+
         log.debug("Service: User added with email: " + friendEmail);
         userRepository.saveFriend(userEmail, friendEmail);
     }
@@ -61,10 +55,9 @@ public class UserService implements IUserService {
      *
      * @param email item unique that permit identify the user
      * @return A user
-     * @throws UserNotFoundException if the user is not found in the database
      */
     public User getUserByEmail(String email) {
-        log.error("UserService: User found with email: " + email);
+        log.debug("UserService: User found with email: " + email);
         return userRepository.findByEmail(email);
     }
 

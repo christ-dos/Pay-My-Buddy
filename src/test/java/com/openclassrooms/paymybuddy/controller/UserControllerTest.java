@@ -38,20 +38,6 @@ public class UserControllerTest {
     @MockBean
     private IUserRepository userRepositoryMock;
 
-    /**
-     * Method that write an object as JsonString to build the body of the request
-     * mock
-     *
-     * @param obj - The object that we want send in the request
-     * @return The value as JsonString of the object
-     */
-//    public String asJsonString(final Object obj) {
-//        try {
-//            return new ObjectMapper().writeValueAsString(obj);
-//        } catch (Exception e) {
-//            throw new RuntimeException("The obj does not be writing", e);
-//        }
-//    }
     @Test
     public void showAddFriendViewTest_whenUrlIsAddfriend_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -172,9 +158,6 @@ public class UserControllerTest {
         String friendEmailNotExist = "wiwi@email.fr";
         String userEmail = "kikine@email.fr";
 
-        User friendNotExist = new User(
-                "wiwi@email.fr", "monpassword", "Lucinda",
-                "Delasalle", 50.00, 256942, null, null);
         doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailNotExist);
         doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailNotExist);
         when(userServiceMock.getUserByEmail(friendEmailNotExist)).thenReturn(null);

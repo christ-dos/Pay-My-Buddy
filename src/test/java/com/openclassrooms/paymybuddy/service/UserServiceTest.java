@@ -1,23 +1,27 @@
 package com.openclassrooms.paymybuddy.service;
 
-import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.IFriendList;
-import com.openclassrooms.paymybuddy.exception.FriendAlreadyExistException;
-import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
-import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.IFriendList;
+import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.repository.IUserRepository;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +78,7 @@ public class UserServiceTest {
         userServiceTest = new UserService(userRepositoryMock);
     }
     @Test
-    public void getUserstest_thenReturnListWithTwo(){
+    public void getUserstest_thenReturnListWithTwoElements(){
         //GIVEN
         Set<User>usersSetMock = new HashSet<>(Arrays.asList(
                 User.builder()
@@ -96,7 +100,7 @@ public class UserServiceTest {
         when(userRepositoryMock.findAll()).thenReturn(usersSetMock);
         //WHEN
         Iterable<User> usersIterable= userServiceTest.getUsers();
-        Iterator it = usersIterable.iterator();
+        Iterator<User> it = usersIterable.iterator();
         //method that count the iterable
         while (it.hasNext()) {
             it.next();

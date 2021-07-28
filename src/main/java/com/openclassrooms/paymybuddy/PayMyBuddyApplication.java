@@ -1,17 +1,13 @@
 package com.openclassrooms.paymybuddy;
 
-import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.IFriendList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.IUserService;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
 
 
 @SpringBootApplication
@@ -45,7 +41,7 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //		System.out.println(user2.getFirstName());
 		//userService.addFriendUser("dada@email.fr","lili@email.fr" );
 		//System.out.println(user1);
-		//userService.addFriendUser("dada@email.fr","luluM@email.fr");
+		//userService.addFriendUser("dada@email.fr","ggpassain@email.fr");
 		//Optional<User> userByEmail = userRepo.findUserByEmail("lili@email.fr");
 		//System.out.println(userByEmail.get());
 		//Set<IFriendList> listUser = userService.getFriendListByEmail("lili@email.fr");
