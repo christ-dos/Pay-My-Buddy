@@ -109,30 +109,17 @@ public class UserServiceTest {
 
     }
     @Test
-    public void addFriendUserTest_whenFriendAddedLucindaDelasalleExist_thenVerifyAddFriendIsCalled() throws SQLIntegrityConstraintViolationException {
+    public void addFriendUserTest_whenFriendAddedLucindaDelasalleExist_thenVerifyAddFriendIsCalled()  {
         //GIVEN
         String userEmail = "kikine@email.fr";
         String friendEmail = "luciole@email.fr";
 
         doNothing().when(userRepositoryMock).saveFriend(isA(String.class), isA(String.class));
-        when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(friend);
         //WHEN
         userServiceTest.addFriendUser(userEmail, friendEmail);
 
         //THEN
         verify(userRepositoryMock, times(1)).saveFriend(userEmail, friendEmail);
-    }
-
-    @Test
-    public void addFriendUserTest_whenFriendToAddNotFound_thenThrowsUserNotFoundException() {
-        //GIVEN
-        String userEmail = "kikine@email.fr";
-        String friendEmail = null;
-        //WHEN
-        //THEN
-        verify(userRepositoryMock, times(0)).saveFriend(userEmail, friendEmail);
-        assertThrows(UserNotFoundException.class,
-                () -> userServiceTest.addFriendUser(userEmail, friendEmail));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
+import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 @Controller
@@ -52,7 +54,6 @@ public class UserController implements WebMvcConfigurer {
     }
 
 
-
 //        @PostMapping(value = "/addfriend")
 //    public ModelAndView submitAddFriend(@ModelAttribute("email") @Valid String friendEmail, BindingResult result, Model model) {
 //        if(result.hasFieldErrors()){
@@ -77,23 +78,47 @@ public class UserController implements WebMvcConfigurer {
 
     @PostMapping(value = "/addfriend")
     public String submitAddFriend(@Valid FriendList friendList, BindingResult result, Model model) {
+
         if (result.hasErrors()) {
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            log.error("Error in fields");
             return "addfriend";
         }
-        if (result.hasGlobalErrors()) {
+        if (friendAlreadyExistsInList(friendList.getEmail())) {
+            result.rejectValue("email", "", "This user already exists in your list");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            log.error("Email already exists in friend list");
             return "addfriend";
         }
-//        try {
+        if (userEmailIsPresentDataBase(friendList.getEmail()) == false) {
+            result.rejectValue("email", "", "This user not exist, you can't add it ");
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            log.error("User Email not exist in data base");
+            return "addfriend";
+        }
         userService.addFriendUser(userEmail, friendList.getEmail());
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-//        } catch (UserNotFoundException ex) {
-//            model.addAttribute("userNotFound", ex.getMessage());
-//        }
         log.info("form submitted");
 
-        return "redirect:/addfriend";
+        return "addfriend";
+    }
+
+    private Boolean friendAlreadyExistsInList(String friendEmail) {
+        Set<IFriendList> listFriend = userService.getFriendListByEmail(userEmail);
+        for (IFriendList friend : listFriend) {
+            if (friend.getEmail().equals(friendEmail)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Boolean userEmailIsPresentDataBase(String friendEmail) {
+        User userExist = userService.getUserByEmail(friendEmail);
+            if (userExist == null) {
+                return false;
+            }
+        return true;
     }
 
 

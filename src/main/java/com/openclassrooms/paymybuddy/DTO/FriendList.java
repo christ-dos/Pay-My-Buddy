@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
@@ -12,7 +13,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class FriendList implements IFriendList {
 
-    @NotEmpty(message= "Friend email cannot be empty")
+    @NotBlank(message= "Email cannot be empty")
     private String email;
 
 
@@ -36,4 +37,12 @@ public class FriendList implements IFriendList {
         return lastName;
     }
 
+    @Override
+    public String toString() {
+        return "FriendList{" +
+                "email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                '}';
+    }
 }

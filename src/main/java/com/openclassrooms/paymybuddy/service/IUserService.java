@@ -9,6 +9,8 @@ import java.util.Set;
 public interface IUserService {
     Iterable<User> getUsers();
 
+    public User getUserByEmail(String email);
+
     void addFriendUser(String userEmail, String FriendEmail);
 
 

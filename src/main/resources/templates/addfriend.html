@@ -11,6 +11,7 @@
         .error {
             color: red;
             font-size: 0.8em;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -76,27 +77,28 @@
                 <h5>Add Friend</h5>
             </div>
             <!--********Bouton New Transaction **********-->
-                <!--Input which look like a button-->
-                <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary btn.block text-light bold text-center " type=button
-                       onclick=window.location.href="http://localhost:9090/index"; value="New Transaction"
-                       id="btnAddConnection"/>
+            <!--Input which look like a button-->
+            <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary btn.block text-light bold text-center " type=button
+                   onclick=window.location.href="http://localhost:9090/index"; value="New Transaction"
+                   id="btnAddConnection"/>
         </div>
         <div class="container gray  p-5">
             <!--*************Input Email****************-->
             <form action="#" method="post" th:action="@{/addfriend}" th:object="${friendList}">
 
                 <div class="row justify-content-center">
-                    <div th:if="${#fields.hasGlobalErrors()}">
-                        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Global errors</p>
-                    </div>
+                      <p class="col-9 col-md-9 col-lg-4 gray m-2 " th:errors="*{email}"
+                            th:errorclass="error"></p>
                     <div class="col-12 col-md-6 col-lg-3 m-2">
-                        <input th:field="*{email}" class="form-control col-12 col-md-9 col-lg-9" type="email" placeholder="Email"/>
-                        <span class="col-12 col-md-12 col-lg-12 m-2"th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
-                              th:errorclass="error">mon span</span>
+                        <input th:field="*{email}" class="form-control col-12 col-md-9 col-lg-9" type="email"
+                               placeholder="Email"/>
                     </div>
                     <!--**************Bouton Add******************-->
-                    <button type="submit" class="col-12 col-md-3 col-lg-2 m-2 btn btn-success btn-block text-light bold " id="btnAdd">Add
+                    <button type="submit"
+                            class="col-12 col-md-3 col-lg-2 m-2 btn btn-success btn-block text-light bold " id="btnAdd">
+                        Add
                     </button>
+
                 </div>
             </form>
         </div>

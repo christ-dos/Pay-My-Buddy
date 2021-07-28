@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Set;
 
 /**
@@ -47,12 +46,12 @@ public class UserService implements IUserService {
      * @throws UserNotFoundException if the user is not found in the database
      */
     @Override
-    public void addFriendUser(String userEmail, String friendEmail)  {
-        User friendToAdded = getUserByEmail(friendEmail);
-        if (friendToAdded == null) {
-            log.error("UserService: User not found with email: " + friendEmail);
-            throw new UserNotFoundException("User not found, please enter a email valid");
-        }
+    public void addFriendUser(String userEmail, String friendEmail) {
+//        User friendToAdded = getUserByEmail(friendEmail);
+////        if (friendToAdded == null) {
+////            log.error("UserService: User not found with email: " + friendEmail);
+////            throw new UserNotFoundException("User not found, please enter a email valid");
+////        }
         log.debug("Service: User added with email: " + friendEmail);
         userRepository.saveFriend(userEmail, friendEmail);
     }
@@ -64,13 +63,9 @@ public class UserService implements IUserService {
      * @return A user
      * @throws UserNotFoundException if the user is not found in the database
      */
-    private User getUserByEmail(String email) {
-        if (email != null) {
-            log.debug("UserService: user found with email: " + email);
-            return userRepository.findByEmail(email);
-        }
-        log.error("UserService: User not found with email: " + email);
-        throw new UserNotFoundException("User not exist");
+    public User getUserByEmail(String email) {
+        log.error("UserService: User found with email: " + email);
+        return userRepository.findByEmail(email);
     }
 
     /**
