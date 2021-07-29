@@ -26,27 +26,27 @@ VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
 
 CREATE TABLE transaction
 (
-    id             TINYINT AUTO_INCREMENT NOT NULL,
+    transaction_id TINYINT AUTO_INCREMENT NOT NULL,
     date           DATETIME               NOT NULL,
     amount         DECIMAL(8, 8)          NOT NULL,
     description    VARCHAR(300),
-    fees           DECIMAL(8, 8)          NOT NULL,
+    fees           DECIMAL(8, 8),
     emitter_email  VARCHAR(100)           NOT NULL,
     receiver_email VARCHAR(100)           NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (transaction_id)
 )
     ENGINE = innoDB;
 
 
 CREATE TABLE transfer
 (
-    id          TINYINT AUTO_INCREMENT NOT NULL,
+    transfer_id TINYINT AUTO_INCREMENT NOT NULL,
     date        DATETIME               NOT NULL,
     type        VARCHAR(10)            NOT NULL,
     amount      DECIMAL(8, 2)          NOT NULL,
     description VARCHAR(300),
     user_email  VARCHAR(100)           NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (transfer_id)
 )
     ENGINE = innoDB;
 

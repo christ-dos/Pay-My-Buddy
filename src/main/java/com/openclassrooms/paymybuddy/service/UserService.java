@@ -22,7 +22,6 @@ public class UserService implements IUserService {
 
     @Autowired
     public UserService(IUserRepository userRepository) {
-
         this.userRepository = userRepository;
     }
 
@@ -45,7 +44,6 @@ public class UserService implements IUserService {
      */
     @Override
     public void addFriendUser(String userEmail, String friendEmail) {
-
         log.debug("Service: User added with email: " + friendEmail);
         userRepository.saveFriend(userEmail, friendEmail);
     }
@@ -70,7 +68,7 @@ public class UserService implements IUserService {
      */
     @Override
     public Set<IFriendList> getFriendListByEmail(String userEmail) {
-
+        log.debug("UserService: User friend found for email: " + userEmail);
         return userRepository.findFriendListByEmail(userEmail);
     }
 

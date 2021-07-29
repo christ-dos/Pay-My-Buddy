@@ -23,7 +23,9 @@ public interface IUserRepository extends CrudRepository<User, Integer> {
     void saveFriend(@Param("userEmail") String userEmail, @Param("friendEmail") String friendEmail);
 
     //@Transactional
-    @Query(value = "SELECT user.email AS email, user.first_name AS firstName, user.last_name  AS lastName, friend.date_added AS dateAdded FROM  user INNER JOIN friend ON friend.friend_email = user.email WHERE friend.user_email=?1 ORDER BY friend.date_added DESC ", nativeQuery = true)
+    @Query(value = "SELECT user.email AS email, user.first_name AS firstName, user.last_name  AS lastName, " +
+            "friend.date_added AS dateAdded FROM  user INNER JOIN friend ON " +
+            "friend.friend_email = user.email WHERE friend.user_email=?1 ORDER BY friend.date_added DESC ", nativeQuery = true)
     Set<IFriendList> findFriendListByEmail(String userEmail);
 
     @Query(value = "SELECT * FROM user WHERE email=?", nativeQuery = true)

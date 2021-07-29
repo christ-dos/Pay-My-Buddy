@@ -28,45 +28,9 @@ public class UserServiceTest {
 
     private UserService userServiceTest;
 
-    @Mock
-    private User user;
-
 
     @BeforeEach
     public void setPerTest() {
-//       User friend = User.builder()
-//                .email("luciole@email.fr")
-//                .password("monpassword")
-//                .firstName("Lucinda")
-//                .lastName("Delasalle")
-//                .balance(50.00)
-//                .accountBank(256942)
-//                .build();
-//        user = new User();
-//        user = User.builder()
-//                .email("kikine@email.fr")
-//                .password("monTropToppassword")
-//                .firstName("Christine")
-//                .lastName("Deldalle")
-//                .balance(30.50)
-//                .accountBank(170974)
-//                .friends(
-//                        new HashSet<>(Arrays.asList(
-//                                User.builder()
-//                                        .email("sara@email.fr")
-//                                        .password("1234")
-//                                        .firstName("François")
-//                                        .lastName("Dujardin")
-//                                        .balance(10.50)
-//                                        .accountBank(694281).build(),
-//                                User.builder()
-//                                        .email("balade@email.fr")
-//                                        .password("5689")
-//                                        .firstName("Albert")
-//                                        .lastName("Martin")
-//                                        .balance(16.00)
-//                                        .accountBank(894762).build())))
-//                .build();
 
         userServiceTest = new UserService(userRepositoryMock);
     }
@@ -101,9 +65,10 @@ public class UserServiceTest {
             count++;
         }
         //THEN
-        //set contain 3 elements
+        //userIterable contain 3 elements
         assertEquals(3, count);
         assertEquals(usersSetMock, usersIterable);
+        verify(userRepositoryMock, times(1)).findAll();
 
     }
 
@@ -145,6 +110,7 @@ public class UserServiceTest {
         //THEN
         assertEquals(2, resultListFriend.size());
         assertEquals(friendListMock, resultListFriend);
+        verify(userRepositoryMock, times(1)).findFriendListByEmail(userEmail);
 
     }
 
@@ -163,10 +129,11 @@ public class UserServiceTest {
         //WHEN
         User userResult = userServiceTest.getUserByEmail(user.getEmail());
         //THEN
-        assertEquals(userEmail,userResult.getEmail());
-        assertEquals("monTropToppassword",userResult.getPassword());
-        assertEquals("Christine",userResult.getFirstName());
-        assertEquals("Deldalle",userResult.getLastName());
+        assertEquals(userEmail, userResult.getEmail());
+        assertEquals("monTropToppassword", userResult.getPassword());
+        assertEquals("Christine", userResult.getFirstName());
+        assertEquals("Deldalle", userResult.getLastName());
+        verify(userRepositoryMock, times(1)).findByEmail(userEmail);
 
     }
 
@@ -182,4 +149,4 @@ public class UserServiceTest {
 
     }
 
-    }
+}
