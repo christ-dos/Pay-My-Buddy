@@ -30,12 +30,12 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
-
-
-    @GetMapping(value = "/users")
-    public Iterable<User> getUserList() {
-        return userService.getUsers();
-    }
+//
+//
+//    @GetMapping(value = "/users")
+//    public Iterable<User> getUserList() {
+//        return userService.getUsers();
+//    }
 
     @GetMapping("/login")
     public ModelAndView showLoginView() {
@@ -50,6 +50,12 @@ public class UserController {
         log.info("The View index displaying");
 
         return new ModelAndView();
+    }
+
+    @PostMapping(value = "/index")
+    public String submitAddFriend(Model model){
+
+        return "index";
     }
 
     @GetMapping({"/addfriend"})
@@ -73,7 +79,7 @@ public class UserController {
             log.error("Email already exists in friend list");
             return "addfriend";
         }
-        if (userEmailIsPresentDataBase(friendList.getEmail()) == false) {
+        if (!userEmailIsPresentDataBase(friendList.getEmail())) {
             result.rejectValue("email", "", "This user not exist, you can't add it ");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
             log.error("User Email not exist in data base");
@@ -98,10 +104,11 @@ public class UserController {
 
     private Boolean userEmailIsPresentDataBase(String friendEmail) {
         User userExist = userService.getUserByEmail(friendEmail);
-        if (userExist == null) {
+        if(userExist == null) {
             return false;
         }
         return true;
     }
+
 
 }

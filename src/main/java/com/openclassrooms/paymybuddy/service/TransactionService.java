@@ -1,12 +1,13 @@
 package com.openclassrooms.paymybuddy.service;
 
+import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -25,7 +26,12 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public Optional<Transaction> getTransactionById(Integer transactionId) {
-        return transactionRepository.findById(transactionId);
+    public Set<IDisplayingTransaction> getTransactionByEmail(String userEmail) {
+        return transactionRepository.findTransactionsByEmail(userEmail);
+    }
+
+    @Override
+    public void addTransaction(String userEmail, String friendEmail, Double amount) {
+        transactionRepository.saveTransaction(userEmail, friendEmail, amount);
     }
 }

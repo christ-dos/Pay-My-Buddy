@@ -3,7 +3,9 @@ package com.openclassrooms.paymybuddy.controller;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
 import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.service.TransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-//@RunWith(SpringRunner.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 public class UserControllerTest {
@@ -37,6 +38,12 @@ public class UserControllerTest {
 
     @MockBean
     private IUserRepository userRepositoryMock;
+
+    @MockBean
+    private ITransactionRepository transactionRepositoryMock;
+
+    @MockBean
+    private TransactionService transactionService;
 
     @Test
     public void showAddFriendViewTest_whenUrlIsAddfriend_thenReturnTwoModelsAndStatusOk() throws Exception {

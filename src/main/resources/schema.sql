@@ -28,14 +28,18 @@ CREATE TABLE transaction
 (
     transaction_id TINYINT AUTO_INCREMENT NOT NULL,
     date           DATETIME               NOT NULL,
-    amount         DECIMAL(8, 8)          NOT NULL,
+    amount         DECIMAL(8, 2)          NOT NULL,
     description    VARCHAR(300),
-    fees           DECIMAL(8, 8),
+    fees           DECIMAL(8, 2),
     emitter_email  VARCHAR(100)           NOT NULL,
     receiver_email VARCHAR(100)           NOT NULL,
     PRIMARY KEY (transaction_id)
 )
     ENGINE = innoDB;
+INSERT INTO transaction(date, amount,description,fees,emitter_email, receiver_email)
+VALUES(now(),15.0,'books',0.0,'dada@email.fr','luluM@email.fr'),
+      (now(),5.0,'diner',0.0,'dada@email.fr','ggpassain@email.fr');
+
 
 
 CREATE TABLE transfer
@@ -60,7 +64,8 @@ CREATE TABLE friend
 )
     ENGINE = innoDB;
 INSERT INTO friend(user_email, friend_email, date_added)
-VALUES ('dada@email.fr', 'ggpassain@email.fr', now());
+VALUES ('dada@email.fr', 'ggpassain@email.fr', now()),
+       ('dada@email.fr', 'luluM@email.fr', now());
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk

@@ -1,5 +1,10 @@
 package com.openclassrooms.paymybuddy;
 
+import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
+import com.openclassrooms.paymybuddy.model.Transaction;
+import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
+import com.openclassrooms.paymybuddy.service.ITransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -9,15 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.IUserService;
 
+import java.util.Set;
+
 
 @SpringBootApplication
 public class PayMyBuddyApplication implements CommandLineRunner {
 
 	@Autowired
-	private IUserService userService;
+	private ITransactionService transactionService;
 
 	@Autowired
-	private IUserRepository userRepo;
+	private ITransactionRepository transactionRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(PayMyBuddyApplication.class, args);
@@ -39,13 +46,13 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //		System.out.println(user1.getFirstName());
 //		User user2 = userRepo.getUser("tela@email.fr");
 //		System.out.println(user2.getFirstName());
-		//userService.addFriendUser("dada@email.fr","lili@email.fr" );
+		transactionService.addTransaction("lili@email.fr","luluM@email.fr",55.0 );
 		//System.out.println(user1);
 		//userService.addFriendUser("dada@email.fr","ggpassain@email.fr");
 		//Optional<User> userByEmail = userRepo.findUserByEmail("lili@email.fr");
 		//System.out.println(userByEmail.get());
-		//Set<IFriendList> listUser = userService.getFriendListByEmail("lili@email.fr");
-		//listUser.forEach(user -> System.out.println(user.getEmail()));
+		Set<IDisplayingTransaction> listtrans = transactionService.getTransactionByEmail("dada@email.fr");
+		listtrans.forEach(trans -> System.out.println(trans.getDescription()));
 
 	}
 }
