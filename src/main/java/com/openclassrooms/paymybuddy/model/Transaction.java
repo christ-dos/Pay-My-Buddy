@@ -1,34 +1,29 @@
 package com.openclassrooms.paymybuddy.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "transaction")
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Transaction {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+    @Column(name = "transaction_id")
+    private Integer transactionId;
 
-    @Column(name = "date")
-    private Date date;
+//    private Date date;
 
-    @Column(name = "type")
-    private String type;
-
-    @Column(name = "amount")
     private Double amount;
 
-    @Column(name = "description")
     private String description;
 
-    @Column(name = "cost")
-    private Double cost;
+    private Double fees;
 }
