@@ -12,10 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
@@ -86,34 +86,36 @@ class TransactionServiceTest {
 
         when(transactionRepositoryMock.findTransactionsByEmail(isA(String.class))).thenReturn((listDisplayingTransactionsTest));
         //WHEN
-        Set<IDisplayingTransaction> setTransactionsResult = transactionServiceTest.getTransactionByEmail(userEmail);
+        Set<IDisplayingTransaction> setTransactionsResult = transactionServiceTest.getTransactionsByEmail(userEmail);
         //THEN
-        assertEquals(listDisplayingTransactionsTest,setTransactionsResult);
+        assertEquals(listDisplayingTransactionsTest, setTransactionsResult);
         verify(transactionRepositoryMock, times(1)).findTransactionsByEmail(isA(String.class
         ));
     }
 
     @Test
-    public void addTransaction_whenUserEmailExistInDB_thenVerifyTransactionAdded(){
+    public void addTransaction_whenUserEmailExistInDB_thenVerifyTransactionAdded() {
         //GIVEN
         String userEmail = "kikine@email.fr";
         String friendEmail = "lise@email.fr";
         Double amount = 25.98;
-        doNothing().when(transactionRepositoryMock).saveTransaction(isA(String.class),isA(String.class),isA(Double.class));
+        String description = "cinema";
+        doNothing().when(transactionRepositoryMock).saveTransaction(isA(String.class), isA(String.class), isA(Double.class), isA(String.class));
         //WHEN
-        transactionServiceTest.addTransaction(userEmail,friendEmail,amount);
+        transactionServiceTest.addTransaction(userEmail, friendEmail, amount, description);
         //THEN
-        verify(transactionRepositoryMock,times(1)).saveTransaction(isA(String.class),isA(String.class),isA(Double.class));
+        verify(transactionRepositoryMock, times(1)).saveTransaction(isA(String.class), isA(String.class), isA(Double.class), isA(String.class));
     }
 
-//    @Test
-//    void getTransactionByIdTest_whenTransactionEmailNotExist_thenReturnNull() {
-//        //GIVEN
-//        when(transactionRepositoryMock.findTransactionsByEmail(isA(String.class)))).thenReturn();
-//      //WHEN
-//        Optional<Transaction> transactionNotExist = transactionServiceTest.getTransactionById(isA(Integer.class));
-//        //THEN
-//        assertNull(transactionNotExist);
-//    }
+    @Test
+    void getTransactionByEmailTest_whenEmitterEmailTransactionNotExist_thenReturnNull() {
+        //GIVEN
+        String userEmail = "barbapapa@email.fr";
+        when(transactionRepositoryMock.findTransactionsByEmail(isA(String.class))).thenReturn(isNull());
+        //WHEN
+        Set<IDisplayingTransaction> transactionsResult = transactionServiceTest.getTransactionsByEmail(userEmail);
+        //THEN
+        assertNull(transactionsResult);
+    }
 
 }

@@ -8,7 +8,7 @@ import java.util.Set;
 public interface ITransactionService {
     public Iterable<Transaction> getTransactions();
 
-    public Set<IDisplayingTransaction> getTransactionByEmail(String userEmail);
+    public Set<IDisplayingTransaction> getTransactionsByEmail(String userEmail);
 
-    public void addTransaction(String userEmail, String friendEmail, Double amount);
+    public void addTransaction(String userEmail, String friendEmail, Double amount, String description);
 }

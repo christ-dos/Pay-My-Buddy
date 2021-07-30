@@ -1,8 +1,6 @@
 package com.openclassrooms.paymybuddy;
 
-import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
-import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +8,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.openclassrooms.paymybuddy.repository.IUserRepository;
-import com.openclassrooms.paymybuddy.service.IUserService;
 
 import java.util.Set;
 
@@ -46,13 +41,13 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //		System.out.println(user1.getFirstName());
 //		User user2 = userRepo.getUser("tela@email.fr");
 //		System.out.println(user2.getFirstName());
-		transactionService.addTransaction("lili@email.fr","luluM@email.fr",55.0 );
+		transactionService.addTransaction("dada@email.fr","luluM@email.fr",55.0 ,"movies");
 		//System.out.println(user1);
 		//userService.addFriendUser("dada@email.fr","ggpassain@email.fr");
 		//Optional<User> userByEmail = userRepo.findUserByEmail("lili@email.fr");
 		//System.out.println(userByEmail.get());
-		Set<IDisplayingTransaction> listtrans = transactionService.getTransactionByEmail("dada@email.fr");
-		listtrans.forEach(trans -> System.out.println(trans.getDescription()));
+		Set<IDisplayingTransaction> listtrans = transactionService.getTransactionsByEmail("dada@email.fr");
+		listtrans.forEach(trans -> System.out.println(trans.getFirstName()));
 
 	}
 }

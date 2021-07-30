@@ -1,8 +1,11 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
+import com.openclassrooms.paymybuddy.DTO.ReceivingDataTransactionView;
 import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +31,13 @@ public class UserController {
 
     private List<IFriendList> friendLists = new ArrayList<>();
 
+    private List<IDisplayingTransaction> transactionslist = new ArrayList<>();
+
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private ITransactionService transactionService;
 //
 //
 //    @GetMapping(value = "/users")
@@ -38,23 +46,28 @@ public class UserController {
 //    }
 
     @GetMapping("/login")
-    public ModelAndView showLoginView() {
+    public String showLoginView(Model model) {
         log.info("The View login displaying");
-        return new ModelAndView();
+
+        return "login";
     }
 
     @GetMapping("/index")
-    public ModelAndView showViewIndex(Model model) {
-        //model.addAttribute("transaction", new TransDTO());
+    public String showIndexView(@ModelAttribute("receivingDataTransactionView") ReceivingDataTransactionView dataTransactionView, Model model) {
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+        model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
         log.info("The View index displaying");
 
-        return new ModelAndView();
+        return "index";
     }
 
     @PostMapping(value = "/index")
-    public String submitAddFriend(Model model){
-
+    public String submitIndexView(@Valid ReceivingDataTransactionView dataTransactionView, BindingResult result, Model model) {
+        transactionService.addTransaction(userEmail,
+                dataTransactionView.getFriendEmail(), dataTransactionView.getAmount(),dataTransactionView.getDescription());
+        model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
+        model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+        log.info("form index submitted");
         return "index";
     }
 
@@ -87,7 +100,7 @@ public class UserController {
         }
         userService.addFriendUser(userEmail, friendList.getEmail());
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-        log.info("form submitted");
+        log.info("form addFriend submitted");
 
         return "addfriend";
     }
@@ -104,7 +117,7 @@ public class UserController {
 
     private Boolean userEmailIsPresentDataBase(String friendEmail) {
         User userExist = userService.getUserByEmail(friendEmail);
-        if(userExist == null) {
+        if (userExist == null) {
             return false;
         }
         return true;

@@ -18,7 +18,7 @@ CREATE TABLE user
 
 INSERT INTO user(email, password, first_name, last_name, balance, account_bank)
 VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
-       ('dada@email.fr', 'monpassword', 'Daminen', 'Sanchez', 3.50, 255896),
+       ('dada@email.fr', 'monpassword', 'Damien', 'Sanchez', 3.50, 255896),
        ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 22.80, 359840),
        ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 18.98, 259873),
        ('lili@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 783600)

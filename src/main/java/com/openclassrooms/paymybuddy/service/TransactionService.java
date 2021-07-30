@@ -26,12 +26,12 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public Set<IDisplayingTransaction> getTransactionByEmail(String userEmail) {
+    public Set<IDisplayingTransaction> getTransactionsByEmail(String userEmail) {
         return transactionRepository.findTransactionsByEmail(userEmail);
     }
 
     @Override
-    public void addTransaction(String userEmail, String friendEmail, Double amount) {
-        transactionRepository.saveTransaction(userEmail, friendEmail, amount);
+    public void addTransaction(String userEmail, String friendEmail, Double amount, String description) {
+        transactionRepository.saveTransaction(userEmail, friendEmail, amount, description);
     }
 }

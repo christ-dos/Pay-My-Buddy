@@ -58,44 +58,6 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-//    @Test
-//    public void showAddFriendViewTest_whenUrlIsAddfriendWithUserEmailKikine_thenReturnModelDisplayingListFriendsUserKikine() throws Exception {
-//        //GIVEN
-//        Set<IFriendList> friendSetMock;
-//        FriendList friend1 = new FriendList();
-//        FriendList friend2 = new FriendList();
-//        friendSetMock = new HashSet<>();
-//
-//        friend1.setEmail("sara@email.fr");
-//        friend1.setFirstName("François");
-//        friend1.setLastName("Dujardin");
-//
-//        friend2.setEmail("amartin@email.fr");
-//        friend2.setFirstName("Albert");
-//        friend2.setLastName("Martin");
-//
-//        friendSetMock.add(friend1);
-//        friendSetMock.add(friend2);
-//        String userEmail = "kikine@email.fr";
-//
-//        List<IFriendList> friendLists = new ArrayList<>(
-//                Arrays.asList(new FriendList("atb@email.fr", "Bela", "Doblado"),
-//                        new FriendList("frans@email.fr", "Francisco", "Cruzeiro"),
-//                        new FriendList("hleleu@email.fr", "Helena", "delemarle")));
-//
-//        when(userRepositoryMock.findFriendListByEmail(isA(String.class))).thenReturn(friendSetMock);
-//        when(userServiceMock.getFriendListByEmail(userEmail)).thenCallRealMethod();
-//        //WHEN
-//        //THEN
-//        mockMvcUser.perform(MockMvcRequestBuilders.get("/addfriend").content(userEmail)
-//                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(view().name("addfriend"))
-//                .andExpect(model().size(2))
-//                .andExpect(model().attributeExists("friendLists"))
-//                .andDo(print());
-//    }
-
     @Test
     public void submitAddFriendTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanaddToFriendInList() throws Exception {
         //GIVEN
@@ -139,7 +101,6 @@ public class UserControllerTest {
 
         friendSetMock.add(friend1);
         friendSetMock.add(friend2);
-
 
         doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailAlreadyExist);
         doNothing().when(userServiceMock).addFriendUser(userEmail,friendEmailAlreadyExist);

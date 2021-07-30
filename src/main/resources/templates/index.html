@@ -86,25 +86,39 @@
                 <h5>Send Money</h5>
             </div>
             <!--********Bouton Add Connection**********-->
-                <!--Input which look like a button-->
-                <input class="col-sm-12 col-md-4 col-lg-2 btn-primary btn-block text-light bold text-center " type=button
-                       onclick=window.location.href="http://localhost:9090/addfriend"; value="Add Connection"
-                       id="btnAddConnection"/>
+            <!--Input which look like a button-->
+            <input class="col-sm-12 col-md-4 col-lg-2 btn-primary btn-block text-light bold text-center " type=button
+                   onclick=window.location.href="http://localhost:9090/addfriend"; value="Add Connection"
+                   id="btnAddConnection"/>
         </div>
         <div class="container gray p-5">
             <!--********Item select A Connection***********-->
-            <form name="formSelectFriend" id="formSelectFriend" action="#" >
+            <form name="formSelectUserEmailReceiver" id="formSelectFriend" action="#" th:action="@{/index}"
+                  th:object="${receivingDataTransactionView}" method="post">
                 <div class="row justify-content-center">
-                        <select class="col-12 col-md-5 col-lg-3 m-2" aria-label="form-select-sm" id="friendEmail">
-                            <option selected value="">Select A Connection</option>
-                            <option th:each="friend: ${friendLists}" th:value="${friend.email}"
-                                    th:text="${friend.email}"/>
-                        </select>
+                    <!--*****************Input description************-->
+                    <div class="col-sm-12 col-md-10 col-lg-10 m-2">
+                        <textarea th:field="*{description}" class="form-control " id="exampleFormControlTextarea1" rows="1"
+                                  placeholder="Description"></textarea>
+                    </div>
+                    <select th:field="*{friendEmail}" class="col-12 col-md-5 col-lg-3 m-2" aria-label="form-select-sm"
+                            id="friendEmail">
+                        <option selected value="">Select A Connection</option>
+                        <option th:each="friend: ${friendLists}" th:value="${friend.email}"
+                                th:text="${friend.email}"/>
+                    </select>
                     <!--*************Input Number**************-->
-                        <input class="col-12 col-md-2 col-lg-2 m-2 text-right" type="number" id="howmuch" step="1" placeholder="0€" min="0" max="1000000">
+                    <input th:field="*{amount}" class="col-12 col-md-2 col-lg-2 m-2 text-right" type="number"
+                           id="howmuch" step="0.01"
+                           placeholder="0€" min="0" max="1000000">
+
                     <!--**************Bouton Pay******************-->
-                        <button type="button" class="col-12 col-md-3 col-lg-2 m-2 btn btn-success btn-block text-light bold" id="btnPay">Pay
-                        </button>
+                    <button type="submit" class="col-12 col-md-3 col-lg-2 m-2 btn btn-success btn-block text-light bold"
+                            id="btnPay">Pay
+                    </button>
+
+
+
                 </div>
             </form>
         </div>
@@ -119,20 +133,10 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>Heyley</td>
-                <td>Restaurant bill Share</td>
-                <td>10€</td>
-            </tr>
-            <tr>
-                <td>Clara</td>
-                <td>Trip money</td>
-                <td>25€</td>
-            </tr>
-            <tr>
-                <td>Smith</td>
-                <td>Movies tickets</td>
-                <td>8€</td>
+            <tr th:each="transaction: ${transactions}">
+                <td th:text="${transaction.firstName}">Heyley</td>
+                <td th:text="${transaction.description}">Restaurant bill Share</td>
+                <td th:text="${transaction.amount}">10€</td>
             </tr>
             </tbody>
         </table>
