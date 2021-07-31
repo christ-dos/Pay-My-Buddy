@@ -36,11 +36,9 @@ CREATE TABLE transaction
     PRIMARY KEY (transaction_id)
 )
     ENGINE = innoDB;
-INSERT INTO transaction(date, amount,description,fees,emitter_email, receiver_email)
-VALUES(now(),15.0,'books',0.0,'dada@email.fr','luluM@email.fr'),
-      (now(),5.0,'diner',0.0,'dada@email.fr','ggpassain@email.fr');
-
-
+INSERT INTO transaction(date, amount, description, fees, emitter_email, receiver_email)
+VALUES (now(), 15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
+       (now(), 5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr');
 
 CREATE TABLE transfer
 (

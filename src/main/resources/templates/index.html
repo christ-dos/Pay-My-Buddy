@@ -36,7 +36,7 @@
     <div class="container-fluid ">
         <div class="row align-nav">
             <div class="col-4  d-flex flex-row justify-content-start">
-                <a class="navbar-brand btn-success text-light rounded order-1 bold text-center" href="#" id="logo">Pay
+                <a class="navbar-brand btn-success text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
                     My Buddy</a>
                 <button class="navbar-toggler gray" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,7 +94,7 @@
             </div>
             <!--********Bouton Add Connection**********-->
             <!--Input which look like a button-->
-            <input class="col-sm-12 col-md-4 col-lg-2 btn-primary btn-block text-light bold text-center " type=button
+            <input class="col-sm-12 col-md-4 col-lg-2 btn-primary btn-block text-light bold text-center rounded" type=button
                    onclick=window.location.href="http://localhost:9090/addfriend"; value="Add Connection"
                    id="btnAddConnection"/>
         </div>
@@ -104,8 +104,8 @@
                   th:object="${receivingDataTransactionView}" method="post">
                 <div class="row justify-content-center">
                     <!--*****************Input description************-->
-                    <div class="col-sm-12 col-md-10 col-lg-10 m-2">
-                        <textarea th:field="*{description}" class="form-control " id="exampleFormControlTextarea1" rows="1"
+                    <div class="col-12 col-md-11 col-lg-10 m-2">
+                        <textarea th:field="*{description}" class="form-control" id="exampleFormControlTextarea1" rows="1"
                                   placeholder="Description"></textarea>
                     </div>
                     <!--*****************Input select friendEmail************-->

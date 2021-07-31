@@ -27,11 +27,11 @@ import java.util.Set;
 @Slf4j
 public class UserController {
 
-    private String userEmail = "dada@email.fr";
+    private final String userEmail = "dada@email.fr";
 
-    private final List<IFriendList> friendLists = new ArrayList<>();
+    //private final List<IFriendList> friendLists = new ArrayList<>();
 
-    private final List<IDisplayingTransaction> transactionslist = new ArrayList<>();
+    //private final List<IDisplayingTransaction> transactionslist = new ArrayList<>();
 
     @Autowired
     private IUserService userService;
