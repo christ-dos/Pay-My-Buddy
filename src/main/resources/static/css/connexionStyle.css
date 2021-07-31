@@ -1,4 +1,3 @@
-
 body{
 	margin: auto;
 	font-size: 1.1em
@@ -12,9 +11,6 @@ input, input::-webkit-input-placeholder{
 .form-payMyBuddy{
 	width: 100%;
 }
-/*.green{*/
-/*	background-color:rgb(128,255,0); */
-/*}*/
 
 .bold{
 font-weight: bold; 
