@@ -4,6 +4,7 @@ import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
 import com.openclassrooms.paymybuddy.DTO.ReceivingDataTransactionView;
+import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
@@ -15,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -27,11 +27,11 @@ import java.util.Set;
 @Slf4j
 public class UserController {
 
-    private final static String userEmail = "dada@email.fr";
+    private String userEmail = "dada@email.fr";
 
-    private List<IFriendList> friendLists = new ArrayList<>();
+    private final List<IFriendList> friendLists = new ArrayList<>();
 
-    private List<IDisplayingTransaction> transactionslist = new ArrayList<>();
+    private final List<IDisplayingTransaction> transactionslist = new ArrayList<>();
 
     @Autowired
     private IUserService userService;
@@ -47,34 +47,49 @@ public class UserController {
 
     @GetMapping("/login")
     public String showLoginView(Model model) {
-        log.info("The View login displaying");
+        log.info("Controller: The View login displaying");
 
         return "login";
     }
 
-    @GetMapping("/index")
+    @GetMapping(value = {"/", "/index"})
     public String showIndexView(@ModelAttribute("receivingDataTransactionView") ReceivingDataTransactionView dataTransactionView, Model model) {
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
         model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
-        log.info("The View index displaying");
+        log.info("Controller: The View index displaying");
 
         return "index";
     }
 
-    @PostMapping(value = "/index")
+    @PostMapping(value = {"/", "/index"})
     public String submitIndexView(@Valid ReceivingDataTransactionView dataTransactionView, BindingResult result, Model model) {
-        transactionService.addTransaction(userEmail,
-                dataTransactionView.getFriendEmail(), dataTransactionView.getAmount(),dataTransactionView.getDescription());
+
+        if (result.hasErrors()) {
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
+            log.error("Controller: Error in fields");
+            return "index";
+        }
+        if (result.getRawFieldValue("friendEmail") == "") {
+            result.rejectValue("friendEmail", "", "field friend Email can not be null");
+        }
+        try {
+            transactionService.addTransaction(userEmail,
+                    dataTransactionView.getFriendEmail(), dataTransactionView.getAmount(), dataTransactionView.getDescription());
+        } catch (BalanceInsufficientException ex) {
+            result.rejectValue("amount", "", ex.getMessage());
+            log.error("Controller: Insufficient account balance");
+        }
         model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-        log.info("form index submitted");
+        log.info("Controller: form index submitted");
         return "index";
     }
 
     @GetMapping({"/addfriend"})
     public String showAddFriendView(@ModelAttribute("friendList") FriendList friendList, Model model) {
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-
+        log.info("Controller: The View addfriend displaying");
         return "addfriend";
     }
 
@@ -83,24 +98,24 @@ public class UserController {
 
         if (result.hasErrors()) {
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-            log.error("Error in fields");
+            log.error("Controller: Error in fields");
             return "addfriend";
         }
         if (friendAlreadyExistsInList(friendList.getEmail())) {
             result.rejectValue("email", "", "This user already exists in your list");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-            log.error("Email already exists in friend list");
+            log.error("Controller: Email already exists in friend list");
             return "addfriend";
         }
         if (!userEmailIsPresentDataBase(friendList.getEmail())) {
             result.rejectValue("email", "", "This user not exist, you can't add it ");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-            log.error("User Email not exist in data base");
+            log.error("Controller: User Email not exist in data base");
             return "addfriend";
         }
         userService.addFriendUser(userEmail, friendList.getEmail());
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-        log.info("form addFriend submitted");
+        log.info("Controller: form addFriend submitted");
 
         return "addfriend";
     }

@@ -41,7 +41,7 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //		System.out.println(user1.getFirstName());
 //		User user2 = userRepo.getUser("tela@email.fr");
 //		System.out.println(user2.getFirstName());
-		transactionService.addTransaction("dada@email.fr","luluM@email.fr",55.0 ,"movies");
+		//transactionService.addTransaction("dada@email.fr","luluM@email.fr",55.0 ,"movies");
 		//System.out.println(user1);
 		//userService.addFriendUser("dada@email.fr","ggpassain@email.fr");
 		//Optional<User> userByEmail = userRepo.findUserByEmail("lili@email.fr");

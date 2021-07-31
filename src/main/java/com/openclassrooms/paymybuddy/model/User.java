@@ -3,24 +3,15 @@ package com.openclassrooms.paymybuddy.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -33,7 +24,6 @@ public class User {
 
     @Column(name = "first_name")
     private String firstName;
-
 
     @Column(name = "last_name")
     private String lastName;
@@ -57,5 +47,19 @@ public class User {
 
     @ManyToMany(mappedBy = "friends")
     private Set<User> users = new HashSet<>();
+
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
+    @JoinColumn(name = "emitter_email")
+    private Set<Transaction> transactionsEmitterSet =  new HashSet<>();
+
+    @OneToMany(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER)
+    @JoinColumn(name = "receiver_email")
+    private Set<Transaction> transactionsReceiverSet =  new HashSet<>();
 
 }

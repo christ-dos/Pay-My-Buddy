@@ -1,11 +1,8 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
+import com.openclassrooms.paymybuddy.DTO.ReceivingDataTransactionView;
+import com.openclassrooms.paymybuddy.model.Transaction;
+import com.openclassrooms.paymybuddy.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,7 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.openclassrooms.paymybuddy.model.User;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -26,7 +25,82 @@ public class UserTestIT {
     @Autowired
     private MockMvc mockMvcUser;
 
+    //************************Integration tests View index**********************
+    @Test
+    public void showIndexViewTest_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().size(3))
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andDo(print());
+    }
 
+    @Test
+    public void showIndexViewTest_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/index"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().size(3))
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andDo(print());
+    }
+
+    @Test
+    public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/home"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenUserExistInDBAndFriendEmailTooAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+        //GIVEN
+//        String friendEmail = "luluM@email.com";
+//        String userEmail = "dada@email.fr";
+//        Double amount = 15.0;
+//        String description = " Movies tickets";
+        Double balance = 20.0;
+
+        Transaction transactionTest = new Transaction();
+        transactionTest.setTransactionId(1);
+        transactionTest.setDescription("cinema");
+        transactionTest.setAmount(16.0);
+
+        ReceivingDataTransactionView receivingDataTransactionView = new ReceivingDataTransactionView();
+        receivingDataTransactionView.setUserEmail("dada@email.fr");
+        receivingDataTransactionView.setFriendEmail("luluM@email.com");
+        receivingDataTransactionView.setDescription("Movies tickets");
+        receivingDataTransactionView.setAmount(15.58);
+
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                                .param("userEmail", receivingDataTransactionView.getUserEmail())
+                                .param("receiverEmail", receivingDataTransactionView.getFriendEmail())
+                                //.param("friendEmail", receivingDataTransactionView.getFriendEmail())
+                                .param("amount", String.valueOf(receivingDataTransactionView.getAmount()))
+                                .param("description", receivingDataTransactionView.getDescription())
+                        //.param("balance", String.valueOf(balance)))
+
+                ).andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().hasNoErrors())
+                .andDo(print());
+    }
+
+
+    //**********************Integartion tests in view addfriend*****************
     @Test
     public void showAddFriendViewTest_thenStatusOk() throws Exception {
         //GIVEN
@@ -38,7 +112,7 @@ public class UserTestIT {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/addfriend")
-                .param("email", user.getEmail()))
+                        .param("email", user.getEmail()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendLists", "friendList"))
@@ -64,8 +138,8 @@ public class UserTestIT {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .param("email", userFriendToAdd.getEmail())
-                .param("userEmail",userEmail))
+                        .param("email", userFriendToAdd.getEmail())
+                        .param("userEmail", userEmail))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList"))
@@ -80,7 +154,7 @@ public class UserTestIT {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .param("email", friendEmailNotExist))
+                        .param("email", friendEmailNotExist))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())
@@ -94,8 +168,8 @@ public class UserTestIT {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                .param("email", ""))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
+                        .param("email", ""))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
@@ -112,8 +186,8 @@ public class UserTestIT {
 
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .param("email",friendEmailAlreadyExist)
-                .param("userEmail",userEmail))
+                        .param("email", friendEmailAlreadyExist)
+                        .param("userEmail", userEmail))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -122,5 +196,6 @@ public class UserTestIT {
                 .andExpect(model().attributeHasErrors())
                 .andDo(print());
     }
+
 
 }

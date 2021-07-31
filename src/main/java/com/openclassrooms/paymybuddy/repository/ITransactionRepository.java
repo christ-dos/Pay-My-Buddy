@@ -27,4 +27,5 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
             " where transaction.emitter_email =?1 ORDER BY transaction.date DESC", nativeQuery = true)
     public Set<IDisplayingTransaction> findTransactionsByEmail(String userEmail);
 
+
 }

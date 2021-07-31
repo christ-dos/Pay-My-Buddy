@@ -19,8 +19,6 @@ public class Transaction {
     @Column(name = "transaction_id")
     private Integer transactionId;
 
-//    private Date date;
-
     private Double amount;
 
     private String description;

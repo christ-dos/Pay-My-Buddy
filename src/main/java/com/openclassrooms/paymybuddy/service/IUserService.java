@@ -13,6 +13,5 @@ public interface IUserService {
 
     void addFriendUser(String userEmail, String FriendEmail);
 
-
     Set<IFriendList> getFriendListByEmail(String userEmail);
 }

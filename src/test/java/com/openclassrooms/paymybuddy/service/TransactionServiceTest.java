@@ -1,23 +1,32 @@
 package com.openclassrooms.paymybuddy.service;
 
-import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
-import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
-import com.openclassrooms.paymybuddy.model.Transaction;
-import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.*;
+import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
+import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
+import com.openclassrooms.paymybuddy.model.Transaction;
+import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
+import com.openclassrooms.paymybuddy.repository.IUserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -27,9 +36,12 @@ class TransactionServiceTest {
     @Mock
     ITransactionRepository transactionRepositoryMock;
 
+    @Mock
+    IUserRepository userRepositoryMock;
+
     @BeforeEach
     void setUp() {
-        transactionServiceTest = new TransactionService(transactionRepositoryMock);
+        transactionServiceTest = new TransactionService(transactionRepositoryMock, userRepositoryMock);
     }
 
     @Test
@@ -94,28 +106,70 @@ class TransactionServiceTest {
     }
 
     @Test
-    public void addTransaction_whenUserEmailExistInDB_thenVerifyTransactionAdded() {
+    public void addTransaction_whenUserBalanceIsSufficient_thenVerifyTransactionAdded() {
         //GIVEN
         String userEmail = "kikine@email.fr";
         String friendEmail = "lise@email.fr";
+
+        User user = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(30.50)
+                .accountBank(170974).build();
+
         Double amount = 25.98;
         String description = "cinema";
+
+        IDisplayingTransaction transactionAdded = new DisplayingTransaction(
+                "Christine", description, amount);
+
         doNothing().when(transactionRepositoryMock).saveTransaction(isA(String.class), isA(String.class), isA(Double.class), isA(String.class));
+        when(userRepositoryMock.findByEmail(userEmail)).thenReturn(user);
         //WHEN
         transactionServiceTest.addTransaction(userEmail, friendEmail, amount, description);
+        Set<IDisplayingTransaction> transactionsResult = transactionServiceTest.getTransactionsByEmail(friendEmail);
         //THEN
-        verify(transactionRepositoryMock, times(1)).saveTransaction(isA(String.class), isA(String.class), isA(Double.class), isA(String.class));
+        verify(transactionRepositoryMock, times(1))
+                .saveTransaction(isA(String.class), isA(String.class), isA(Double.class), isA(String.class));
+
     }
 
-    @Test
-    void getTransactionByEmailTest_whenEmitterEmailTransactionNotExist_thenReturnNull() {
-        //GIVEN
-        String userEmail = "barbapapa@email.fr";
-        when(transactionRepositoryMock.findTransactionsByEmail(isA(String.class))).thenReturn(isNull());
-        //WHEN
-        Set<IDisplayingTransaction> transactionsResult = transactionServiceTest.getTransactionsByEmail(userEmail);
-        //THEN
-        assertNull(transactionsResult);
-    }
+        @Test
+        public void addTransaction_whenUserBalanceNotEnough_thenThrowBalanceInsufficientException () {
+            //GIVEN
+            String friendEmail = "lise@email.fr";
+            String userEmail = "kikine@email.fr";
+            User user = User.builder()
+                    .email("kikine@email.fr")
+                    .password("monTropToppassword")
+                    .firstName("Christine")
+                    .lastName("Deldalle")
+                    .balance(30.50)
+                    .accountBank(170974).build();
 
-}
+            Transaction transaction = Transaction.builder()
+                    .transactionId(2).amount(50.0).description("diner paula")
+                    .build();
+            when(userRepositoryMock.findByEmail(userEmail)).thenReturn(user);
+            //WHEN
+            //THEN
+            assertThrows(BalanceInsufficientException.class, () -> transactionServiceTest.addTransaction(
+                    userEmail, friendEmail, transaction.getAmount(), transaction.getDescription()));
+            verify(userRepositoryMock, times(1)).findByEmail(isA(String.class));
+
+        }
+
+        @Test
+        void getTransactionByEmailTest_whenEmitterEmailTransactionNotExist_thenReturnNull () {
+            //GIVEN
+            String userEmail = "barbapapa@email.fr";
+            when(transactionRepositoryMock.findTransactionsByEmail(isA(String.class))).thenReturn(isNull());
+            //WHEN
+            Set<IDisplayingTransaction> transactionsResult = transactionServiceTest.getTransactionsByEmail(userEmail);
+            //THEN
+            assertNull(transactionsResult);
+        }
+
+    }

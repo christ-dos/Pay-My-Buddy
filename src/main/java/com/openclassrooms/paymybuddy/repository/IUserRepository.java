@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.util.Set;
 
 @Repository
@@ -27,7 +26,6 @@ public interface IUserRepository extends CrudRepository<User, Integer> {
             "friend.date_added AS dateAdded FROM  user INNER JOIN friend ON " +
             "friend.friend_email = user.email WHERE friend.user_email=?1 ORDER BY friend.date_added DESC ", nativeQuery = true)
     public Set<IFriendList> findFriendListByEmail(String userEmail);
-
 
 
 }
