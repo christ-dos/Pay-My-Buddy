@@ -9,7 +9,6 @@ import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -38,7 +37,7 @@ public class TransactionService implements ITransactionService {
         return transactionRepository.findTransactionsByEmail(userEmail);
     }
 
-    @Transactional
+    //@Transactional
     @Override
     public void addTransaction(String userEmail, String friendEmail, Double amount, String description) {
         User userEmitterTransaction = userRepository.findByEmail(userEmail);
@@ -47,10 +46,17 @@ public class TransactionService implements ITransactionService {
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
         }
         transactionRepository.saveTransaction(userEmail, friendEmail, amount, description);
-        //update user emitter with new balance
+        // user emitter save with new balance
         userRepository.save(getBalanceEmitter(userEmitterTransaction, amount));
-        //update user receiver with new balance
+        // user receiver save with new balance
         userRepository.save(getBalanceReceiver(friendEmail, amount));
+
+    }
+
+    private Double getFees(Double amount){
+        Double fees = (amount * 0.5 ) /100;
+
+        return fees;
     }
 
     private User getBalanceReceiver(String friendEmail, Double amount) {

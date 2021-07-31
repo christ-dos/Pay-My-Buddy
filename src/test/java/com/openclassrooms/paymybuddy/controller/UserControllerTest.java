@@ -118,12 +118,14 @@ public class UserControllerTest {
         transactionTest.setTransactionId(1);
         transactionTest.setDescription("cinema");
         transactionTest.setAmount(16.0);
+        transactionTest.setFees(0.08);
 
         ReceivingDataTransactionView receivingDataTransactionView = new ReceivingDataTransactionView();
         receivingDataTransactionView.setUserEmail("fifi@email.com");
         receivingDataTransactionView.setFriendEmail("kikine@email.fr");
         receivingDataTransactionView.setDescription("books");
         receivingDataTransactionView.setAmount(12.58);
+
 
         doNothing().when(transactionRepositoryMock).saveTransaction(userEmail, friendEmail, transactionTest.getAmount(), transactionTest.getDescription());
         doNothing().when(transactionServiceMock).addTransaction(userEmail, friendEmail, transactionTest.getAmount(), transactionTest.getDescription());

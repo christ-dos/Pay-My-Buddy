@@ -111,15 +111,7 @@ class TransactionServiceTest {
                 .balance(30.50)
                 .accountBank(170974).build();
 
-        User userEmitterWithNewBalance = User.builder()
-                .email("kikine@email.fr")
-                .password("monTropToppassword")
-                .firstName("Christine")
-                .lastName("Deldalle")
-                .balance(4.52)
-                .accountBank(170974).build();
-
-        User userReceiver = User.builder()
+               User userReceiver = User.builder()
                 .email("lise@email.fr")
                 .password("monToppassword")
                 .firstName("Lisandreia")
@@ -127,16 +119,9 @@ class TransactionServiceTest {
                 .balance(20.0)
                 .accountBank(895706).build();
 
-        User userReceiverWithNewBalance = User.builder()
-                .email("lise@email.fr")
-                .password("monToppassword")
-                .firstName("Lisandreia")
-                .lastName("Duhamel")
-                .balance(45.98)
-                .accountBank(895706).build();
-
-        Double amount = 25.98;
+        Double amount = 10.0;
         String description = "cinema";
+        Double fees = 0.05;
 
         IDisplayingTransaction transactionAdded = new DisplayingTransaction(
                 "Christine", description, amount);

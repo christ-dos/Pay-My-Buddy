@@ -18,7 +18,8 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
     @Transactional
     @Query(value = "INSERT INTO transaction(date, amount,description, emitter_email, receiver_email) " +
             "VALUES (NOW(),:amount, :description, :userEmitterEmail, :userReceiverEmail)", nativeQuery = true)
-    public void saveTransaction(@Param("userEmitterEmail") String userEmail, @Param("userReceiverEmail") String friendEmail, @Param("amount") Double amount, @Param("description") String description);
+    public void saveTransaction(@Param("userEmitterEmail") String userEmail, @Param("userReceiverEmail") String friendEmail,
+                                @Param("amount") Double amount, @Param("description") String description);
 
     @Query(value = " SELECT user.email AS userEmail, user.first_name AS firstName," +
             " transaction.description AS description, transaction.amount AS amount" +
