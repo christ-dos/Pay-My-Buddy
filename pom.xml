@@ -21,7 +21,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-		<!--**************javax dependencie***********-->
+		<!--**************javax dependency***********-->
 		<dependency>
 			<groupId>javax.json</groupId>
 			<artifactId>javax.json-api</artifactId>
@@ -51,6 +51,12 @@
 <!--			<version>0.8.5</version>-->
 <!--			<type>maven-plugin</type>-->
 <!--		</dependency>-->
+		<dependency>
+			<groupId>org.jacoco</groupId>
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>0.8.6</version>
+		</dependency>
+
 		<!--****************mysql connector*******************-->
 		<dependency>
 			<groupId>mysql</groupId>
