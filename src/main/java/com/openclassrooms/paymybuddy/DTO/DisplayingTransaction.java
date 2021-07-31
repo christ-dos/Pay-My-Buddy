@@ -11,7 +11,7 @@ import javax.persistence.Column;
 @NoArgsConstructor
 @Setter
 public class DisplayingTransaction implements IDisplayingTransaction {
-    @Column(name = "first_name")
+
     private String firstName;
 
     private String description;

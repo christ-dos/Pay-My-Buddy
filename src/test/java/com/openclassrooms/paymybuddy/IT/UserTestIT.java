@@ -1,7 +1,6 @@
 package com.openclassrooms.paymybuddy.IT;
 
 import com.openclassrooms.paymybuddy.DTO.ReceivingDataTransactionView;
-import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +25,7 @@ public class UserTestIT {
     private MockMvc mockMvcUser;
 
     //************************Integration tests View index**********************
+    //***************************Tests in  URL /***************************************
     @Test
     public void showIndexViewTest_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -38,6 +38,106 @@ public class UserTestIT {
                 .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
                 .andDo(print());
     }
+
+
+    @Test
+    public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/home"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenURLIsSlashAndUserExistInDBAndFriendEmailTooAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+        //GIVEN
+        Double balance = 20.0;
+
+        ReceivingDataTransactionView receivingDataTransactionView = new ReceivingDataTransactionView();
+        receivingDataTransactionView.setUserEmail("dada@email.fr");
+        receivingDataTransactionView.setFriendEmail("luluM@email.fr");
+        receivingDataTransactionView.setDescription("Movies tickets");
+        receivingDataTransactionView.setAmount(2.0);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/")
+                        .param("userEmail", receivingDataTransactionView.getUserEmail())
+                        .param("friendEmail", receivingDataTransactionView.getFriendEmail())
+                        .param("amount", String.valueOf(receivingDataTransactionView.getAmount()))
+                        .param("description", receivingDataTransactionView.getDescription())
+
+                ).andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().hasNoErrors())
+                .andDo(print());
+    }
+
+
+    @Test
+    public void submitIndexViewTest_whenUrlIsSlashAmountIsNull_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/")
+                        .param("amount", "")
+                        .param("friendEmail", "luluM@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenUrlIsSlashAmountIsGreaterTo1000_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/")
+                        .param("amount", "1500")
+                        .param("friendEmail", "luluM@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenUlrIsSlashAmountIsLessTo1_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/")
+                        .param("amount", "0.5")
+                        .param("friendEmail", "luluM@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenUrlIsSlashAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/")
+                        .param("amount", "2")
+                        .param("friendEmail", ""))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "friendEmail"))
+                .andDo(print());
+    }
+
+
+    //************************************Tests in View index in URL /index****************************************
 
     @Test
     public void showIndexViewTest_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
@@ -53,44 +153,22 @@ public class UserTestIT {
     }
 
     @Test
-    public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
+    public void submitIndexViewTest_whenURLIsIndexAndUserExistInDBAndFriendEmailTooAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
         //GIVEN
-        //WHEN
-        //THEN
-        mockMvcUser.perform(get("/home"))
-                .andExpect(status().isNotFound())
-                .andDo(print());
-    }
-
-    @Test
-    public void submitIndexViewTest_whenUserExistInDBAndFriendEmailTooAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
-        //GIVEN
-//        String friendEmail = "luluM@email.com";
-//        String userEmail = "dada@email.fr";
-//        Double amount = 15.0;
-//        String description = " Movies tickets";
         Double balance = 20.0;
-
-        Transaction transactionTest = new Transaction();
-        transactionTest.setTransactionId(1);
-        transactionTest.setDescription("cinema");
-        transactionTest.setAmount(16.0);
 
         ReceivingDataTransactionView receivingDataTransactionView = new ReceivingDataTransactionView();
         receivingDataTransactionView.setUserEmail("dada@email.fr");
-        receivingDataTransactionView.setFriendEmail("luluM@email.com");
+        receivingDataTransactionView.setFriendEmail("luluM@email.fr");
         receivingDataTransactionView.setDescription("Movies tickets");
-        receivingDataTransactionView.setAmount(15.58);
-
+        receivingDataTransactionView.setAmount(5.0);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
-                                .param("userEmail", receivingDataTransactionView.getUserEmail())
-                                .param("receiverEmail", receivingDataTransactionView.getFriendEmail())
-                                //.param("friendEmail", receivingDataTransactionView.getFriendEmail())
-                                .param("amount", String.valueOf(receivingDataTransactionView.getAmount()))
-                                .param("description", receivingDataTransactionView.getDescription())
-                        //.param("balance", String.valueOf(balance)))
+                        .param("userEmail", receivingDataTransactionView.getUserEmail())
+                        .param("friendEmail", receivingDataTransactionView.getFriendEmail())
+                        .param("amount", String.valueOf(receivingDataTransactionView.getAmount()))
+                        .param("description", receivingDataTransactionView.getDescription())
 
                 ).andExpect(status().isOk())
                 .andExpect(view().name("index"))
@@ -99,8 +177,67 @@ public class UserTestIT {
                 .andDo(print());
     }
 
+    @Test
+    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsNull_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                        .param("amount", "")
+                        .param("friendEmail", "luluM@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andDo(print());
+    }
 
-    //**********************Integartion tests in view addfriend*****************
+    @Test
+    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsGreaterTo1000_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                        .param("amount", "1500")
+                        .param("friendEmail", "luluM@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsLessTo1_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                        .param("amount", "0.5")
+                        .param("friendEmail", "luluM@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenUrlIsIndexAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrors() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                        .param("amount", "2")
+                        .param("friendEmail", ""))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "friendEmail"))
+                .andDo(print());
+    }
+
+    //**********************Integration tests in view addfriend*****************
     @Test
     public void showAddFriendViewTest_thenStatusOk() throws Exception {
         //GIVEN

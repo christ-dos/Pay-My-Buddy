@@ -62,7 +62,6 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    //******************************Tests View Index****************************
     @Test
     public void showLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
@@ -72,8 +71,7 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
-
-
+    //******************************Tests View Index****************************
     @Test
     public void showIndexViewTest_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -189,7 +187,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void submitIndexViewTest_whenValueSelectorFrienEmailIsEmpty_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrors() throws Exception {
         //GIVEN
         //WHEN
         //THEN

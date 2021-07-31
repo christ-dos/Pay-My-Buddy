@@ -16,7 +16,7 @@ public class ReceivingDataTransactionView {
     private String UserEmail;
 
     @NotBlank(message = "Friend email cannot be null")
-    @NotNull
+    //@NotNull
     private String friendEmail;
 
     @NotNull(message = "Amount cannot be equals to 0")
