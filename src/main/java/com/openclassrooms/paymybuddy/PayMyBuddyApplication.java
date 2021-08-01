@@ -26,7 +26,7 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 	}
 
 	@Override
-	@Transactional
+	//@Transactional
 	public void run(String... args) throws Exception {
 
 		System.out.println("Hello World !");
@@ -46,8 +46,8 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 		//userService.addFriendUser("dada@email.fr","ggpassain@email.fr");
 		//Optional<User> userByEmail = userRepo.findUserByEmail("lili@email.fr");
 		//System.out.println(userByEmail.get());
-		Set<IDisplayingTransaction> listtrans = transactionService.getTransactionsByEmail("dada@email.fr");
-		listtrans.forEach(trans -> System.out.println(trans.getFirstName()));
+//		Set<IDisplayingTransaction> listtrans = transactionService.getTransactionsByEmail("dada@email.fr");
+//		listtrans.forEach(trans -> System.out.println(trans.getFirstName()));
 
 	}
 }
