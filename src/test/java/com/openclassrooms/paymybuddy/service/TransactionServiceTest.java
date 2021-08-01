@@ -102,7 +102,6 @@ class TransactionServiceTest {
     @Test
     public void addTransaction_whenUserBalanceIsSufficient_thenVerifyTransactionAdded() {
         //GIVEN
-
         User userEmitter = User.builder()
                 .email("kikine@email.fr")
                 .password("monTropToppassword")
@@ -111,7 +110,7 @@ class TransactionServiceTest {
                 .balance(30.50)
                 .accountBank(170974).build();
 
-               User userReceiver = User.builder()
+        User userReceiver = User.builder()
                 .email("lise@email.fr")
                 .password("monToppassword")
                 .firstName("Lisandreia")
@@ -121,10 +120,6 @@ class TransactionServiceTest {
 
         Double amount = 10.0;
         String description = "cinema";
-        Double fees = 0.05;
-
-        IDisplayingTransaction transactionAdded = new DisplayingTransaction(
-                "Christine", description, amount);
 
         doNothing().when(transactionRepositoryMock).saveTransaction(isA(String.class), isA(String.class), isA(Double.class), isA(String.class));
         when(userRepositoryMock.findByEmail(userEmitter.getEmail())).thenReturn(userEmitter);
@@ -133,7 +128,7 @@ class TransactionServiceTest {
         transactionServiceTest.addTransaction(userEmitter.getEmail(), userReceiver.getEmail(), amount, description);
         //THEN
         verify(transactionRepositoryMock, times(1))
-                .saveTransaction(userEmitter.getEmail(),userReceiver.getEmail(),amount,description);
+                .saveTransaction(userEmitter.getEmail(), userReceiver.getEmail(), amount, description);
     }
 
     @Test

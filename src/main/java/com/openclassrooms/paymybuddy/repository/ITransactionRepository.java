@@ -26,7 +26,6 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
      * @param description A String describing the reason of transaction
      */
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    //@Transactional
     @Query(value = "INSERT INTO transaction(date, amount,description, emitter_email, receiver_email) " +
             "VALUES (NOW(),:amount, :description, :userEmitterEmail, :userReceiverEmail)", nativeQuery = true)
     public void saveTransaction(@Param("userEmitterEmail") String userEmail, @Param("userReceiverEmail") String friendEmail,
