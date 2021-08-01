@@ -3,7 +3,6 @@ package com.openclassrooms.paymybuddy.service;
 import com.openclassrooms.paymybuddy.DTO.IFriendList;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,17 +17,23 @@ import java.util.Set;
 @Service
 @Slf4j
 public class UserService implements IUserService {
-
+    /**
+     * An instance of {@link IUserRepository}
+     */
     private final IUserRepository userRepository;
 
+    /**
+     * Constructor of the class
+     *
+     * @param userRepository An instance of {@link IUserRepository}
+     */
     @Autowired
     public UserService(IUserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-
     /**
-     * Method that get list of users
+     * Method that get list of all users
      *
      * @return An Iterable of User
      */
@@ -53,8 +58,8 @@ public class UserService implements IUserService {
     /**
      * Method which get a user by email
      *
-     * @param email item unique that permit identify the user
-     * @return A user
+     * @param email item unique that permit identifies the user
+     * @return A User
      */
     public User getUserByEmail(String email) {
         log.debug("UserService: User found with email: " + email);

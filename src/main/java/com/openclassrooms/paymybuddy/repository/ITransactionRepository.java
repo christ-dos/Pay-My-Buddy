@@ -11,6 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+/**
+ * Interface that handles database queries for transactions
+ *
+ * @author Christine Duarte
+ */
 @Repository
 public interface ITransactionRepository extends CrudRepository<Transaction, Integer> {
 
