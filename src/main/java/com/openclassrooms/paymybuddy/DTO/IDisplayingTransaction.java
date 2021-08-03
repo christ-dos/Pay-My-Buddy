@@ -19,4 +19,6 @@ public interface IDisplayingTransaction {
      * Method that get amount of the transaction
      */
     Double getAmount();
+//
+//    String getEmitterEmail();
 }

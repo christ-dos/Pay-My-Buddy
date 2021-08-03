@@ -20,8 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -47,6 +46,8 @@ public class UserControllerTest {
 
     @MockBean
     private TransactionService transactionServiceMock;
+
+
 
     //***********************Tests View Login*************************************
     @Test
@@ -233,10 +234,36 @@ public class UserControllerTest {
         String friendEmailNotExistInList = "fifi@email.com";
         String userEmail = "kikine@email.fr";
 
+        User user = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(30.50)
+                .accountBank(170974)
+                .friends(Arrays.asList(User.builder()
+                                .email("françois@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("François")
+                                .lastName("Dujardin")
+                                .balance(30.50)
+                                .accountBank(170974).build(),
+                        User.builder()
+                                .email("amartin@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("Albert")
+                                .lastName("Martin")
+                                .balance(30.50)
+                                .accountBank(170974).build())
+                ).build();
+
+
+
+
         User userToAdd = User.builder()
                 .email("fifi@email.com").firstName("Filipe").lastName("Dupont").build();
 
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailNotExistInList);
+        doNothing().when(userRepositoryMock).save(user);
         doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailNotExistInList);
         when(userServiceMock.getUserByEmail(friendEmailNotExistInList)).thenReturn(userToAdd);
         //WHEN
@@ -257,10 +284,35 @@ public class UserControllerTest {
         String friendEmailAlreadyExist = "sara@email.fr";
         String userEmail = "kikine@email.fr";
 
-        Set<IFriendList> friendSetMock;
+        User user = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(30.50)
+                .accountBank(170974)
+                .friends(Arrays.asList(User.builder()
+                                .email("françois@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("François")
+                                .lastName("Dujardin")
+                                .balance(30.50)
+                                .accountBank(170974).build(),
+                        User.builder()
+                                .email("amartin@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("Albert")
+                                .lastName("Martin")
+                                .balance(30.50)
+                                .accountBank(170974).build())
+                ).build();
+
+
+
+        List<FriendList> friendListMock;
         FriendList friend1 = new FriendList();
         FriendList friend2 = new FriendList();
-        friendSetMock = new HashSet<>();
+        friendListMock = new ArrayList<>();
 
         friend1.setEmail("sara@email.fr");
         friend1.setFirstName("François");
@@ -270,12 +322,12 @@ public class UserControllerTest {
         friend2.setFirstName("Albert");
         friend2.setLastName("Martin");
 
-        friendSetMock.add(friend1);
-        friendSetMock.add(friend2);
+        friendListMock.add(friend1);
+        friendListMock.add(friend2);
 
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailAlreadyExist);
+        doNothing().when(userRepositoryMock).save(user);
         doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailAlreadyExist);
-        when(userServiceMock.getFriendListByEmail(friendEmailAlreadyExist)).thenReturn(friendSetMock);
+        when(userServiceMock.getFriendListByEmail(friendEmailAlreadyExist)).thenReturn(friendListMock);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
@@ -297,7 +349,32 @@ public class UserControllerTest {
         String friendEmailNotExist = "wiwi@email.fr";
         String userEmail = "kikine@email.fr";
 
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailNotExist);
+        User user = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(30.50)
+                .accountBank(170974)
+                .friends(Arrays.asList(User.builder()
+                                .email("françois@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("François")
+                                .lastName("Dujardin")
+                                .balance(30.50)
+                                .accountBank(170974).build(),
+                        User.builder()
+                                .email("amartin@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("Albert")
+                                .lastName("Martin")
+                                .balance(30.50)
+                                .accountBank(170974).build())
+                ).build();
+
+
+
+        doNothing().when(userRepositoryMock).save(user);
         doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailNotExist);
         when(userServiceMock.getUserByEmail(friendEmailNotExist)).thenReturn(null);
         //WHEN
@@ -316,7 +393,33 @@ public class UserControllerTest {
         //GIVEN
         String friendEmailNotExist = "";
         String userEmail = "kikine@email.fr";
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailNotExist);
+
+
+        User user = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(30.50)
+                .accountBank(170974)
+                .friends(Arrays.asList(User.builder()
+                                .email("françois@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("François")
+                                .lastName("Dujardin")
+                                .balance(30.50)
+                                .accountBank(170974).build(),
+                        User.builder()
+                                .email("amartin@email.fr")
+                                .password("monTropToppassword")
+                                .firstName("Albert")
+                                .lastName("Martin")
+                                .balance(30.50)
+                                .accountBank(170974).build())
+                ).build();
+
+
+        doNothing().when(userRepositoryMock).save(user);
         doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailNotExist);
         when(userServiceMock.getUserByEmail(friendEmailNotExist)).thenReturn(null);
         //WHEN

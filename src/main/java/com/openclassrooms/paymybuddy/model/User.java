@@ -1,6 +1,8 @@
 package com.openclassrooms.paymybuddy.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -43,23 +45,24 @@ public class User {
             joinColumns = @JoinColumn(name="user_email", referencedColumnName = "email"),
             inverseJoinColumns = @JoinColumn(name = "friend_email", referencedColumnName = "email")
     )
-    private Set<User> friends = new HashSet<>();
+    private List<User> friends = new ArrayList<>();
 
     @ManyToMany(mappedBy = "friends")
-    private Set<User> users = new HashSet<>();
+    private List<User> users =  new ArrayList<>();
 
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.EAGER)
-    @JoinColumn(name = "emitter_email")
-    private Set<Transaction> transactionsEmitterSet =  new HashSet<>();
 
-    @OneToMany(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.EAGER)
-    @JoinColumn(name = "receiver_email")
-    private Set<Transaction> transactionsReceiverSet =  new HashSet<>();
+
+//    @OneToMany(
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true,
+//            fetch = FetchType.EAGER)
+//    @JoinColumn(name = "emitter_email")
+//    private List<Transaction> transactionsEmitter =  new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "email",
+//            cascade = CascadeType.ALL,
+//            orphanRemoval = true,
+//            fetch = FetchType.EAGER)
+//    private List<Transaction> transactions =  new ArrayList<>();
 
 }

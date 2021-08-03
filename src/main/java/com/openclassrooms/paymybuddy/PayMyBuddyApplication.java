@@ -1,11 +1,18 @@
 package com.openclassrooms.paymybuddy;
 
-import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
-import com.openclassrooms.paymybuddy.service.ITransactionService;
+import com.openclassrooms.paymybuddy.model.Friend;
+import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.repository.IFriendRepository;
+import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import javax.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Class that start the application
@@ -18,8 +25,8 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //    @Autowired
 //    private ITransactionService transactionService;
 //
-//    @Autowired
-//    private ITransactionRepository transactionRepository;
+    @Autowired
+    private UserService userService;
 
 	/**
 	 * Method main that initiate the application
@@ -31,7 +38,7 @@ public class PayMyBuddyApplication implements CommandLineRunner {
     }
 
     @Override
-    //@Transactional
+    @Transactional
     public void run(String... args) throws Exception {
 
         System.out.println("Hello World !");
@@ -53,7 +60,21 @@ public class PayMyBuddyApplication implements CommandLineRunner {
         //System.out.println(userByEmail.get());
 //		Set<IDisplayingTransaction> listtrans = transactionService.getTransactionsByEmail("dada@email.fr");
 //		listtrans.forEach(trans -> System.out.println(trans.getFirstName()));
-
+//        User user  = userRepository.findUserByEmailByEmail("dada@email.fr");
+//        System.out.println(user);
+       // List<User> list = user.getFriends();
+       // list.forEach(x-> x.getFriends().forEach(y-> System.out.println("coucou:" + y.getEmail())));
+//          Friend friend =  new Friend("dada@email.fr","tela@email.fr",LocalDateTime.now());
+//            System.out.println(userService.addFriendUser("dada@email.fr","tela@email.fr"));
+//           User friend = userService.getUserByEmail("dada@email.fr");
+//        List<User> friends =  friend.getFriends();
+//        friends.forEach(x->System.out.println(x.getEmail()));
+//
+//        User user = userService.getUserByEmail("ggpassain@email.fr");
+//        List<User> users =  user.getUsers();
+//        users.forEach(x->System.out.println(x.getEmail()));
+//        Friend friend1 =  new Friend("dada@email.fr","lili@email.fr",LocalDateTime.now());
+//        System.out.println(friendRepository.save(friend1));
     }
 }
 

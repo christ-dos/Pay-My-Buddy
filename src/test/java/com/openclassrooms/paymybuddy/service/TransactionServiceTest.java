@@ -72,7 +72,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    void getTransactionByEmailTest_whenTransactionWithEmailkikineExist_thenReturnSetTransactionsForEmailkikine() {
+    void getTransactionByEmailTest_whenTransactionWithEmailkikineExist_thenReturnListTransactionsForEmailkikine() {
         //GIVEN
         String userEmail = "kikine@email.fr";
 

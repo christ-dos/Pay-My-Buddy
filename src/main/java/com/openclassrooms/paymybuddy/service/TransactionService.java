@@ -60,7 +60,28 @@ public class TransactionService implements ITransactionService {
      */
     @Override
     public Set<IDisplayingTransaction> getTransactionsByEmail(String userEmail) {
-        return transactionRepository.findTransactionsByEmail(userEmail);
+//        Set<IDisplayingTransaction> transactions = transactionRepository.findTransactionsByEmail(userEmail);
+    return null;
+//
+//        for (IDisplayingTransaction transaction : transactions) {
+//            if (transaction.getEmailEmail() == userEmail) {
+//                return new DisplayingTransaction(transaction.getFirstName(), transaction.getDescription(), -transaction.getAmount());
+//            } else {
+//                //
+//            }
+//        }
+
+
+
+//        return transactions.stream()
+//                .map(transaction -> {
+//                    if (transaction.getEmiterEmail().equals(userEmail)) {
+//                        return new DisplayingTransaction(transaction.getFirstName(), transaction.getDescription(), -transaction.getAmount());
+//                    } else {
+//                        return transaction;
+//                    }
+//                })
+//                .collect(Collectors.toSet());
     }
 
     /**

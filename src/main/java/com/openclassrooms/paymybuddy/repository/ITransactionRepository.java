@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,8 +29,8 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = "INSERT INTO transaction(date, amount,description, emitter_email, receiver_email) " +
             "VALUES (NOW(),:amount, :description, :userEmitterEmail, :userReceiverEmail)", nativeQuery = true)
-    public void saveTransaction(@Param("userEmitterEmail") String userEmail, @Param("userReceiverEmail") String friendEmail,
-                                @Param("amount") Double amount, @Param("description") String description);
+    void saveTransaction(@Param("userEmitterEmail") String userEmail, @Param("userReceiverEmail") String friendEmail,
+                         @Param("amount") Double amount, @Param("description") String description);
 
     /**
      * Query that permit find transactions linked at a user's email
@@ -41,7 +42,16 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
             " transaction.description AS description, transaction.amount AS amount" +
             "  FROM user" +
             " JOIN transaction ON user.email= transaction.receiver_email" +
-            " where transaction.emitter_email =?1 ORDER BY transaction.date DESC", nativeQuery = true)
-    public Set<IDisplayingTransaction> findTransactionsByEmail(String userEmail);
+            " where transaction.emitter_email=?1 ORDER BY transaction.date DESC", nativeQuery = true)
+    Set<IDisplayingTransaction> findTransactionsByEmail(String userEmail);
 
+
+//
+//    @Query(value = "SELECT t.description, t.amount, u.first_name as firstName" +
+//            " FROM transaction t" +
+//            " JOIN user u on t.emitter_email = u.email OR t.receiver_email = u.email" +
+//            " where t.emitter_email = ?1 OR t.receiver_email = ?1 ORDER BY t.date DESC", nativeQuery = true)
+//    Set<IDisplayingTransaction> findUserTransactions(String userEmail);
+
+//    List<Transaction> findByEmitterEmailAndReceiverEmail(String userEmail);
 }

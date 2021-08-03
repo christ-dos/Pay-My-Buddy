@@ -24,4 +24,16 @@ public class Transaction {
     private String description;
 
     private Double fees;
+
+    private Date date;
+
+    @Column(name = "emitter_email")
+    private String emitterEmail;
+
+    @Column(name = "receiver_email")
+    private String receiverEmail;
+
+//    @ManyToOne
+//    @JoinColumn(name = "transactionsEmitter", nullable = false)
+//    private User user;
 }

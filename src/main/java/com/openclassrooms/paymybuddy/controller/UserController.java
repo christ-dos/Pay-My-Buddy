@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -175,7 +176,7 @@ public class UserController {
      * @return true if the friend already exist in list else return false
      */
     private Boolean friendAlreadyExistsInList(String friendEmail) {
-        Set<IFriendList> listFriend = userService.getFriendListByEmail(userEmail);
+        List<FriendList> listFriend = userService.getFriendListByEmail(userEmail);
         for (IFriendList friend : listFriend) {
             if (friend.getEmail().equals(friendEmail)) {
                 return true;

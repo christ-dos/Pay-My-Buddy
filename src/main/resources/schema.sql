@@ -27,7 +27,7 @@ VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
 CREATE TABLE transaction
 (
     transaction_id TINYINT AUTO_INCREMENT NOT NULL,
-    date           DATETIME               NOT NULL,
+    date           TIMESTAMP              NOT NULL,
     amount         DECIMAL(8, 2)          NOT NULL,
     description    VARCHAR(300),
     fees           DECIMAL(8, 2),
@@ -57,13 +57,14 @@ CREATE TABLE friend
 (
     user_email   VARCHAR(100) NOT NULL,
     friend_email VARCHAR(100) NOT NULL,
-    date_added   DATETIME     NOT NULL,
+    date_added   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_email, friend_email)
+
 )
     ENGINE = innoDB;
-INSERT INTO friend(user_email, friend_email, date_added)
-VALUES ('dada@email.fr', 'ggpassain@email.fr', now()),
-       ('dada@email.fr', 'luluM@email.fr', now());
+# INSERT INTO friend(user_email, friend_email, date_added)
+# VALUES ('dada@email.fr', 'ggpassain@email.fr', NOW());
+#        ('dada@email.fr', 'luluM@email.fr');
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk
@@ -71,14 +72,14 @@ ALTER TABLE friend
             REFERENCES user (email)
             ON
                 DELETE NO ACTION
-            ON UPDATE CASCADE;
+            ON UPDATE NO ACTION;
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk1
         FOREIGN KEY (friend_email)
             REFERENCES user (email)
             ON DELETE NO ACTION
-            ON UPDATE CASCADE;
+            ON UPDATE NO ACTION;
 
 ALTER TABLE transfer
     ADD CONSTRAINT user_transfer_fk
