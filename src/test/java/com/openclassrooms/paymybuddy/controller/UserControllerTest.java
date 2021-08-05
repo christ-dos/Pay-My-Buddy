@@ -9,6 +9,7 @@ import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.TransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,6 +51,10 @@ public class UserControllerTest {
     @MockBean
     private TransactionService transactionServiceMock;
 
+    @BeforeEach
+    public void setupPerTest() {
+        String userEmail = "dada@email.fr";
+    }
 
     //***********************Tests View Login*************************************
     @Test
@@ -277,7 +282,7 @@ public class UserControllerTest {
         String friendEmailAlreadyExist = "françois@email.fr";
         String userEmail = "dada@email.fr";
 
-        User userFrançois = User.builder()
+        User userFrancois = User.builder()
                 .email("françois@email.fr")
                 .password("monTropToppassword")
                 .firstName("François")
@@ -302,7 +307,7 @@ public class UserControllerTest {
         friendListMock.add(friend1);
         friendListMock.add(friend2);
 
-        when(userServiceMock.getUserByEmail(friendEmailAlreadyExist)).thenReturn(userFrançois);
+        when(userServiceMock.getUserByEmail(friendEmailAlreadyExist)).thenReturn(userFrancois);
         when(userServiceMock.getFriendListByEmail(userEmail)).thenReturn(friendListMock);
         //WHEN
         //THEN
@@ -346,6 +351,20 @@ public class UserControllerTest {
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitAddFriendTest_whenEmailToAddAndEmailUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
+                        .param("email", "dada@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendList"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UnableAddingOwnEmail"))
                 .andDo(print());
     }
 }

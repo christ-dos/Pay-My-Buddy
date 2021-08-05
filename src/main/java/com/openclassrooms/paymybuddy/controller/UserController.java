@@ -148,8 +148,16 @@ public class UserController {
             log.error("Controller: Error in fields");
             return "addfriend";
         }
-        if (friendAlreadyExistsInList(friendList.getEmail(),userEmail)) {
-            result.rejectValue("email", "UserAlreadyExist", "This user already exists in your list");
+        if (result.getRawFieldValue("email").equals(userEmail)) {
+            result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+
+            log.error("Controller: Invalid addition with email: " + userEmail);
+            return "addfriend";
+        }
+        if (friendAlreadyExistsInList(friendList.getEmail(), userEmail)) {
+            result.rejectValue("email", "UserAlreadyExist", "This user already exists in your Connections");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
             log.error("Controller: Email already exists in friend list");
             return "addfriend";
@@ -158,14 +166,6 @@ public class UserController {
             result.rejectValue("email", "UserNotExistDB", "This user not exist, you can't add it ");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
             log.error("Controller: User Email not exist in data base");
-            return "addfriend";
-        }
-        if (result.getRawFieldValue("email").equals(userEmail)) {
-            result.rejectValue("email", "UnableAddCurrentUserEmail", "Unable add your email in friend List");
-            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-
-            log.error("Controller: Invalid addition with email: " + userEmail);
             return "addfriend";
         }
         userService.addFriendUser(userEmail, friendList.getEmail());

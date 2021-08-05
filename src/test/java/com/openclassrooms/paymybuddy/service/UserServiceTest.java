@@ -75,7 +75,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void addFriendUserTest_whenFriendAddedfrançoisExistInDbButIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
+    public void addFriendUserTest_whenFriendAddedfrancoisExistInDBButIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
         //GIVEN
         String userEmail = "kikine@email.fr";
         String friendEmail = "françois@email.fr";
@@ -165,5 +165,7 @@ public class UserServiceTest {
         //THEN
         assertNull(userResult);
     }
+
+
 
 }

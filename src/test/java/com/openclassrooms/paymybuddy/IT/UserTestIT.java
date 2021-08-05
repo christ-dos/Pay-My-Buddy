@@ -379,4 +379,18 @@ public class UserTestIT {
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserAlreadyExist"))
                 .andDo(print());
     }
+
+    @Test
+    public void submitAddFriendTest_whenEmailToAddAndEmailUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
+                        .param("email", "dada@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendList"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UnableAddingOwnEmail"))
+                .andDo(print());
+    }
 }
