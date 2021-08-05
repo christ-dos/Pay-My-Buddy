@@ -148,27 +148,25 @@ public class UserController {
             log.error("Controller: Error in fields");
             return "addfriend";
         }
-        if (friendAlreadyExistsInList(friendList.getEmail())) {
-            result.rejectValue("email", "", "This user already exists in your list");
+        if (friendAlreadyExistsInList(friendList.getEmail(),userEmail)) {
+            result.rejectValue("email", "UserAlreadyExist", "This user already exists in your list");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
             log.error("Controller: Email already exists in friend list");
             return "addfriend";
         }
         if (!userEmailIsPresentDataBase(friendList.getEmail())) {
-            result.rejectValue("email", "", "This user not exist, you can't add it ");
+            result.rejectValue("email", "UserNotExistDB", "This user not exist, you can't add it ");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
             log.error("Controller: User Email not exist in data base");
             return "addfriend";
         }
         if (result.getRawFieldValue("email").equals(userEmail)) {
-            result.rejectValue("email", "", "Unable add your email in friend List");
+            result.rejectValue("email", "UnableAddCurrentUserEmail", "Unable add your email in friend List");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
 
             log.error("Controller: Invalid addition with email: " + userEmail);
             return "addfriend";
-
-
         }
         userService.addFriendUser(userEmail, friendList.getEmail());
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
@@ -183,7 +181,7 @@ public class UserController {
      * @param friendEmail A string containing the email of the friend
      * @return true if the friend already exist in list else return false
      */
-    private Boolean friendAlreadyExistsInList(String friendEmail) {
+    private Boolean friendAlreadyExistsInList(String friendEmail, String userEmail) {
         List<FriendList> listFriend = userService.getFriendListByEmail(userEmail);
         for (FriendList friend : listFriend) {
             if (friend.getEmail().equals(friendEmail)) {
