@@ -20,7 +20,6 @@ import java.util.Optional;
  */
 @Repository
 public interface IUserRepository extends CrudRepository<User, String> {
-
     /**
      * Query to find a user by email
      *
@@ -28,25 +27,4 @@ public interface IUserRepository extends CrudRepository<User, String> {
      * @return A user object
      */
     User findByEmail(String Email);
-
-    /**
-     * Query that insert friends in table friend
-     *
-     * @param userEmail   A String containing the user's email
-     * @param friendEmail A String containing the friend's  email
-     */
-//    @Modifying(clearAutomatically = true, flushAutomatically = true)
-//    @Transactional
-//    @Query(value = "INSERT INTO friend (user_email, friend_email, date_added) VALUES (:userEmail, :friendEmail, NOW())", nativeQuery = true)
-//    void saveFriend(@Param("userEmail") String userEmail, @Param("friendEmail") String friendEmail);
-//    User save(User user);
-
-    /**
-     * Query that permit find by user's email the list of his friends order by date
-     *
-     * @param userEmail A String containing the user's email
-     * @return A {@link User}
-     */
-    @Query(value = "SELECT friend_email, f ",nativeQuery = true)
-    List<Friend> findAllByEmailOrderBydateAdded();
 }

@@ -6,6 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -19,21 +24,26 @@ public class Transaction {
     @Column(name = "transaction_id")
     private Integer transactionId;
 
+    @NotNull(message = "Amount cannot be equals to 0")
+    @Min(value = 1, message = "Amount cannot be less than 1")
+    @Max(value = 1000, message = "amount cannot be greater than 1000")
     private Double amount;
 
     private String description;
 
     private Double fees;
 
-    private Date date;
+    private LocalDateTime date;
 
     @Column(name = "emitter_email")
     private String emitterEmail;
 
+    @NotBlank(message = "Friend email cannot be null")
     @Column(name = "receiver_email")
     private String receiverEmail;
 
-//    @ManyToOne
-//    @JoinColumn(name = "transactionsEmitter", nullable = false)
-//    private User user;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "emitter_email", insertable = false, updatable = false)
+    private User user;
+
 }

@@ -101,7 +101,7 @@
         <div class="container gray p-5">
             <!--********Item select A Connection***********-->
             <form name="formSelectUserEmailReceiver" id="formSelectFriend" action="#" th:action="@{/index}"
-                  th:object="${receivingDataTransactionView}" method="post">
+                  th:object="${transaction}" method="post">
                 <div class="row justify-content-center">
                     <!--*****************Input description************-->
                     <div class="col-12 col-md-11 col-lg-10 m-2">
@@ -109,9 +109,9 @@
                                   placeholder="Description"></textarea>
                     </div>
                     <!--*****************Input select friendEmail************-->
-                    <p class="col-9 col-md-9 col-lg-4 text-center m-2 " th:errors="*{friendEmail}"
+                    <p class="col-9 col-md-9 col-lg-4 text-center m-2 " th:errors="*{receiverEmail}"
                        th:errorclass="error"></p>
-                    <select th:field="*{friendEmail}" class="col-12 col-md-5 col-lg-3 m-2" aria-label="form-select-sm"
+                    <select th:field="*{receiverEmail}" class="col-12 col-md-5 col-lg-3 m-2" aria-label="form-select-sm"
                             id="friendEmailSelect">
                         <option selected value="">Select A Connection</option>
                         <option th:each="friend: ${friendLists}" th:value="${friend.email}"
@@ -120,7 +120,7 @@
                     <!--*************Input Number**************-->
                     <p class="col-10 col-md-10 col-lg-4 m-2 text-center" th:if="${#fields.hasAnyErrors()}" th:errors="*{amount}"
                        th:errorclass="error"></p>
-                    <input th:field="*{amount}" class="col-12 col-md-2 col-lg-2 m-2 text-right" type="number"
+                    <input th:field="*{amount}"  class="col-12 col-md-2 col-lg-2 m-2 text-right" type="number"
                            id="howmuch" step="0.01"
                            placeholder="0€" min="0" max="10000">
 
@@ -128,9 +128,6 @@
                     <button type="submit" class="col-12 col-md-3 col-lg-2 m-2 btn btn-success btn-block text-light bold"
                             id="btnPay">Pay
                     </button>
-
-
-
                 </div>
             </form>
         </div>

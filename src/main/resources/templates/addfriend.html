@@ -112,10 +112,10 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="friendLists: ${friendLists}">
-                <td th:text="${friendLists.email}">lili@email.fr</td>
-                <td th:text="${friendLists.firstName}">Lili</td>
-                <td th:text="${friendLists.lastName}">Mendez</td>
+            <tr th:each="friendList: ${friendLists}">
+                <td th:text="${friendList.email}">lili@email.fr</td>
+                <td th:text="${friendList.firstName}">Lili</td>
+                <td th:text="${friendList.lastName}">Mendez</td>
             </tr>
             </tbody>
         </table>

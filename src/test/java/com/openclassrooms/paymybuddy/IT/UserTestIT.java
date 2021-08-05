@@ -1,6 +1,6 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import com.openclassrooms.paymybuddy.DTO.ReceivingDataTransactionView;
+import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +35,9 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andExpect(model().size(3))
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andDo(print());
     }
-
 
     @Test
     public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
@@ -55,26 +54,25 @@ public class UserTestIT {
         //GIVEN
         Double balance = 20.0;
 
-        ReceivingDataTransactionView receivingDataTransactionView = new ReceivingDataTransactionView();
-        receivingDataTransactionView.setUserEmail("dada@email.fr");
-        receivingDataTransactionView.setFriendEmail("luluM@email.fr");
-        receivingDataTransactionView.setDescription("Movies tickets");
-        receivingDataTransactionView.setAmount(2.0);
+        Transaction transaction = new Transaction();
+        transaction.setEmitterEmail("dada@email.fr");
+        transaction.setReceiverEmail("luluM@email.fr");
+        transaction.setDescription("Movies tickets");
+        transaction.setAmount(2.0);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/")
-                        .param("userEmail", receivingDataTransactionView.getUserEmail())
-                        .param("friendEmail", receivingDataTransactionView.getFriendEmail())
-                        .param("amount", String.valueOf(receivingDataTransactionView.getAmount()))
-                        .param("description", receivingDataTransactionView.getDescription())
+                        .param("userEmail", transaction.getEmitterEmail())
+                        .param("receiverEmail", transaction.getReceiverEmail())
+                        .param("amount", String.valueOf(transaction.getAmount()))
+                        .param("description", transaction.getDescription())
 
                 ).andExpect(status().isOk())
                 .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().hasNoErrors())
                 .andDo(print());
     }
-
 
     @Test
     public void submitIndexViewTest_whenUrlIsSlashAmountIsNull_thenReturnFieldsErrors() throws Exception {
@@ -83,11 +81,11 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/")
                         .param("amount", "")
-                        .param("friendEmail", "luluM@email.fr"))
+                        .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
                 .andDo(print());
     }
 
@@ -98,11 +96,11 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/")
                         .param("amount", "1500")
-                        .param("friendEmail", "luluM@email.fr"))
+                        .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
                 .andDo(print());
     }
 
@@ -113,11 +111,11 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/")
                         .param("amount", "0.5")
-                        .param("friendEmail", "luluM@email.fr"))
+                        .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
                 .andDo(print());
     }
 
@@ -128,15 +126,13 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/")
                         .param("amount", "2")
-                        .param("friendEmail", ""))
+                        .param("receiverEmail", ""))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "friendEmail"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "receiverEmail"))
                 .andDo(print());
     }
-
-
     //************************************Tests in View index in URL /index****************************************
 
     @Test
@@ -148,7 +144,7 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andExpect(model().size(3))
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andDo(print());
     }
 
@@ -157,22 +153,22 @@ public class UserTestIT {
         //GIVEN
         Double balance = 20.0;
 
-        ReceivingDataTransactionView receivingDataTransactionView = new ReceivingDataTransactionView();
-        receivingDataTransactionView.setUserEmail("dada@email.fr");
-        receivingDataTransactionView.setFriendEmail("luluM@email.fr");
-        receivingDataTransactionView.setDescription("Movies tickets");
-        receivingDataTransactionView.setAmount(5.0);
+        Transaction transaction = new Transaction();
+        transaction.setEmitterEmail("dada@email.fr");
+        transaction.setReceiverEmail("luluM@email.fr");
+        transaction.setDescription("Movies tickets");
+        transaction.setAmount(5.0);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
-                        .param("userEmail", receivingDataTransactionView.getUserEmail())
-                        .param("friendEmail", receivingDataTransactionView.getFriendEmail())
-                        .param("amount", String.valueOf(receivingDataTransactionView.getAmount()))
-                        .param("description", receivingDataTransactionView.getDescription())
+                        .param("userEmail", transaction.getEmitterEmail())
+                        .param("receiverEmail", transaction.getReceiverEmail())
+                        .param("amount", String.valueOf(transaction.getAmount()))
+                        .param("description", transaction.getDescription())
 
                 ).andExpect(status().isOk())
                 .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().hasNoErrors())
                 .andDo(print());
     }
@@ -184,11 +180,11 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
                         .param("amount", "")
-                        .param("friendEmail", "luluM@email.fr"))
+                        .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
                 .andDo(print());
     }
 
@@ -199,11 +195,11 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
                         .param("amount", "1500")
-                        .param("friendEmail", "luluM@email.fr"))
+                        .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
                 .andDo(print());
     }
 
@@ -214,11 +210,11 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
                         .param("amount", "0.5")
-                        .param("friendEmail", "luluM@email.fr"))
+                        .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "amount"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
                 .andDo(print());
     }
 
@@ -229,11 +225,11 @@ public class UserTestIT {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
                         .param("amount", "2")
-                        .param("friendEmail", ""))
+                        .param("receiverEmail", ""))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("receivingDataTransactionView", "friendEmail"))
+                .andExpect(model().attributeHasFieldErrors("transaction", "receiverEmail"))
                 .andDo(print());
     }
 
@@ -328,11 +324,8 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
-//                .andExpect(model().attribute("friendList",new FriendList("sara@email.fr",null,null)))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasErrors())
                 .andDo(print());
     }
-
-
 }

@@ -1,9 +1,8 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.IFriendList;
-import com.openclassrooms.paymybuddy.DTO.ReceivingDataTransactionView;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
+import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Class Controller that manage requests of views
@@ -69,15 +67,15 @@ public class UserController {
     /**
      * Method GET to displaying the view index mapped in "/" and "/index"
      *
-     * @param dataTransactionView A model DTO {@link ReceivingDataTransactionView} that displaying transactions
-     *                            informations in view : receiver's name, reason of transaction and amount
-     * @param model               Interface that defines a support for model attributes.
+     * @param transaction A model DTO {@link Transaction} that displaying transactions
+     *                    informations in view : receiver's name, reason of transaction and amount
+     * @param model       Interface that defines a support for model attributes.
      * @return A String containing the name of view
      */
     @GetMapping(value = {"/", "/index"})
-    public String showIndexView(@ModelAttribute("receivingDataTransactionView") ReceivingDataTransactionView dataTransactionView, Model model) {
+    public String showIndexView(@ModelAttribute("transaction") Transaction transaction, Model model) {
+        model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail, userEmail));
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-        model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
         log.info("Controller: The View index displaying");
 
         return "index";
@@ -87,32 +85,32 @@ public class UserController {
      * Method POST that process data receiving by the view index in endpoint "/index" and "/"
      * for adding transactions in table transaction in database
      *
-     * @param dataTransactionView A model DTO {@link ReceivingDataTransactionView} that displaying transactions
-     *                            informations in view : receiver's name, reason of transaction and amount
-     * @param result              An Interface that permit check validity of entries on fields with annotation @Valid
-     * @param model               Interface that defines a support for model attributes
+     * @param transaction A model DTO {@link Transaction} that displaying transactions
+     *                    informations in view : receiver's name, reason of transaction and amount
+     * @param result      An Interface that permit check validity of entries on fields with annotation @Valid
+     * @param model       Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
     @PostMapping(value = {"/", "/index"})
-    public String submitIndexView(@Valid ReceivingDataTransactionView dataTransactionView, BindingResult result, Model model) {
+    public String submitIndexView(@Valid Transaction transaction, BindingResult result, Model model) {
 
         if (result.hasErrors()) {
+            model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail, userEmail));
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-            model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
             log.error("Controller: Error in fields");
             return "index";
         }
-        if (result.getRawFieldValue("friendEmail") == "") {
-            result.rejectValue("friendEmail", "", "field friend Email can not be null");
+        if (result.getRawFieldValue("receiverEmail") == "") {
+            result.rejectValue("receiverEmail", "", "field friend Email can not be null");
         }
         try {
-            transactionService.addTransaction(userEmail,
-                    dataTransactionView.getFriendEmail(), dataTransactionView.getAmount(), dataTransactionView.getDescription());
+            transaction.setEmitterEmail(userEmail);
+            transactionService.addTransaction(transaction);
         } catch (BalanceInsufficientException ex) {
             result.rejectValue("amount", "", ex.getMessage());
             log.error("Controller: Insufficient account balance");
         }
-        model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail));
+        model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail, userEmail));
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
         log.info("Controller: form index submitted");
 
@@ -162,6 +160,16 @@ public class UserController {
             log.error("Controller: User Email not exist in data base");
             return "addfriend";
         }
+        if (result.getRawFieldValue("email").equals(userEmail)) {
+            result.rejectValue("email", "", "Unable add your email in friend List");
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
+
+            log.error("Controller: Invalid addition with email: " + userEmail);
+            return "addfriend";
+
+
+        }
         userService.addFriendUser(userEmail, friendList.getEmail());
         model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
         log.info("Controller: form addFriend submitted");
@@ -177,7 +185,7 @@ public class UserController {
      */
     private Boolean friendAlreadyExistsInList(String friendEmail) {
         List<FriendList> listFriend = userService.getFriendListByEmail(userEmail);
-        for (IFriendList friend : listFriend) {
+        for (FriendList friend : listFriend) {
             if (friend.getEmail().equals(friendEmail)) {
                 return true;
             }

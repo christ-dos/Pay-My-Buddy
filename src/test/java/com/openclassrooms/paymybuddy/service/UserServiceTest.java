@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -40,7 +41,7 @@ public class UserServiceTest {
     @Test
     public void getUserstest_thenReturnListWithTwoElements() {
         //GIVEN
-        Set<User> usersSetMock = new HashSet<>(Arrays.asList(
+        List<User> usersSetMock = new ArrayList<>(Arrays.asList(
                 User.builder()
                         .email("vanessa@email.fr").firstName("Vanessa")
                         .lastName("Paradis").password("vava2020")
@@ -71,7 +72,6 @@ public class UserServiceTest {
         assertEquals(3, count);
         assertEquals(usersSetMock, usersIterable);
         verify(userRepositoryMock, times(1)).findAll();
-
     }
 
     @Test
@@ -81,113 +81,56 @@ public class UserServiceTest {
         String friendEmail = "françois@email.fr";
 
         Friend friendToAdd = new Friend(userEmail, friendEmail, LocalDateTime.now());
-//        User user = User.builder()
-//                .email("kikine@email.fr")
-//                .password("monTropToppassword")
-//                .firstName("Christine")
-//                .lastName("Deldalle")
-//                .balance(30.50)
-//                .accountBank(170974)
-//                .friends(Arrays.asList(User.builder()
-//                        .email("sarah@email.fr")
-//                        .password("monTropToppassword")
-//                        .firstName("Sarah")
-//                        .lastName("Dupont")
-//                        .balance(30.50)
-//                        .accountBank(178974).build(), null))
-//                .build();
-//
-//        User friendToAdd = User.builder()
-//                .email("françois@email.fr")
-//                .password("monpassword")
-//                .firstName("Françcois")
-//                .lastName("Deldalle")
-//                .balance(30.50)
-//                .accountBank(170974)
-//                .build();
-//
-//        User userWithFriendAdded = User.builder()
-//                .email("kikine@email.fr")
-//                .password("monTropToppassword")
-//                .firstName("Christine")
-//                .lastName("Deldalle")
-//                .balance(30.50)
-//                .accountBank(170974)
-//                .friends(Arrays.asList(User.builder()
-//                                .email("sarah@email.fr")
-//                                .password("monTropToppassword")
-//                                .firstName("Sarah")
-//                                .lastName("Dupont")
-//                                .balance(30.50)
-//                                .accountBank(178974).build(),
-//                        User.builder()
-//                                .email("françois@email.fr")
-//                                .password("monpassword")
-//                                .firstName("Françcois")
-//                                .lastName("Deldalle")
-//                                .balance(30.50)
-//                                .accountBank(170974)
-//                                .build()
-//                )).build();
-
-//        when(userRepositoryMock.findByEmail(userEmail)).thenReturn(user);
-//        when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(friendToAdd);
         when(friendRepositoryMock.save(isA(Friend.class))).thenReturn(friendToAdd);
         //WHEN
         Friend userAdded = userServiceTest.addFriendUser(userEmail, friendEmail);
-
         //THEN
         verify(friendRepositoryMock, times(1)).save(isA(Friend.class));
-//        assertEquals(friendEmail,userAdded.getFriends().get(1).getEmail());
-//        assertEquals(friendToAdd.getFirstName(),userAdded.getFriends().get(1).getFirstName());
-//        assertEquals(friendToAdd.getLastName(),userAdded.getFriends().get(1).getLastName());
+        assertEquals("kikine@email.fr", userAdded.getUserEmail());
+        assertEquals("françois@email.fr", userAdded.getFriendEmail());
     }
 
     @Test
     public void getFriendListByEmailTest_whenUserEmailIsKikine_thenReturnListFriend() {
         //GIVEN
-        User user = User.builder()
-                .email("kikine@email.fr")
+        String user = "kikine@email.fr";
+
+        User user1 = User.builder()
+                .email("françois@email.fr")
                 .password("monTropToppassword")
-                .firstName("Christine")
-                .lastName("Deldalle")
+                .firstName("François")
+                .lastName("Dujardin")
                 .balance(30.50)
-                .accountBank(170974)
-                .friends(Arrays.asList(User.builder()
-                                .email("sara@email.fr")
-                                .password("monTropToppassword")
-                                .firstName("François")
-                                .lastName("Dujardin")
-                                .balance(30.50)
-                                .accountBank(170974).build(),
-                        User.builder()
-                                .email("amartin@email.fr")
-                                .password("monTropToppassword")
-                                .firstName("Albert")
-                                .lastName("Martin")
-                                .balance(30.50)
-                                .accountBank(170974).build())
-                ).build();
+                .accountBank(170974).build();
+        User user2 = User.builder()
+                .email("amartin@email.fr")
+                .password("monTropToppassword")
+                .firstName("Albert")
+                .lastName("Martin")
+                .balance(30.50)
+                .accountBank(170974).build();
 
-//        User user2 = User.builder()
-//                .email("amartin@email.fr")
-//                .password("monTropToppassword")
-//                .firstName("Albert")
-//                .lastName("Martin")
-//                .balance(30.50)
-//                .accountBank(170974).build();
-
-        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(user);
-
+        List<Friend> friends = new ArrayList<>(Arrays.asList(
+                new Friend("kikine@email.fr", "sara@email.fr", LocalDateTime.now()),
+                new Friend("kikine@email.fr", "amartin@email.fr", LocalDateTime.now())
+        ));
+        User userMock = mock(User.class);
+        when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(user)).thenReturn(friends);
+        friends.stream().map(friend -> {
+            when(userRepositoryMock.findByEmail(anyString())).thenReturn(user1, user2);
+            return new FriendList(userMock.getEmail(), userMock.getFirstName(), userMock.getLastName());
+        }).collect(Collectors.toList());
         //WHEN
-        List<FriendList> resultListFriend = userServiceTest.getFriendListByEmail(user.getEmail());
+        List<FriendList> resultListFriend = userServiceTest.getFriendListByEmail("kikine@email.fr");
         //THEN
         assertEquals(2, resultListFriend.size());
-        assertEquals(user.getFriends().get(0).getEmail(), resultListFriend.get(0).getEmail());
-        assertEquals(user.getFriends().get(0).getFirstName(), resultListFriend.get(0).getFirstName());
-        assertEquals(user.getFriends().get(0).getLastName(), resultListFriend.get(0).getLastName());
-        verify(userRepositoryMock, times(1)).findByEmail(user.getEmail());
-
+        assertEquals("françois@email.fr", resultListFriend.get(0).getEmail());
+        assertEquals("François", resultListFriend.get(0).getFirstName());
+        assertEquals("Dujardin", resultListFriend.get(0).getLastName());
+        assertEquals("amartin@email.fr", resultListFriend.get(1).getEmail());
+        assertEquals("Albert", resultListFriend.get(1).getFirstName());
+        assertEquals("Martin", resultListFriend.get(1).getLastName());
+        verify(userRepositoryMock, times(2)).findByEmail(any(String.class));
     }
 
     @Test
@@ -210,7 +153,6 @@ public class UserServiceTest {
         assertEquals("Christine", userResult.getFirstName());
         assertEquals("Deldalle", userResult.getLastName());
         verify(userRepositoryMock, times(1)).findByEmail(userEmail);
-
     }
 
     @Test
@@ -222,7 +164,6 @@ public class UserServiceTest {
         User userResult = userServiceTest.getUserByEmail(userEmail);
         //THEN
         assertNull(userResult);
-
     }
 
 }

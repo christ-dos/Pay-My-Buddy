@@ -1,6 +1,6 @@
 package com.openclassrooms.paymybuddy.service;
 
-import com.openclassrooms.paymybuddy.DTO.IDisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Class of service that manage Transaction entity
@@ -33,8 +35,9 @@ public class TransactionService implements ITransactionService {
 
     /**
      * Constructor
+     *
      * @param transactionRepository Instance of {@link ITransactionRepository}
-     * @param userRepository Instance of {@link IUserRepository}
+     * @param userRepository        Instance of {@link IUserRepository}
      */
     @Autowired
     public TransactionService(ITransactionRepository transactionRepository, IUserRepository userRepository) {
@@ -55,57 +58,54 @@ public class TransactionService implements ITransactionService {
     /**
      * Method which get all transactions for a user email
      *
-     * @param userEmail A String Containing the email of the user
-     * @return A set of {@link IDisplayingTransaction}, a data transfer object
+     * @param emitterEmail A String Containing the email of the emitter of the transaction
+     * @param receiverEmail A String Containing the email of the receiver of the transaction
+     * @return A list of {@link DisplayingTransaction}, a data transfer object
      */
     @Override
-    public Set<IDisplayingTransaction> getTransactionsByEmail(String userEmail) {
-//        Set<IDisplayingTransaction> transactions = transactionRepository.findTransactionsByEmail(userEmail);
-    return null;
-//
-//        for (IDisplayingTransaction transaction : transactions) {
-//            if (transaction.getEmailEmail() == userEmail) {
-//                return new DisplayingTransaction(transaction.getFirstName(), transaction.getDescription(), -transaction.getAmount());
-//            } else {
-//                //
-//            }
-//        }
+    public List<DisplayingTransaction> getTransactionsByEmail(String emitterEmail, String receiverEmail) {
+        List<Transaction> transactions = transactionRepository.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(emitterEmail, receiverEmail);
 
-
-
-//        return transactions.stream()
-//                .map(transaction -> {
-//                    if (transaction.getEmiterEmail().equals(userEmail)) {
-//                        return new DisplayingTransaction(transaction.getFirstName(), transaction.getDescription(), -transaction.getAmount());
-//                    } else {
-//                        return transaction;
-//                    }
-//                })
-//                .collect(Collectors.toSet());
+        List<DisplayingTransaction> DisplayingListUser = transactions.stream()
+                .map(transaction -> {
+                    User userReceiver = userRepository.findByEmail(transaction.getReceiverEmail());
+                    if (transaction.getEmitterEmail().equals(emitterEmail)) {
+                        return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
+                    } else {
+                        User userEmitter = userRepository.findByEmail(transaction.getEmitterEmail());
+                        return new DisplayingTransaction(userEmitter.getFirstName(), transaction.getDescription(), transaction.getAmount());
+                    }
+                })
+                .collect(Collectors.toList());
+        log.info("Service: displaying list of transaction for userEmail: " + emitterEmail);
+        return DisplayingListUser;
     }
 
     /**
      * Method which add a transaction in database
      *
-     * @param userEmail   A String containing user email, the emitter of transaction
-     * @param friendEmail A String containing friend email, the receiver of transaction
-     * @param amount      A Double that containing value of transaction
-     * @param description A String that describe the transaction
+     * @param transaction An object {@link Transaction} to save
+     * @return
      */
     @Transactional
     @Override
-    public void addTransaction(String userEmail, String friendEmail, Double amount, String description) {
-        User userEmitterTransaction = userRepository.findByEmail(userEmail);
-        if (amount > userEmitterTransaction.getBalance()) {
+    public Transaction addTransaction(Transaction transaction) {
+//        Transaction transactionToAdd = Transaction.builder()
+//                .emitterEmail(userEmail).receiverEmail(friendEmail).amount(amount).description(description).build();
+
+        User  userEmitterTransaction = userRepository.findByEmail(transaction.getEmitterEmail());
+        if (transaction.getAmount() > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
         }
-        transactionRepository.saveTransaction(userEmail, friendEmail, amount, description);
-        // user emitter save with new balance
-        userRepository.save(getBalanceEmitter(userEmitterTransaction, amount));
-        // user receiver save with new balance
-        userRepository.save(getBalanceReceiver(friendEmail, amount));
+        transaction.setFees(calculateFees(transaction.getAmount()));
+        transaction.setDate(LocalDateTime.now());
 
+        // user emitter save with new balance
+        userRepository.save(getBalanceEmitter(userEmitterTransaction, transaction.getAmount()));
+        // user receiver save with new balance
+        userRepository.save(getBalanceReceiver(transaction.getReceiverEmail(), transaction.getAmount()));
+        return transactionRepository.save(transaction);
     }
 
     /**
@@ -114,18 +114,17 @@ public class TransactionService implements ITransactionService {
      * @param amount A Double that containing value of transaction
      * @return A Double with the value of the fees for the transaction
      */
-    private Double getFees(Double amount) {
-        Double fees = (amount * 0.5) / 100;
+    private Double calculateFees(Double amount) {
+        double feesPercentage = 0.5;
 
-        return fees;
+        return (amount * feesPercentage) / 100;
     }
 
     /**
      * Method private that get the new balance after transaction for the receiver
      *
      * @param friendEmail A String containing friend email, the receiver of transaction
-     * @param amount A Double that containing value of transaction
-     *
+     * @param amount      A Double that containing value of transaction
      * @return A User receiver with the new balance updated
      */
     private User getBalanceReceiver(String friendEmail, Double amount) {
@@ -140,8 +139,7 @@ public class TransactionService implements ITransactionService {
      * Method private that get the new balance after transaction for the emitter
      *
      * @param userEmitterTransaction A User Emitter of the transaction
-     * @param amount A Double that containing value of transaction
-     *
+     * @param amount                 A Double that containing value of transaction
      * @return A User emitter with the new balance updated
      */
     private User getBalanceEmitter(User userEmitterTransaction, Double amount) {

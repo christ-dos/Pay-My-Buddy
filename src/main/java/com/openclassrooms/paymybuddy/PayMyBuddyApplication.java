@@ -1,9 +1,7 @@
 package com.openclassrooms.paymybuddy;
 
-import com.openclassrooms.paymybuddy.model.Friend;
-import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.repository.IFriendRepository;
-import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.model.Transaction;
+import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -11,8 +9,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.transaction.Transactional;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class that start the application
@@ -22,14 +20,13 @@ import java.util.List;
 @SpringBootApplication
 public class PayMyBuddyApplication implements CommandLineRunner {
 
-//    @Autowired
-//    private ITransactionService transactionService;
-//
+    @Autowired
+    private ITransactionRepository transactionrepo;
+
     @Autowired
     private UserService userService;
 
-	/**
-	 * Method main that initiate the application
+	/** Method main that initiate the application
 	 *
 	 * @param args
 	 */
@@ -68,8 +65,11 @@ public class PayMyBuddyApplication implements CommandLineRunner {
 //            System.out.println(userService.addFriendUser("dada@email.fr","tela@email.fr"));
 //           User friend = userService.getUserByEmail("dada@email.fr");
 //        List<User> friends =  friend.getFriends();
-//        friends.forEach(x->System.out.println(x.getEmail()));
-//
+//        friends.forEach(x->System.out.println(x.getEmail()))
+//        Iterable<Transaction> trans = transactionService.getTransactions();
+//        trans.forEach(x->System.out.println(x.getEmitterEmail()));
+        List<Transaction> liTrans = transactionrepo.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc("dada@email.fr" , "dada@email.fr" );
+        liTrans.forEach(x->System.out.println(x.getReceiverEmail()));
 //        User user = userService.getUserByEmail("ggpassain@email.fr");
 //        List<User> users =  user.getUsers();
 //        users.forEach(x->System.out.println(x.getEmail()));

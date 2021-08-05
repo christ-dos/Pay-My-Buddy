@@ -27,7 +27,7 @@ VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
 CREATE TABLE transaction
 (
     transaction_id TINYINT AUTO_INCREMENT NOT NULL,
-    date           TIMESTAMP              NOT NULL,
+    date           TIMESTAMP              NOT NULL DEFAULT NOW(),
     amount         DECIMAL(8, 2)          NOT NULL,
     description    VARCHAR(300),
     fees           DECIMAL(8, 2),
@@ -36,9 +36,11 @@ CREATE TABLE transaction
     PRIMARY KEY (transaction_id)
 )
     ENGINE = innoDB;
-INSERT INTO transaction(date, amount, description, fees, emitter_email, receiver_email)
-VALUES (now(), 15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
-       (now(), 5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr');
+INSERT INTO transaction(amount, description, fees, emitter_email, receiver_email)
+VALUES (15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
+       (5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr'),
+       (25.0, 'cimena', 0.0, 'luluM@email.fr', 'dada@email.fr'),
+       (25.0, 'cimena', 0.0, 'luluM@email.fr', 'lili@email.fr');
 
 CREATE TABLE transfer
 (
@@ -57,14 +59,14 @@ CREATE TABLE friend
 (
     user_email   VARCHAR(100) NOT NULL,
     friend_email VARCHAR(100) NOT NULL,
-    date_added   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_added   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_email, friend_email)
 
 )
     ENGINE = innoDB;
-# INSERT INTO friend(user_email, friend_email, date_added)
-# VALUES ('dada@email.fr', 'ggpassain@email.fr', NOW());
-#        ('dada@email.fr', 'luluM@email.fr');
+INSERT INTO friend(user_email, friend_email)
+VALUES ('dada@email.fr', 'ggpassain@email.fr'),
+       ('dada@email.fr', 'luluM@email.fr');
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk
