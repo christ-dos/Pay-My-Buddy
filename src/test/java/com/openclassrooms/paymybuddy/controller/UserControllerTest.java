@@ -1,7 +1,7 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.model.Friend;
+import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IFriendRepository;
@@ -19,9 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -62,8 +60,8 @@ public class UserControllerTest {
         mockMvcUser.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
-                //.andExpect(model().size(3))
-                // .andExpect(model().attributeExists("friendLists","transactions","receivingDataTransactionView"))
+//                .andExpect(model().size(3))
+                // .andExpect(model().attributeExists("friendLists","transactions","transaction"))
                 .andDo(print());
     }
 
@@ -115,10 +113,10 @@ public class UserControllerTest {
     }
 
     @Test
-    public void submitIndexViewTest_whenUserExistInDBAndFriendEmailTooAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+    public void submitIndexViewTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
-        String friendEmail = "fifi@email.com";
-        String userEmail = "kikine@email.fr";
+        String receiverEmail = "fifi@email.com";
+        String emitterEmail = "kikine@email.fr";
 
         Transaction transactionTest = new Transaction();
         transactionTest.setTransactionId(1);
@@ -126,31 +124,47 @@ public class UserControllerTest {
         transactionTest.setAmount(16.0);
         transactionTest.setFees(0.08);
 
-//        ReceivingDataTransactionView receivingDataTransactionView = new ReceivingDataTransactionView();
-//        receivingDataTransactionView.setUserEmail("fifi@email.com");
-//        receivingDataTransactionView.setFriendEmail("kikine@email.fr");
-//        receivingDataTransactionView.setDescription("books");
-//        receivingDataTransactionView.setAmount(12.58);
-
-
-//        doNothing().when(transactionRepositoryMock).saveTransaction(userEmail, friendEmail, transactionTest.getAmount(), transactionTest.getDescription());
-//        doNothing().when(transactionServiceMock).addTransaction(userEmail, friendEmail, transactionTest.getAmount(), transactionTest.getDescription());
+        when(transactionRepositoryMock.save(transactionTest)).thenReturn(transactionTest);
+        when(transactionServiceMock.addTransaction(transactionTest)).thenReturn(transactionTest);
         //WHEN
         //THEN
-//        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
-//                        .param("userEmail",userEmail)
-//                        .param("friendEmail", receivingDataTransactionView.getFriendEmail())
-//                        .param("amount", String.valueOf(receivingDataTransactionView.getAmount()))
-//                        .param("description", receivingDataTransactionView.getDescription()))
-//                .andExpect(status().isOk())
-//                .andExpect(view().name("index"))
-//                .andExpect(model().attributeExists("friendLists", "transactions", "receivingDataTransactionView"))
-//                .andExpect(model().hasNoErrors())
-//                .andDo(print());
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                        .param("userEmail", emitterEmail)
+                        .param("receiverEmail", receiverEmail)
+                        .param("amount", String.valueOf(transactionTest.getAmount()))
+                        .param("description", transactionTest.getDescription()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().hasNoErrors())
+                .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenAmountIsNull_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenBalanceIsInsufficient_thenReturnBalanceInsufficientException() throws Exception {
+        //GIVEN
+        String receiverEmail = "luluM@email.fr";
+        String emitterEmail = "dada@email.fr";
+
+        when(transactionServiceMock.addTransaction(isA(Transaction.class))).thenThrow(new BalanceInsufficientException("Insufficient account balance, your balance is: " + emitterEmail));
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                        .param("balance", "20")
+                        .param("emitterEmail", emitterEmail)
+                        .param("receiverEmail", receiverEmail)
+                        .param("amount", "50"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -160,12 +174,12 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "NotNull"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -176,11 +190,12 @@ public class UserControllerTest {
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Max"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenAmountIsLessTo1_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -191,21 +206,23 @@ public class UserControllerTest {
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Min"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
                         .param("amount", "2")
-                        .param("friendEmail", ""))
+                        .param("receiverEmail", ""))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrors("transaction", "receiverEmail"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
 
@@ -290,14 +307,14 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                        .param("email", "françois@email.fr"))
+                        .param("email", "françois@email.fr")
+                        .param("userEmail", userEmail))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasErrors())
-                .andExpect(model().attributeHasFieldErrorCode("friendList", "email","UserAlreadyExist"))
-                .andExpect(model().attributeHasFieldErrors("friendList", "email"))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserAlreadyExist"))
                 .andDo(print());
         //verify that addFriendUser was not called because friend already exists in DB
         verify(userServiceMock, times(0)).addFriendUser(anyString(), anyString());
@@ -314,12 +331,12 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())
-                .andExpect(model().attributeHasFieldErrorCode("friendList", "email","UserNotExistDB"))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserNotExistDB"))
                 .andDo(print());
     }
 
     @Test
-    public void submitAddFriendTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBeNull() throws Exception {
+    public void submitAddFriendTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -328,7 +345,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("friendList", "email","NotBlank"))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "NotBlank"))
                 .andDo(print());
     }
 }

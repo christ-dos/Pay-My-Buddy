@@ -101,13 +101,13 @@ public class UserController {
             return "index";
         }
         if (result.getRawFieldValue("receiverEmail") == "") {
-            result.rejectValue("receiverEmail", "", "field friend Email can not be null");
+            result.rejectValue("receiverEmail", "NotBlank", "field friend Email can not be null");
         }
         try {
             transaction.setEmitterEmail(userEmail);
             transactionService.addTransaction(transaction);
         } catch (BalanceInsufficientException ex) {
-            result.rejectValue("amount", "", ex.getMessage());
+            result.rejectValue("amount", "BalanceInsufficientException", ex.getMessage());
             log.error("Controller: Insufficient account balance");
         }
         model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail, userEmail));

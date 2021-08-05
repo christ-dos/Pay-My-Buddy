@@ -50,7 +50,7 @@ public class UserTestIT {
     }
 
     @Test
-    public void submitIndexViewTest_whenURLIsSlashAndUserExistInDBAndFriendEmailTooAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+    public void submitIndexViewTest_whenURLIsSlashAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
         //GIVEN
         Double balance = 20.0;
 
@@ -75,7 +75,33 @@ public class UserTestIT {
     }
 
     @Test
-    public void submitIndexViewTest_whenUrlIsSlashAmountIsNull_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenURLIsSlashAndBalanceIsInsufficient_thenReturnFieldErrorBalanceInsufficientException() throws Exception {
+        //GIVEN
+        Double balance = 20.0;
+
+        Transaction transaction = new Transaction();
+        transaction.setEmitterEmail("dada@email.fr");
+        transaction.setReceiverEmail("luluM@email.fr");
+        transaction.setDescription("Movies tickets");
+        transaction.setAmount(30.0);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/")
+                        .param("userEmail", transaction.getEmitterEmail())
+                        .param("receiverEmail", transaction.getReceiverEmail())
+                        .param("amount", String.valueOf(transaction.getAmount()))
+                        .param("description", transaction.getDescription())
+
+                ).andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
+                .andDo(print());
+    }
+
+
+    @Test
+    public void submitIndexViewTest_whenUrlIsSlashAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -85,12 +111,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "NotNull"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenUrlIsSlashAmountIsGreaterTo1000_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenUrlIsSlashAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -100,12 +126,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Max"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenUlrIsSlashAmountIsLessTo1_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenUlrIsSlashAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -115,12 +141,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Min"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenUrlIsSlashAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenUrlIsSlashAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -130,7 +156,7 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "receiverEmail"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
     //************************************Tests in View index in URL /index****************************************
@@ -149,7 +175,7 @@ public class UserTestIT {
     }
 
     @Test
-    public void submitIndexViewTest_whenURLIsIndexAndUserExistInDBAndFriendEmailTooAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+    public void submitIndexViewTest_whenURLIsIndexAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
         //GIVEN
         Double balance = 20.0;
 
@@ -174,7 +200,32 @@ public class UserTestIT {
     }
 
     @Test
-    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsNull_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenURLIsIndexBalanceIsInsufficient_thenReturnFieldErrorBalanceInsufficientException() throws Exception {
+        //GIVEN
+        Double balance = 20.0;
+
+        Transaction transaction = new Transaction();
+        transaction.setEmitterEmail("dada@email.fr");
+        transaction.setReceiverEmail("luluM@email.fr");
+        transaction.setDescription("Movies tickets");
+        transaction.setAmount(30.0);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+                        .param("userEmail", transaction.getEmitterEmail())
+                        .param("receiverEmail", transaction.getReceiverEmail())
+                        .param("amount", String.valueOf(transaction.getAmount()))
+                        .param("description", transaction.getDescription())
+
+                ).andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
+                .andDo(print());
+    }
+
+    @Test
+    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -184,12 +235,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "NotNull"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsGreaterTo1000_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -199,12 +250,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Max"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsLessTo1_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenUrlIsIndexAndAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -214,12 +265,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Min"))
                 .andDo(print());
     }
 
     @Test
-    public void submitIndexViewTest_whenUrlIsIndexAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrors() throws Exception {
+    public void submitIndexViewTest_whenUrlIsIndexAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -229,7 +280,7 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "receiverEmail"))
+                .andExpect(model().attributeHasFieldErrorCode("transaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
 
@@ -263,7 +314,7 @@ public class UserTestIT {
     }
 
     @Test
-    public void saveFriendTest_whenUsersExistAndFriendIsNotInListFriend_thenReturnStatusIsOk() throws Exception {
+    public void submitAddFriendTest_whenUsersExistAndFriendIsNotInListFriend_thenReturnStatusIsOk() throws Exception {
         //GIVEN
         String userEmail = "tela@email.fr";
         User userFriendToAdd = User.builder()
@@ -281,7 +332,7 @@ public class UserTestIT {
     }
 
     @Test
-    public void saveFriendTest_whenEmailFriendNotExistInDB_thenReturnErrorInFieldEmailUserNotExist() throws Exception {
+    public void submitAddFriendTest_whenEmailFriendNotExistInDB_thenReturnErrorInFieldEmailUserNotExistDB() throws Exception {
         //GIVEN
         String friendEmailNotExist = "wiwi@email.fr";
         //WHEN
@@ -291,12 +342,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())
-                .andExpect(model().attributeHasFieldErrors("friendList", "email"))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserNotExistDB"))
                 .andDo(print());
     }
 
     @Test
-    public void saveFriendTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBeNull() throws Exception {
+    public void submitAddFriendTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBeNull() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -306,12 +357,12 @@ public class UserTestIT {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("friendList", "email"))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "NotBlank"))
                 .andDo(print());
     }
 
     @Test
-    public void saveFriendTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
+    public void submitAddFriendTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
         String friendEmailAlreadyExist = "ggpassain@email.fr";
         String userEmail = "tela@email.fr";
@@ -325,7 +376,7 @@ public class UserTestIT {
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasErrors())
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserAlreadyExist"))
                 .andDo(print());
     }
 }
