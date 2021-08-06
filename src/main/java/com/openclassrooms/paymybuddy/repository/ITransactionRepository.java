@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Interface that handles database queries for transactions
+ * Interface that handles database queries for transaction's table
  *
  * @author Christine Duarte
  */

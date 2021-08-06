@@ -3,6 +3,7 @@ package com.openclassrooms.paymybuddy.controller;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
+import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -44,12 +45,15 @@ public class UserController {
      */
     @Autowired
     private ITransactionService transactionService;
-//
-//
-//    @GetMapping(value = "/users")
-//    public Iterable<User> getUserList() {
-//        return userService.getUsers();
-//    }
+
+    /**
+     * Method that get all users
+     * @return An Iterable of User object
+     */
+    @GetMapping(value = "/users")
+    public Iterable<User> getUserList() {
+        return userService.getUsers();
+    }
 
     /**
      * Method GET to displaying the view for log-in mapped in "/login"
@@ -179,6 +183,7 @@ public class UserController {
      * Private method that verify if the friend already exist in the list
      *
      * @param friendEmail A string containing the email of the friend
+     * @param userEmail A string containing the email of the user
      * @return true if the friend already exist in list else return false
      */
     private Boolean friendAlreadyExistsInList(String friendEmail, String userEmail) {

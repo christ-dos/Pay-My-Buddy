@@ -1,36 +1,43 @@
 package com.openclassrooms.paymybuddy.model;
 
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.jpa.repository.Temporal;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 import java.time.LocalDateTime;
 
-
+/**
+ * Class That models the entity Friend
+ *
+ * @author Christine Duarte
+ */
 @NoArgsConstructor
-@Data
+@AllArgsConstructor
+@Setter
+@Getter
 @Entity
 @IdClass(FriendId.class)
 public class Friend {
-
-    public Friend(String userEmail, String friendEmail, LocalDateTime dateAdded) {
-        this.userEmail = userEmail;
-        this.friendEmail = friendEmail;
-        this.dateAdded = dateAdded;
-    }
+    /**
+     * key composite with the userEmail
+     */
     @Id
     @Column(name = "user_email")
     private String userEmail;
+    /**
+     * key composite with the friendEmail
+     */
     @Id
     @Column(name = "friend_email")
     private String friendEmail;
-
+    /**
+     * Date when the friend user was added
+     */
     @Column(name = "date_added")
-    @CreationTimestamp
     private LocalDateTime dateAdded;
-
-//    @ManyToMany(mappedBy = "friends")
-//    private List<User> users =  new ArrayList<>();
-
 }

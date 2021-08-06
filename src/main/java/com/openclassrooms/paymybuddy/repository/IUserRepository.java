@@ -24,7 +24,7 @@ public interface IUserRepository extends CrudRepository<User, String> {
      * Query to find a user by email
      *
      * @param Email A String containing user's email
-     * @return A user object
+     * @return A {@link User} object
      */
     User findByEmail(String Email);
 }
