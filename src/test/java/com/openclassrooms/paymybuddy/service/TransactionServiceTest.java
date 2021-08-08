@@ -106,7 +106,7 @@ class TransactionServiceTest {
                 .balance(30.50)
                 .accountBank(170974).build();
 
-        User userMock = mock(User.class);
+//        User userMock = mock(User.class);
         when(transactionRepositoryMock.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(emitterEmail, receiverEmail)).thenReturn(transactions);
         transactions.stream()
                 .map(transaction -> {

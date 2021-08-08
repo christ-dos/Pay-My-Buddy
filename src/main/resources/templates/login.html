@@ -1,5 +1,5 @@
 <!doctype>
-<html lang="fr">
+<html xmlns:th="http://www.thymeleaf.org"  lang="fr">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -31,15 +31,19 @@
                             </div>
                         </div>
                     </div>
-                    <form class="form-payMyBuddy">
+                    <form th:action="@{/authentication/login}" th:object="${userDetails}"  method="post" class="form-payMyBuddy" action="#" >
                         <!--*********Input Email*****************-->
+                        <p class="col-9 col-md-9 col-lg-4 m-2 " th:errors="*{username}"
+                           th:errorclass="error"></p>
                         <div class="form-label-group py-4">
-                            <input type="email" id="inputEmail" class="form-control input-lg inputIcon"
+                            <input th:field="*{username}" type="email" id="inputEmail" class="form-control input-lg inputIcon"
                                    placeholder="&#xf0e0  Email" required autofocus>
                         </div>
                         <!--*********Input Password*****************-->
                         <div class="form-label-group py-3">
-                            <input type="password" id="inputPassword" class="form-control input-lg inputIcon"
+                            <p class="col-9 col-md-9 col-lg-4 m-2 " th:errors="*{password}"
+                               th:errorclass="error"></p>
+                            <input  th:field="*{password}" type="password" id="inputPassword" class="form-control input-lg inputIcon"
                                    placeholder="   Password" required>
                         </div>
                         <!--*********Remember me*****************-->

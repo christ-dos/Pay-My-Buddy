@@ -1,6 +1,8 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.configuration.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -8,6 +10,8 @@ import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -31,6 +36,7 @@ public class UserController {
      */
     private final static String userEmail = "dada@email.fr";
 
+
     //private final List<IFriendList> friendLists = new ArrayList<>();
 
     //private final List<IDisplayingTransaction> transactionslist = new ArrayList<>();
@@ -46,8 +52,12 @@ public class UserController {
     @Autowired
     private ITransactionService transactionService;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     /**
      * Method that get all users
+     *
      * @return An Iterable of User object
      */
     @GetMapping(value = "/users")
@@ -56,16 +66,39 @@ public class UserController {
     }
 
     /**
-     * Method GET to displaying the view for log-in mapped in "/login"
+     * Method GET to displaying the view for log in mapped in "/login"
      *
      * @param model Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
-    @GetMapping("/login")
-    public String showLoginView(Model model) {
+//    @RolesAllowed({"USER"})
+    @GetMapping("/authentication/login")
+    public String showLoginView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
         log.info("Controller: The View login displaying");
 
         return "login";
+    }
+
+    //    @RolesAllowed({"USER", "ADMIN"})
+    @PostMapping("/authentication/login")
+    public String submitLoginView(@Valid @ModelAttribute ("userDetails") MyUserDetails userDetails, BindingResult result, Model model) {
+
+        if (result.hasErrors()) {
+//            model.addAttribute("userDetails", "Bad credentials");
+            log.error("Controller: Error in fieldspost");
+            return "login";
+        }
+        try {
+            userDetailsService.loadUserByUsername(userDetails.getUsername());
+            log.info("je suis dans le try/");
+        } catch (UsernameNotFoundException ex) {
+            result.rejectValue("username", "UserNameNotFound", ex.getMessage());
+            log.error("Controller: Username Not found");
+            return "login";
+        }
+
+        return "index";
+
     }
 
     /**
@@ -95,16 +128,16 @@ public class UserController {
      * @param model       Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
+//    @RolesAllowed({"USER", "ADMIN"})
     @PostMapping(value = {"/", "/index"})
     public String submitIndexView(@Valid Transaction transaction, BindingResult result, Model model) {
-
         if (result.hasErrors()) {
             model.addAttribute("transactions", transactionService.getTransactionsByEmail(userEmail, userEmail));
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
             log.error("Controller: Error in fields");
             return "index";
         }
-        if (result.getRawFieldValue("receiverEmail") == "") {
+        if (result.getRawFieldValue("receiverEmail").equals("")) {
             result.rejectValue("receiverEmail", "NotBlank", "field friend Email can not be null");
         }
         try {
@@ -155,8 +188,6 @@ public class UserController {
         if (result.getRawFieldValue("email").equals(userEmail)) {
             result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
             model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-            model.addAttribute("friendLists", userService.getFriendListByEmail(userEmail));
-
             log.error("Controller: Invalid addition with email: " + userEmail);
             return "addfriend";
         }
@@ -183,7 +214,7 @@ public class UserController {
      * Private method that verify if the friend already exist in the list
      *
      * @param friendEmail A string containing the email of the friend
-     * @param userEmail A string containing the email of the user
+     * @param userEmail   A string containing the email of the user
      * @return true if the friend already exist in list else return false
      */
     private Boolean friendAlreadyExistsInList(String friendEmail, String userEmail) {

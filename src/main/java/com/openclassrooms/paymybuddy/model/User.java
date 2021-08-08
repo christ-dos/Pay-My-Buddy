@@ -3,8 +3,10 @@ package com.openclassrooms.paymybuddy.model;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +33,8 @@ public class User {
     /**
      * A String containing the password
      */
+//    @NotBlank(message = "password cannot be blank")
+//    @Max(value = 255, message = "password must be between 8 and 255")
     private String password;
 
     /**

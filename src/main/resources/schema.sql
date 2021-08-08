@@ -18,7 +18,7 @@ CREATE TABLE user
 
 INSERT INTO user(email, password, first_name, last_name, balance, account_bank)
 VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
-       ('dada@email.fr', 'monpassword', 'Damien', 'Sanchez', 20, 255896),
+       ('dada@email.fr', 'pass', 'Damien', 'Sanchez', 20, 255896),
        ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 22.80, 359840),
        ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 18.98, 259873),
        ('lili@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 783600)
@@ -40,6 +40,7 @@ INSERT INTO transaction(amount, description, fees, emitter_email, receiver_email
 VALUES (15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
        (5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr'),
        (25.0, 'cimena', 0.0, 'luluM@email.fr', 'dada@email.fr'),
+       (5.0, 'diner', 0.0, 'lili@email.fr', 'dada@email.fr'),
        (25.0, 'cimena', 0.0, 'luluM@email.fr', 'lili@email.fr');
 
 CREATE TABLE transfer

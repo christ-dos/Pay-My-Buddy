@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -9,7 +10,7 @@ import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.TransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,13 +18,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,10 +44,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
+//@SpringBootTest
 public class UserControllerTest {
 
     @Autowired
-    private MockMvc mockMvcUser;
+    private MockMvc mockMvc;
+
 
     @MockBean
     private UserService userServiceMock;
@@ -51,42 +66,94 @@ public class UserControllerTest {
     @MockBean
     private TransactionService transactionServiceMock;
 
-    @BeforeEach
-    public void setupPerTest() {
-        String userEmail = "dada@email.fr";
-    }
+    @MockBean
+    private UserDetailsService userDetailsServiceMock;
 
-    //***********************Tests View Login*************************************
+//    @BeforeEach
+//    public void setup() {
+//        mockMvc = MockMvcBuilders
+//                .webAppContextSetup(context)
+//                .apply(springSecurity())
+//                .build();
+//    }
+ /*-----------------------------------------------------------------------------------------------------
+                                     Tests View Login
+ ------------------------------------------------------------------------------------------------------*/
+
     @Test
+//    @WithMockUser
     public void showLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/login"))
+        mockMvc.perform(get("/customlogin"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
-//                .andExpect(model().size(3))
-                // .andExpect(model().attributeExists("friendLists","transactions","transaction"))
+                .andExpect(model().attributeExists("userDetails"))
                 .andDo(print());
     }
 
+    @WithMockUser(value = "@dada@email.fr")
     @Test
     public void showLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/log"))
+        mockMvc.perform(get("/log"))
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
 
-    //******************************Tests View Index****************************
+    @Test
+    public void submitLoginViewTest_whenUserNameIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
+        //GIVEN
+        MyUserDetails myUserDetails = new MyUserDetails("", "pass");
+        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/customlogin")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .accept(MediaType.ALL)).andExpect(status().isOk())
+//                .andExpect(redirectedUrl("/customlogin"))
+//                .andExpect(MockMvcResultMatchers.redirectedUrl("/customlogin"))
+//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/customlogin")))
+                .andExpect(model().attributeExists("userDetails"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrorCode("userDetails", "username", "NotBlank"))
+                .andDo(print());
+    }
+@WithMockUser(username = "dada@email.fr", password = "pass")
+    @Test
+    public void submitLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlIndex() throws Exception {
+        //GIVEN
+        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", "pass");
+        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/authentication/login")
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()).param("username", "dada@email.fr").param("password", "pass")
+                        .accept(MediaType.ALL)).andExpect(status().isOk())
+//                .andExpect(redirectedUrl("/index"))
+//                .andExpect(MockMvcResultMatchers.redirectedUrl("/index"))
+//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/index")))
+                .andExpect(view().name("login"))
+                .andExpect(model().attributeExists("userDetails"))
+                .andExpect(model().hasNoErrors())
+                .andDo(print());
+    }
+
+
+    /*-------------------------------------------------------------------------------------------------------
+                                         Tests View Index
+    ---------------------------------------------------------------------------------------------------------*/
+    @WithMockUser(value = "spring")
     @Test
     public void showIndexViewTest_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/"))
+        mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andExpect(model().size(3))
@@ -94,12 +161,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void showIndexViewTest_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/index"))
+        mockMvc.perform(get("/index"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andExpect(model().size(3))
@@ -107,16 +175,18 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/home"))
+        mockMvc.perform(get("/home"))
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitIndexViewTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
@@ -133,7 +203,7 @@ public class UserControllerTest {
         when(transactionServiceMock.addTransaction(transactionTest)).thenReturn(transactionTest);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("userEmail", emitterEmail)
                         .param("receiverEmail", receiverEmail)
                         .param("amount", String.valueOf(transactionTest.getAmount()))
@@ -145,6 +215,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitIndexViewTest_whenBalanceIsInsufficient_thenReturnBalanceInsufficientException() throws Exception {
         //GIVEN
@@ -154,7 +225,7 @@ public class UserControllerTest {
         when(transactionServiceMock.addTransaction(isA(Transaction.class))).thenThrow(new BalanceInsufficientException("Insufficient account balance, your balance is: " + emitterEmail));
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("balance", "20")
                         .param("emitterEmail", emitterEmail)
                         .param("receiverEmail", receiverEmail)
@@ -168,12 +239,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitIndexViewTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
@@ -183,12 +255,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitIndexViewTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "1500")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
@@ -199,12 +272,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitIndexViewTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "0.5")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
@@ -215,12 +289,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitIndexViewTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "2")
                         .param("receiverEmail", ""))
                 .andExpect(status().isOk())
@@ -231,13 +306,16 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    //***********************Tests View Addfriend**********************************
+    /*-----------------------------------------------------------------------------------------------------
+                                        Tests View addfriend
+     ------------------------------------------------------------------------------------------------------*/
+    @WithMockUser(value = "spring")
     @Test
     public void showAddFriendViewTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/addfriend"))
+        mockMvc.perform(get("/addfriend"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().size(2))
@@ -245,16 +323,18 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void showAddFriendViewTest_whenUrlIsAddAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/add"))
+        mockMvc.perform(get("/add"))
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitAddFriendTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanaddToFriendInList() throws Exception {
         //GIVEN
@@ -265,7 +345,7 @@ public class UserControllerTest {
         when(userServiceMock.getUserByEmail(friendEmailNotExistInList)).thenReturn(userToAdd);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
+        mockMvc.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("email", userToAdd.getEmail())
                         .param("firstName", userToAdd.getFirstName()))
                 .andExpect(status().isOk())
@@ -276,6 +356,7 @@ public class UserControllerTest {
 //        verify(friendRepositoryMock, times(1)).save(friendAdded);
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitAddFriendTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
@@ -311,7 +392,7 @@ public class UserControllerTest {
         when(userServiceMock.getFriendListByEmail(userEmail)).thenReturn(friendListMock);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
+        mockMvc.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("email", "françois@email.fr")
                         .param("userEmail", userEmail))
                 .andExpect(status().isOk())
@@ -325,14 +406,20 @@ public class UserControllerTest {
         verify(userServiceMock, times(0)).addFriendUser(anyString(), anyString());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitAddFriendTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
         //GIVEN
+        String springToken = "org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository.CSRF_TOKEN";
+        HttpSessionCsrfTokenRepository httpSessionCsrfTokenRepository = new HttpSessionCsrfTokenRepository();
+        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
+
         String friendEmailNotExist = "wiwi@email.fr";
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                        .param("email", friendEmailNotExist))
+        mockMvc.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", friendEmailNotExist).sessionAttr(springToken, csrfToken))
+
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())
@@ -340,12 +427,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitAddFriendTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
+        mockMvc.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("email", ""))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
@@ -354,12 +442,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitAddFriendTest_whenEmailToAddAndEmailUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
+        mockMvc.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("email", "dada@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))

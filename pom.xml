@@ -31,10 +31,10 @@
 			<artifactId>javax.json</artifactId>
 			<version>1.1</version>
 		</dependency>
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>javax.persistence-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>javax.persistence</groupId>-->
+<!--			<artifactId>javax.persistence-api</artifactId>-->
+<!--		</dependency>-->
 		<!--********************oAuth2********************-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -55,12 +55,6 @@
 			<version>0.8.5</version>
 			<type>maven-plugin</type>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.jacoco</groupId>-->
-<!--			<artifactId>jacoco-maven-plugin</artifactId>-->
-<!--			<version>0.8.6</version>-->
-<!--		</dependency>-->
-
 		<!--****************mysql connector*******************-->
 		<dependency>
 			<groupId>mysql</groupId>
@@ -88,7 +82,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
-        <dependency>
+		<dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
         </dependency>
@@ -101,7 +95,7 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>5.0.1.Final</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
+		<!-- *******************************org.jetbrains/annotations***************** -->
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
@@ -160,6 +154,26 @@
 								<include>**/*IT.java</include>
 							</includes>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- *************JaCoCo plugin******************-->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
