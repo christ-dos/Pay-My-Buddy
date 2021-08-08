@@ -10,7 +10,7 @@
     <style>
         .error {
             color: red;
-            font-size: 0.8em;
+            font-size: 0.7em;
             font-weight: bold;
         }
     </style>
@@ -86,11 +86,11 @@
             <!--*************Input Email****************-->
             <form action="#" method="post" th:action="@{/addfriend}" th:object="${friendList}">
                 <div class="row justify-content-center">
-                    <p class="col-9 col-md-9 col-lg-4 m-2 " th:errors="*{email}"
-                       th:errorclass="error"></p>
-                    <div class="col-12 col-md-6 col-lg-3 m-2">
+                    <div class="col-12 col-md-6 col-lg-4 m-2">
                         <input th:field="*{email}" class="form-control col-12 col-md-9 col-lg-9" type="email"
                                placeholder="Email"/>
+                        <p  th:errors="*{email}"
+                           th:errorclass="error"></p>
                     </div>
                     <!--**************Bouton Add******************-->
                     <button type="submit"
