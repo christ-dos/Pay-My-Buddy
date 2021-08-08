@@ -2,7 +2,6 @@ package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
-import com.openclassrooms.paymybuddy.configuration.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -72,7 +70,7 @@ public class UserController {
      * @return A String containing the name of view
      */
 //    @RolesAllowed({"USER"})
-    @GetMapping("/authentication/login")
+    @GetMapping("/login")
     public String showLoginView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
         log.info("Controller: The View login displaying");
 
@@ -80,17 +78,16 @@ public class UserController {
     }
 
     //    @RolesAllowed({"USER", "ADMIN"})
-    @PostMapping("/authentication/login")
-    public String submitLoginView(@Valid @ModelAttribute ("userDetails") MyUserDetails userDetails, BindingResult result, Model model) {
+    @PostMapping("/login")
+    public String submitLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
 
         if (result.hasErrors()) {
 //            model.addAttribute("userDetails", "Bad credentials");
             log.error("Controller: Error in fieldspost");
-            return "login";
+//            return "login";
         }
         try {
             userDetailsService.loadUserByUsername(userDetails.getUsername());
-            log.info("je suis dans le try/");
         } catch (UsernameNotFoundException ex) {
             result.rejectValue("username", "UserNameNotFound", ex.getMessage());
             log.error("Controller: Username Not found");
@@ -128,7 +125,6 @@ public class UserController {
      * @param model       Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
-//    @RolesAllowed({"USER", "ADMIN"})
     @PostMapping(value = {"/", "/index"})
     public String submitIndexView(@Valid Transaction transaction, BindingResult result, Model model) {
         if (result.hasErrors()) {

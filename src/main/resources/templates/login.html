@@ -31,9 +31,9 @@
                             </div>
                         </div>
                     </div>
-                    <form th:action="@{/authentication/login}" th:object="${userDetails}"  method="post" class="form-payMyBuddy" action="#" >
+                    <form th:action="@{/login}" th:object="${userDetails}"  method="post" class="form-payMyBuddy" action="#" >
                         <!--*********Input Email*****************-->
-                        <p class="col-9 col-md-9 col-lg-4 m-2 " th:errors="*{username}"
+                        <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}" th:errors="*{username}"
                            th:errorclass="error"></p>
                         <div class="form-label-group py-4">
                             <input th:field="*{username}" type="email" id="inputEmail" class="form-control input-lg inputIcon"
@@ -41,7 +41,7 @@
                         </div>
                         <!--*********Input Password*****************-->
                         <div class="form-label-group py-3">
-                            <p class="col-9 col-md-9 col-lg-4 m-2 " th:errors="*{password}"
+                            <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}" th:errors="*{password}"
                                th:errorclass="error"></p>
                             <input  th:field="*{password}" type="password" id="inputPassword" class="form-control input-lg inputIcon"
                                    placeholder="   Password" required>

@@ -68,8 +68,8 @@ public class TransactionService implements ITransactionService {
 
         List<DisplayingTransaction> DisplayingListUser = transactions.stream()
                 .map(transaction -> {
-                    User userReceiver = userRepository.findByEmail(transaction.getReceiverEmail());
                     if (transaction.getEmitterEmail().equals(emitterEmail)) {
+                        User userReceiver = userRepository.findByEmail(transaction.getReceiverEmail());
                         return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
                     } else {
                         User userEmitter = userRepository.findByEmail(transaction.getEmitterEmail());
@@ -100,7 +100,6 @@ public class TransactionService implements ITransactionService {
         }
         transaction.setFees(calculateFees(transaction.getAmount()));
         transaction.setDate(LocalDateTime.now());
-
         // user emitter save with new balance
         userRepository.save(getBalanceEmitter(userEmitterTransaction, transaction.getAmount()));
         // user receiver save with new balance

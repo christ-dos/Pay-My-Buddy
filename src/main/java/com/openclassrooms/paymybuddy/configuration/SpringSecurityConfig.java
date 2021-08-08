@@ -40,31 +40,31 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-//                .csrf().disable()
-                .authorizeRequests()
-//                .antMatchers("/admin").hasRole("ADMIN")
-                .antMatchers("/").hasRole("USER")
-                .antMatchers("/index").hasRole("USER")
-                .antMatchers("/addfriend").hasRole("USER")
-                .antMatchers("/customlogin").hasRole("USER")
-                .antMatchers("/css/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-//                .httpBasic()
-                .formLogin()
-                .usernameParameter("username")
-                .usernameParameter("password")
-                .loginPage("/authentication/login")
-                .loginProcessingUrl("/authentication/login")
-                .defaultSuccessUrl( "/index", true )
-                .failureUrl("/authentication/login")
-                .permitAll()
-                ;
+//        http
+////                .csrf().disable()
+//                .authorizeRequests()
+////                .antMatchers("/admin").hasRole("ADMIN")
+//                .antMatchers("/").hasRole("USER")
+//                .antMatchers("/index").hasRole("USER")
+//                .antMatchers("/addfriend").hasRole("USER")
+//                .antMatchers("/customlogin").hasRole("USER")
+//                .antMatchers("/css/**").permitAll()
+//                .anyRequest().authenticated()
+//                .and()
+////                .httpBasic()
+//                .formLogin()
+////                .usernameParameter("username")
+////                .usernameParameter("password")
+//                .loginPage("/login")
+//                .loginProcessingUrl("/login")
+//                .defaultSuccessUrl( "/index", true )
+//                .failureUrl("/login?error")
+//                .permitAll()
+//                ;
 
 //                .and()
 //                .oauth2Login();
-//        http.csrf().disable();
+        http.csrf().disable();
     }
 
 //    @Bean

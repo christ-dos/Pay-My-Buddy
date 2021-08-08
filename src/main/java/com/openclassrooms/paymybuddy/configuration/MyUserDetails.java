@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.Arrays;
 import java.util.Collection;
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class MyUserDetails implements UserDetails {
     @NotBlank
     private String username;
 
-    @Min(value = 8, message = "password must be between 8 and 255 character")
+    @Size(min= 8, max = 255 , message = "password must be between 8 and 255 character")
     private String password;
 
     @Override
