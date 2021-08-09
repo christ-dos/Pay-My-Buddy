@@ -75,23 +75,23 @@ class TransactionServiceTest {
     @Test
     void getTransactionsByEmailTest_whenTransactionWithEmailEmitterIsKikineOrReceiverEmailIsKikine_thenReturnListDisplayingTransactionForEmailkikineWithSignNegatifIfEmitterEmailIsKikine() {
         //GIVEN
-        String emitterEmail = "kikine@email.fr";
-        String receiverEmail = "kikine@email.fr";
+        String emitterEmail = "dada@email.fr";
+//        String receiverEmail = "kikine@email.fr";
 
         List<Transaction> transactions = new ArrayList<>();
         Transaction transaction1 = Transaction.builder()
                 .transactionId(1).amount(25.0).description("diner paula")
-                .emitterEmail("kikine@email.fr").receiverEmail("lisa@email.fr")
+                .emitterEmail("dada@email.fr").receiverEmail("lisa@email.fr")
                 .date(LocalDateTime.now())
                 .build();
         Transaction transaction2 = Transaction.builder()
                 .transactionId(2).amount(15.0).description("shopping  casa china")
-                .emitterEmail("kikine@email.fr").receiverEmail("lisa@email.fr").
+                .emitterEmail("dada@email.fr").receiverEmail("lisa@email.fr").
                 date(LocalDateTime.now())
                 .build();
         Transaction transaction3 = Transaction.builder()
                 .transactionId(3).amount(18.0).description("movies tickets")
-                .emitterEmail("lisa@email.fr").receiverEmail("kikine@email.fr")
+                .emitterEmail("lisa@email.fr").receiverEmail("dada@email.fr")
                 .date(LocalDateTime.now())
                 .build();
         transactions.add(transaction1);
@@ -106,8 +106,8 @@ class TransactionServiceTest {
                 .balance(30.50)
                 .accountBank(170974).build();
 
-//        User userMock = mock(User.class);
-        when(transactionRepositoryMock.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(emitterEmail, receiverEmail)).thenReturn(transactions);
+        User userMock = mock(User.class);
+        when(transactionRepositoryMock.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(isA(String.class), isA(String.class))).thenReturn(transactions);
         transactions.stream()
                 .map(transaction -> {
                     if (transaction.getEmitterEmail().equals(emitterEmail)) {
@@ -118,14 +118,14 @@ class TransactionServiceTest {
                     }
                 }).collect(Collectors.toList());
         //WHEN
-        List<DisplayingTransaction> listTransactionsResult = transactionServiceTest.getTransactionsByEmail(emitterEmail, receiverEmail);
+        List<DisplayingTransaction> listTransactionsResult = transactionServiceTest.getCurrentUserTransactionsByEmail();
         //THEN
         assertEquals(3, listTransactionsResult.size());
         assertEquals("Lisette", listTransactionsResult.get(0).getFirstName());
         assertEquals(-25, listTransactionsResult.get(0).getAmount());
         assertEquals("Lisette",listTransactionsResult.get(2).getFirstName());
         assertEquals(18, listTransactionsResult.get(2).getAmount());
-        verify(userRepositoryMock, times(4)).findByEmail(isA(String.class));
+        verify(userRepositoryMock, times(3)).findByEmail(isA(String.class));
     }
 
     @Test
@@ -135,7 +135,7 @@ class TransactionServiceTest {
         String receiverEmail = "teletubiz@email.fr";
         List<DisplayingTransaction> emptyList = new ArrayList<>();
         //WHEN
-        List<DisplayingTransaction> transactionsResult = transactionServiceTest.getTransactionsByEmail(emitterEmail, receiverEmail);
+        List<DisplayingTransaction> transactionsResult = transactionServiceTest.getCurrentUserTransactionsByEmail();
         //THEN
         assertEquals(emptyList, transactionsResult);
     }
@@ -190,4 +190,6 @@ class TransactionServiceTest {
         assertThrows(BalanceInsufficientException.class, () -> transactionServiceTest.addTransaction(transaction));
         verify(userRepositoryMock, times(1)).findByEmail(isA(String.class));
     }
+
+
 }

@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -58,17 +59,15 @@ public class TransactionService implements ITransactionService {
     /**
      * Method which get all transactions for a user email
      *
-     * @param emitterEmail A String Containing the email of the emitter of the transaction
-     * @param receiverEmail A String Containing the email of the receiver of the transaction
      * @return A list of {@link DisplayingTransaction}, a data transfer object
      */
     @Override
-    public List<DisplayingTransaction> getTransactionsByEmail(String emitterEmail, String receiverEmail) {
-        List<Transaction> transactions = transactionRepository.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(emitterEmail, receiverEmail);
+    public List<DisplayingTransaction> getCurrentUserTransactionsByEmail() {
+        List<Transaction> transactions = transactionRepository.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(SecurityUtilities.userEmail, SecurityUtilities.userEmail);
 
         List<DisplayingTransaction> DisplayingListUser = transactions.stream()
                 .map(transaction -> {
-                    if (transaction.getEmitterEmail().equals(emitterEmail)) {
+                    if (transaction.getEmitterEmail().equals(SecurityUtilities.userEmail)) {
                         User userReceiver = userRepository.findByEmail(transaction.getReceiverEmail());
                         return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
                     } else {
@@ -77,7 +76,7 @@ public class TransactionService implements ITransactionService {
                     }
                 })
                 .collect(Collectors.toList());
-        log.info("Service: displaying list of transaction for userEmail: " + emitterEmail);
+        log.info("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
         return DisplayingListUser;
     }
 
@@ -85,16 +84,14 @@ public class TransactionService implements ITransactionService {
      * Method which add a transaction in database
      *
      * @param transaction An object {@link Transaction} to save
-     * @return
+     * @return A {@link Transaction} object
      */
     @Transactional
     @Override
     public Transaction addTransaction(Transaction transaction) {
-//        Transaction transactionToAdd = Transaction.builder()
-//                .emitterEmail(userEmail).receiverEmail(friendEmail).amount(amount).description(description).build();
 
         User  userEmitterTransaction = userRepository.findByEmail(transaction.getEmitterEmail());
-        if (transaction.getAmount() > userEmitterTransaction.getBalance()) {
+        if ((transaction.getAmount() + calculateFees(transaction.getAmount())) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
         }
@@ -142,7 +139,7 @@ public class TransactionService implements ITransactionService {
      * @return A User emitter with the new balance updated
      */
     private User getBalanceEmitter(User userEmitterTransaction, Double amount) {
-        Double newBalanceEmitter = (userEmitterTransaction.getBalance()) - amount;
+        Double newBalanceEmitter = (userEmitterTransaction.getBalance()) - (amount + calculateFees(amount));
         userEmitterTransaction.setBalance(newBalanceEmitter);
 
         return userEmitterTransaction;

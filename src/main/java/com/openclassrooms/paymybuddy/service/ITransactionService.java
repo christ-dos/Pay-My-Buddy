@@ -13,7 +13,8 @@ public interface ITransactionService {
 
 //    public void addTransaction(String userEmail, String friendEmail, Double amount, String description);
 
-    List<DisplayingTransaction> getTransactionsByEmail(String emitterEmail, String receiverEmail);
+
+    List<DisplayingTransaction> getCurrentUserTransactionsByEmail();
 
     @Transactional
     Transaction addTransaction(Transaction transaction);

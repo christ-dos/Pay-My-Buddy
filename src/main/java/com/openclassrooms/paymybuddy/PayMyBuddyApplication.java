@@ -17,11 +17,11 @@ import javax.transaction.Transactional;
 @SpringBootApplication
 public class PayMyBuddyApplication implements CommandLineRunner {
 
-    @Autowired
-    private ITransactionRepository transactionrepo;
+//    @Autowired
+//    private ITransactionRepository transactionrepo;
 
-    @Autowired
-    private UserService userService;
+//    @Autowired
+//    private UserService userService;
 
     /**
      * Method main that initiate the application
