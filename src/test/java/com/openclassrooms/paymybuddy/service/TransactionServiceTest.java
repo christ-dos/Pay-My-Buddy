@@ -143,29 +143,39 @@ class TransactionServiceTest {
     @Test
     public void addTransaction_whenUserBalanceIsSufficient_thenVerifyTransactionAdded() {
         //GIVEN
-        User userEmitter = User.builder()
+        User userEmitterBefore = User.builder()
                 .email("kikine@email.fr")
                 .password("monTropToppassword")
                 .firstName("Christine")
                 .lastName("Deldalle")
-                .balance(30.50)
+                .balance(100.50)
                 .accountBank(170974).build();
 
-        Transaction transactionTest = Transaction.builder()
-                .receiverEmail("lise@email.fr").emitterEmail("kikine@email.fr").
-                amount(10.0)
+        User userEmitterAfter = User.builder()
+                .email("kikine@email.fr")
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(0.0)
+                .accountBank(170974).build();
+
+        Transaction transactionTest = Transaction.builder().transactionId(1)
+                .receiverEmail("lise@email.fr").emitterEmail("kikine@email.fr")
+                .amount(100.0).fees(0.50)
                 .date(LocalDateTime.now()).build();
 
-        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userEmitter);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userEmitterBefore);
         when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
+
         //WHEN
         Transaction transactionResult = transactionServiceTest.addTransaction(transactionTest);
-        //THEN
+        Double UserEmitterBalanceAfterTransaction = userRepositoryMock.findByEmail(transactionResult.getEmitterEmail()).getBalance();
         verify(transactionRepositoryMock, times(1))
                 .save(isA(Transaction.class));
         assertEquals("kikine@email.fr", transactionResult.getEmitterEmail());
         assertEquals("lise@email.fr", transactionResult.getReceiverEmail());
-        assertEquals(10.0, transactionResult.getAmount());
+        assertEquals(100, transactionResult.getAmount());
+        assertEquals(0.5,transactionResult.getFees());
     }
 
     @Test
@@ -177,11 +187,11 @@ class TransactionServiceTest {
                 .password("monTropToppassword")
                 .firstName("Christine")
                 .lastName("Deldalle")
-                .balance(30.0)
+                .balance(200.0)
                 .accountBank(170974).build();
 
         Transaction transaction = Transaction.builder()
-                .transactionId(2).amount(50.0).description("diner paula").date(LocalDateTime.now())
+                .transactionId(2).amount(200.0).fees(1.0).description("diner paula").date(LocalDateTime.now())
                 .emitterEmail("kikine@email.fr")
                 .build();
         when(userRepositoryMock.findByEmail(userEmail)).thenReturn(emitter);

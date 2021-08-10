@@ -113,6 +113,7 @@ public class UserController {
     @PostMapping(value = "/addfriend")
     public String addFriendToListConnection(@Valid FriendList friendList, BindingResult result, Model model) {
         if (result.hasErrors()) {
+            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
             log.error("Controller: Error in fields");
             return "addfriend";
         }
