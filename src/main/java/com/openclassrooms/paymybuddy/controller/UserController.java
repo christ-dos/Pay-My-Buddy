@@ -3,6 +3,8 @@ package com.openclassrooms.paymybuddy.controller;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
+import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +18,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
-import java.util.List;
 
 /**
  * Class Controller that manage users'requests
@@ -95,7 +96,7 @@ public class UserController {
      */
     @GetMapping({"/addfriend"})
     public String getListConnections(@ModelAttribute("friendList") FriendList friendList, Model model) {
-        model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
+        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: The View addfriend displaying");
         return "addfriend";
     }
@@ -111,65 +112,29 @@ public class UserController {
      */
     @PostMapping(value = "/addfriend")
     public String addFriendToListConnection(@Valid FriendList friendList, BindingResult result, Model model) {
-
         if (result.hasErrors()) {
-
-            model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
             log.error("Controller: Error in fields");
             return "addfriend";
         }
         if (result.getRawFieldValue("email").equals(SecurityUtilities.userEmail)) {
             result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
-            model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
+            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
             log.error("Controller: Invalid addition with email: " + SecurityUtilities.userEmail);
             return "addfriend";
         }
-        if (friendAlreadyExistsInList(friendList.getEmail())) {
-            result.rejectValue("email", "UserAlreadyExist", "This user already exists in your Connections");
-            model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
-            log.error("Controller: Email already exists in friend list");
-            return "addfriend";
-        }
-        if (!userEmailIsPresentDataBase(friendList.getEmail())) {
-            result.rejectValue("email", "UserNotExistDB", "This user not exist, you can't add it ");
-            model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
+        try {
+            userService.addFriendCurrentUserList(friendList.getEmail());
+        } catch (UserAlreadyExistException e1) {
+            result.rejectValue("email", "UserAlreadyExist", e1.getMessage());
+            log.error("Controller: User already exist in your list");
+        } catch (UserNotFoundException e2) {
+            result.rejectValue("email", "UserNotExistDB", e2.getMessage());
             log.error("Controller: User Email not exist in data base");
-            return "addfriend";
         }
-        userService.addFriendUser(SecurityUtilities.userEmail, friendList.getEmail());
-        model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
+        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: form addFriend submitted");
 
         return "addfriend";
-    }
-
-    /**
-     * Private method that verify if the friend already exist in the list
-     *
-     * @param friendEmail A string containing the email of the friend
-     * @return true if the friend already exist in list else return false
-     */
-    private Boolean friendAlreadyExistsInList(String friendEmail) {
-        List<FriendList> listFriend = userService.getFriendListByEmail(SecurityUtilities.userEmail);
-        for (FriendList friend : listFriend) {
-            if (friend.getEmail().equals(friendEmail)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Private method that check if the friend that we want added exist in database
-     *
-     * @param friendEmail A string containing the email of the friend that aw want added
-     * @return True if the friend exist in database and false if not exist
-     */
-    private Boolean userEmailIsPresentDataBase(String friendEmail) {
-        if (userService.getUserByEmail(friendEmail) == null) {
-            return false;
-        }
-        return true;
     }
 
 }

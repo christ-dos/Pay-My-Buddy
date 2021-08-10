@@ -22,7 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * @author Christine Duarte
  */
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
@@ -30,7 +30,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 //        auth.authenticationProvider(authenticationProvider());
-            auth.userDetailsService(userDetailsService);
+//            auth.userDetailsService(userDetailsService);
 
 //      auth.inMemoryAuthentication()
 //         .withUser("spring@email.fr")

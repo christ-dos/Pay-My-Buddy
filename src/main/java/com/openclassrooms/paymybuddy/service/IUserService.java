@@ -3,7 +3,6 @@ package com.openclassrooms.paymybuddy.service;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
@@ -12,8 +11,8 @@ public interface IUserService {
 
     User getUserByEmail(String email);
 
-    Friend addFriendUser(String userEmail, String FriendEmail);
+    Friend addFriendCurrentUserList(String friendEmail);
 
-    List<FriendList> getFriendListByEmail(String userEmail);
+    List<FriendList> getFriendListByCurrentUserEmail();
 
 }

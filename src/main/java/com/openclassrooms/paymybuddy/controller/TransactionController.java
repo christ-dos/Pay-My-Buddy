@@ -48,7 +48,7 @@ public class TransactionController {
     @GetMapping(value = {"/", "/index"})
     public String getTransactionsHomeView(@ModelAttribute("transaction") Transaction transaction, Model model) {
         model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
-        model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
+        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: The View index displaying");
 
         return "index";
@@ -68,7 +68,7 @@ public class TransactionController {
     public String addTransaction(@Valid Transaction transaction, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
-            model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
+            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
             log.error("Controller: Error in fields");
             return "index";
         }
@@ -83,7 +83,7 @@ public class TransactionController {
             log.error("Controller: Insufficient account balance");
         }
         model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
-        model.addAttribute("friendLists", userService.getFriendListByEmail(SecurityUtilities.userEmail));
+        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: form index submitted");
 
         return "index";

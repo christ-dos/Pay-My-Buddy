@@ -1,10 +1,13 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
+import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
+import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,14 +18,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,8 +47,8 @@ public class UserControllerTest {
     @MockBean
     private UserService userServiceMock;
 
-//    @MockBean
-//    private UserDetailsService userDetailsServiceMock;
+    @MockBean
+    private UserDetailsService userDetailsServiceMock;
 
 //    @BeforeEach
 //    public void setup() {
@@ -99,17 +103,21 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("userDetails", "username", "NotBlank"))
                 .andDo(print());
     }
-@WithMockUser(username = "dada@email.fr", password = "pass")
+
+    @WithMockUser(username = "dada@email.fr", password = "pass")
     @Test
     public void submitLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlIndex() throws Exception {
         //GIVEN
+        String username = SecurityUtilities.userEmail;
         MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", "pass");
-//        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
+        when(userDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/authentication/login")
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()).param("username", "dada@email.fr").param("password", "pass")
+                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("pass"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("username", username)
+                        .param("password", "pass")
                         .accept(MediaType.ALL)).andExpect(status().isOk())
 //                .andExpect(redirectedUrl("/index"))
 //                .andExpect(MockMvcResultMatchers.redirectedUrl("/index"))
@@ -125,7 +133,7 @@ public class UserControllerTest {
      ------------------------------------------------------------------------------------------------------*/
     @WithMockUser(value = "spring")
     @Test
-    public void showAddFriendViewTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void addFriendToListConnectionTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -150,7 +158,7 @@ public class UserControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanaddToFriendInList() throws Exception {
+    public void addFriendToListConnectionTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanaddToFriendInList() throws Exception {
         //GIVEN
         String friendEmailNotExistInList = "fifi@email.com";
 
@@ -172,43 +180,18 @@ public class UserControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
+    public void addFriendToListConnectionTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
         String friendEmailAlreadyExist = "françois@email.fr";
-        String userEmail = "dada@email.fr";
 
-        User userFrancois = User.builder()
-                .email("françois@email.fr")
-                .password("monTropToppassword")
-                .firstName("François")
-                .lastName("Dujardin")
-                .balance(30.50)
-                .accountBank(170974).build();
-
-
-        List<FriendList> friendListMock;
-        friendListMock = new ArrayList<>();
-        FriendList friend1 = new FriendList();
-        FriendList friend2 = new FriendList();
-
-        friend1.setEmail("françois@email.fr");
-        friend1.setFirstName("François");
-        friend1.setLastName("Dujardin");
-
-        friend2.setEmail("amartin@email.fr");
-        friend2.setFirstName("Albert");
-        friend2.setLastName("Martin");
-
-        friendListMock.add(friend1);
-        friendListMock.add(friend2);
-
-        when(userServiceMock.getUserByEmail(friendEmailAlreadyExist)).thenReturn(userFrancois);
-        when(userServiceMock.getFriendListByEmail(userEmail)).thenReturn(friendListMock);
+        when(userServiceMock.addFriendCurrentUserList(friendEmailAlreadyExist)).thenThrow(new UserAlreadyExistException("user already exist in list of connections"));
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("email", "françois@email.fr")
-                        .param("userEmail", userEmail))
+                        .param("firstName", "François")
+                        .param("lastName", "Dujardin")
+                        .param("userEmail", SecurityUtilities.userEmail))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -216,25 +199,25 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasErrors())
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserAlreadyExist"))
                 .andDo(print());
-        //verify that addFriendUser was not called because friend already exists in DB
-        verify(userServiceMock, times(0)).addFriendUser(anyString(), anyString());
+        verify(userServiceMock, times(1)).addFriendCurrentUserList(anyString());
     }
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
+    public void addFriendToListConnectionTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
         //GIVEN
-        String springToken = "org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository.CSRF_TOKEN";
-        HttpSessionCsrfTokenRepository httpSessionCsrfTokenRepository = new HttpSessionCsrfTokenRepository();
-        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
+//        String springToken = "org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository.CSRF_TOKEN";
+//        HttpSessionCsrfTokenRepository httpSessionCsrfTokenRepository = new HttpSessionCsrfTokenRepository();
+//        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
 
         String friendEmailNotExist = "wiwi@email.fr";
+        when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", friendEmailNotExist).sessionAttr(springToken, csrfToken))
-
-                .andExpect(status().isOk())
+                        .param("userEmail", SecurityUtilities.userEmail)
+                        .param("email", friendEmailNotExist)//.sessionAttr(springToken, csrfToken))
+                ).andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserNotExistDB"))
@@ -243,7 +226,7 @@ public class UserControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
+    public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -258,7 +241,7 @@ public class UserControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenEmailToAddAndEmailUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
+    public void addFriendToListConnectionTest_whenEmailToAddAndEmailUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
         //WHEN
         //THEN

@@ -89,7 +89,6 @@ public class TransactionService implements ITransactionService {
     @Transactional
     @Override
     public Transaction addTransaction(Transaction transaction) {
-
         User  userEmitterTransaction = userRepository.findByEmail(transaction.getEmitterEmail());
         if ((transaction.getAmount() + calculateFees(transaction.getAmount())) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");

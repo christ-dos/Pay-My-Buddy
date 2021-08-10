@@ -85,7 +85,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitIndexViewTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
+    public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         String receiverEmail = "fifi@email.com";
         String emitterEmail = "kikine@email.fr";
@@ -114,7 +114,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitIndexViewTest_whenBalanceIsInsufficient_thenReturnBalanceInsufficientException() throws Exception {
+    public void addTransactionTest_whenBalanceIsInsufficient_thenReturnBalanceInsufficientException() throws Exception {
         //GIVEN
         String receiverEmail = "luluM@email.fr";
         String emitterEmail = "dada@email.fr";
@@ -138,7 +138,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitIndexViewTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
+    public void addTransactionTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -154,7 +154,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitIndexViewTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
+    public void addTransactionTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -171,7 +171,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitIndexViewTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
+    public void addTransactionTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -188,7 +188,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void submitIndexViewTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
+    public void addTransactionTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
