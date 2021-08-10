@@ -30,4 +30,12 @@ public class DisplayingTransaction  {
      */
     private Double amount;
 
+    @Override
+    public String toString() {
+        return "DisplayingTransaction{" +
+                "firstName='" + firstName + '\'' +
+                ", description='" + description + '\'' +
+                ", amount=" + amount +
+                '}';
+    }
 }

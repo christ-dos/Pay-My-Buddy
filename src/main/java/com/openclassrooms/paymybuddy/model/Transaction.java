@@ -82,6 +82,10 @@ public class Transaction {
      */
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "emitter_email", insertable = false, updatable = false)
-    private User user;
+    private User userEmitter;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_email", insertable = false, updatable = false)
+    private User userReceiver;
 
 }

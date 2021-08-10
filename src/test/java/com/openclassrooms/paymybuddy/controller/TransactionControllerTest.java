@@ -1,5 +1,6 @@
 package com.openclassrooms.paymybuddy.controller;
 
+import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
@@ -17,12 +18,17 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 @WebMvcTest(TransactionController.class)
 @ExtendWith(MockitoExtension.class)
@@ -85,10 +91,79 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
+    public void getTransactionsHomeViewTest_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
+        //GIVEN
+        String receiverEmail = "dada@email.fr";
+        String emitterEmail = "Lisa@email.fr";
+
+        List<DisplayingTransaction> transactions = new ArrayList<>();
+        DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
+        DisplayingTransaction displayingTransaction2 = new DisplayingTransaction("Lisette", "movies tickets", 18.0);
+
+        transactions.add(displayingTransaction1);
+        transactions.add(displayingTransaction2);
+
+        //WHEN
+        when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(transactions);
+        //THEN
+        mockMvcTransaction.perform(MockMvcRequestBuilders.get("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+                .param("receiverEmail", "dada@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attribute("transactions",hasItem(hasProperty("firstName", is("Lisette")))))
+                .andExpect(model().attribute("transactions",hasItem(hasProperty("amount", is(-15.0)))))
+                .andExpect(model().attribute("transactions",hasItem(hasProperty("description", is("shopping  casa china")))))
+                .andExpect(model().attribute("transactions",hasItem(hasProperty("amount", is(18.0)))))
+                .andExpect(model().attribute("transactions",hasItem(hasProperty("description", is("movies tickets")))))
+                .andDo(print());
+
+    }
+
+//    @WithMockUser(value = "spring")
+//    @Test
+//    public void addTransactionTest_whenUserReceiverIsCurrentUserAndEmitterUserIsLili_thenReturnTransactionAdddedForReceiverCurrentUser() throws Exception {
+//        //GIVEN
+//        String emitterEmail = "lili@email.fr";
+//        String receiverEmail = "dada@email.fr";
+//
+//        Transaction transactionTest = new Transaction();
+//        transactionTest.setTransactionId(2);
+//        transactionTest.setDescription("books");
+//        transactionTest.setAmount(10.0);
+//        transactionTest.setFees(0.05);
+//        transactionTest.setReceiverEmail(receiverEmail);
+//        transactionTest.setEmitterEmail(emitterEmail);
+//
+////        when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
+////        when(transactionServiceMock.addTransaction(isA(Transaction.class))).thenReturn(transactionTest);
+//        //WHEN
+//        //THEN
+//        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+//                        .param("transactionId", String.valueOf(transactionTest.getTransactionId()))
+////                .param("username", "dada@email.fr")
+//                        .param("amount", String.valueOf(transactionTest.getAmount()))
+//                        .param("description", transactionTest.getDescription())
+//                        .param("fees", String.valueOf(transactionTest.getFees()))
+//                        .param("emitterEmail", transactionTest.getEmitterEmail())
+//                        .param("receiverEmail", transactionTest.getReceiverEmail()))
+//                .andExpect(status().isOk())
+//                .andExpect(model().hasNoErrors())
+//                .andExpect(view().name("index"))
+//                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+//                .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("dada@email.fr"))))
+//                .andExpect(model().attribute("transaction", hasProperty("emitterEmail", is("lili@email.fr"))))
+//                .andExpect(model().attribute("transaction", hasProperty("fees", is(0.05))))
+//                .andExpect(model().attribute("transaction", hasProperty("amount", is(10.0))))
+//                .andDo(print());
+//    }
+
+    @WithMockUser(value = "spring")
+    @Test
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         String receiverEmail = "fifi@email.com";
-        String emitterEmail = "kikine@email.fr";
+        String emitterEmail = "dada@email.fr";
 
         Transaction transactionTest = new Transaction();
         transactionTest.setTransactionId(1);
@@ -96,21 +171,26 @@ public class TransactionControllerTest {
         transactionTest.setAmount(16.0);
         transactionTest.setFees(0.08);
 
-        when(transactionRepositoryMock.save(transactionTest)).thenReturn(transactionTest);
-        when(transactionServiceMock.addTransaction(transactionTest)).thenReturn(transactionTest);
+        when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
+        when(transactionServiceMock.addTransaction(isA(Transaction.class))).thenReturn(transactionTest);
         //WHEN
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("userEmail", emitterEmail)
                         .param("receiverEmail", receiverEmail)
                         .param("amount", String.valueOf(transactionTest.getAmount()))
-                        .param("description", transactionTest.getDescription()))
-                .andExpect(status().isOk())
+                        .param("description", transactionTest.getDescription())
+                        .param("fees", String.valueOf(0.08))).andExpect(status().isOk())
+                .andExpect(model().hasNoErrors())
                 .andExpect(view().name("index"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().hasNoErrors())
+                .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("fifi@email.com"))))
+                .andExpect(model().attribute("transaction", hasProperty("emitterEmail", is("dada@email.fr"))))
+                .andExpect(model().attribute("transaction", hasProperty("fees", is(0.08))))
+                .andExpect(model().attribute("transaction", hasProperty("amount", is(16.0))))
                 .andDo(print());
     }
+
 
     @WithMockUser(value = "spring")
     @Test

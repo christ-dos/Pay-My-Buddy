@@ -96,10 +96,12 @@ public class TransactionService implements ITransactionService {
         }
         transaction.setFees(calculateFees(transaction.getAmount()));
         transaction.setDate(LocalDateTime.now());
+        transaction.setUserEmitter(getUserEmitterNewBalance(userEmitterTransaction, transaction.getAmount()));
+        transaction.setUserReceiver(getUserReceiverNewBalance(transaction.getReceiverEmail(), transaction.getAmount()));
         // user emitter save with new balance
-        userRepository.save(getBalanceEmitter(userEmitterTransaction, transaction.getAmount()));
+//        userRepository.save(getUserEmitterNewBalance(userEmitterTransaction, transaction.getAmount()));
         // user receiver save with new balance
-        userRepository.save(getBalanceReceiver(transaction.getReceiverEmail(), transaction.getAmount()));
+//        userRepository.save(getUserReceiverNewBalance(transaction.getReceiverEmail(), transaction.getAmount()));
         return transactionRepository.save(transaction);
     }
 
@@ -122,7 +124,7 @@ public class TransactionService implements ITransactionService {
      * @param amount      A Double that containing value of transaction
      * @return A User receiver with the new balance updated
      */
-    private User getBalanceReceiver(String friendEmail, Double amount) {
+    private User getUserReceiverNewBalance(String friendEmail, Double amount) {
         User userReceiverTransaction = userRepository.findByEmail(friendEmail);
         Double newBalanceReceiver = (userReceiverTransaction.getBalance()) + amount;
         userReceiverTransaction.setBalance(newBalanceReceiver);
@@ -137,7 +139,7 @@ public class TransactionService implements ITransactionService {
      * @param amount                 A Double that containing value of transaction
      * @return A User emitter with the new balance updated
      */
-    private User getBalanceEmitter(User userEmitterTransaction, Double amount) {
+    private User getUserEmitterNewBalance(User userEmitterTransaction, Double amount) {
         Double newBalanceEmitter = (userEmitterTransaction.getBalance()) - (amount + calculateFees(amount));
         userEmitterTransaction.setBalance(newBalanceEmitter);
 

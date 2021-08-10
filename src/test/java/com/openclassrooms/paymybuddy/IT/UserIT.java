@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -164,6 +166,29 @@ public class UserIT {
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UnableAddingOwnEmail"))
+                .andDo(print());
+    }
+
+    @Test
+    public void getListConnectionsTest_whenEmailIsDada_thenReturnListOfFriendList() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.get("/addfriend")
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
+                .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
+                .andExpect(status().isOk())
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("friendLists"))
+//                .andExpect(model().attribute("friendLists",hasItems(iterableWithSize(3))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("ggpassain@email.fr")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Geraldine")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Passain")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("luluM@email.fr")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Lubin")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Mendes")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("lili@email.fr")))))
+
                 .andDo(print());
     }
 }

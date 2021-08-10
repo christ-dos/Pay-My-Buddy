@@ -131,6 +131,18 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                         Tests View addfriend
      ------------------------------------------------------------------------------------------------------*/
+
+    @WithMockUser(value = "spring")
+    @Test
+    public void showAddFriendViewTest_whenUrlIsAddAndWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/add"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
     @WithMockUser(value = "spring")
     @Test
     public void addFriendToListConnectionTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
@@ -142,17 +154,6 @@ public class UserControllerTest {
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().size(2))
                 .andExpect(model().attributeExists("friendLists", "friendList"))
-                .andDo(print());
-    }
-
-    @WithMockUser(value = "spring")
-    @Test
-    public void showAddFriendViewTest_whenUrlIsAddAndWrong_thenReturnStatusNotFound() throws Exception {
-        //GIVEN
-        //WHEN
-        //THEN
-        mockMvcUser.perform(get("/add"))
-                .andExpect(status().isNotFound())
                 .andDo(print());
     }
 

@@ -22,6 +22,18 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+    @Override
+    public String toString() {
+        return "User{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", balance=" + balance +
+                ", accountBank=" + accountBank +
+                '}';
+    }
+
     /**
      * A String containing the email of the user, id that identify him
      * this field cannot be blank in the UI

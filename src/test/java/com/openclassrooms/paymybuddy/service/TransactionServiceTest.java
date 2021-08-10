@@ -76,7 +76,6 @@ class TransactionServiceTest {
     void getTransactionsByEmailTest_whenTransactionWithEmailEmitterIsKikineOrReceiverEmailIsKikine_thenReturnListDisplayingTransactionForEmailkikineWithSignNegatifIfEmitterEmailIsKikine() {
         //GIVEN
         String emitterEmail = "dada@email.fr";
-//        String receiverEmail = "kikine@email.fr";
 
         List<Transaction> transactions = new ArrayList<>();
         Transaction transaction1 = Transaction.builder()
