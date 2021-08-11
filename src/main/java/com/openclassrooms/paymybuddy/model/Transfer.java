@@ -19,19 +19,6 @@ public class Transfer {
     @Column(name = "transfer_id")
     private Integer transferId;
 
-    @Override
-    public String toString() {
-        return "Transfer{" +
-                "transferId=" + transferId +
-                ", date=" + date +
-                ", type='" + type + '\'' +
-                ", amount=" + amount +
-                ", description='" + description + '\'' +
-                ", userEmail='" + userEmail + '\'' +
-                ", user=" + user +
-                '}';
-    }
-
     private LocalDateTime date;
 
     private String type;
@@ -46,5 +33,18 @@ public class Transfer {
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_email", insertable = false, updatable = false)
     private User user;
+
+    @Override
+    public String toString() {
+        return "Transfer{" +
+                "transferId=" + transferId +
+                ", date=" + date +
+                ", type='" + type + '\'' +
+                ", amount=" + amount +
+                ", description='" + description + '\'' +
+                ", userEmail='" + userEmail + '\'' +
+                ", user=" + user +
+                '}';
+    }
 
 }
