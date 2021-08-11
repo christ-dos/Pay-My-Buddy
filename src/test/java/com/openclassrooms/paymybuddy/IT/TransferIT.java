@@ -8,5 +8,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
-public class TransfereIT {
+public class TransferIT {
 }

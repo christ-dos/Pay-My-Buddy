@@ -1,4 +1,4 @@
 package com.openclassrooms.paymybuddy.service;
 
-public interface ITransfereService {
+public interface ITransferService {
 }

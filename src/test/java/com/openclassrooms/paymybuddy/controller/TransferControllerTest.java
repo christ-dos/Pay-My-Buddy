@@ -5,8 +5,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
-@WebMvcTest(TransfereController.class)
+@WebMvcTest(TransferController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-public class TransfereControllerTest {
+public class TransferControllerTest {
 }

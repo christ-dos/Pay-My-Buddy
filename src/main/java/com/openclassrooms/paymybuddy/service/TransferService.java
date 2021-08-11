@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class TransfereService implements ITransfereService {
+public class TransferService implements ITransferService {
 
     private ITransferRepository transferRepository;
 
     @Autowired
-    public TransfereService(ITransferRepository transferRepository) {
+    public TransferService(ITransferRepository transferRepository) {
         this.transferRepository = transferRepository;
     }
 }

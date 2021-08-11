@@ -1,4 +1,4 @@
 package com.openclassrooms.paymybuddy.controller;
 
-public class TransfereController {
+public class TransferController {
 }
