@@ -65,6 +65,20 @@ public class UserController {
         return "login";
     }
 
+    /**
+     * Method GET to displaying the view for contact  in endpoint in "/contact"
+     *
+     * @param model Interface that defines a support for model attributes
+     * @return A String containing the name of view
+     */
+//    @RolesAllowed({"USER"})
+    @GetMapping("/contact")
+    public String showContactView(Model model) {
+        log.info("Controller: The View contact displaying");
+
+        return "contact";
+    }
+
     //    @RolesAllowed({"USER", "ADMIN"})
     @PostMapping("/login")
     public String submitLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
@@ -82,7 +96,7 @@ public class UserController {
             return "login";
         }
 
-        return "index";
+        return "transfer";
 
     }
 

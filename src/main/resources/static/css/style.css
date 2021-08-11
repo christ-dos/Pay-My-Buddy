@@ -16,8 +16,8 @@ font-weight: bold;
 }
 
 /************** navBar****************/
-.navbar-nav>.nav-item>.nav-link>span:active {
-	color: rgb(130,192,255);
+.navbar-nav>.nav-item>.nav-link>.active {
+	color: blue;
 }
 
 .align-nav {

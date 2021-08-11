@@ -16,7 +16,21 @@ public class Transfer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "transfer_id")
     private Integer transferId;
+
+    @Override
+    public String toString() {
+        return "Transfer{" +
+                "transferId=" + transferId +
+                ", date=" + date +
+                ", type='" + type + '\'' +
+                ", amount=" + amount +
+                ", description='" + description + '\'' +
+                ", userEmail='" + userEmail + '\'' +
+                ", user=" + user +
+                '}';
+    }
 
     private LocalDateTime date;
 
@@ -25,5 +39,12 @@ public class Transfer {
     private Double amount;
 
     private String description;
+
+    @Column(name = "user_email")
+    private String userEmail;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_email", insertable = false, updatable = false)
+    private User user;
 
 }

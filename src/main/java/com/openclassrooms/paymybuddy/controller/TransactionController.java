@@ -51,7 +51,7 @@ public class TransactionController {
         model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: The View index displaying");
 
-        return "index";
+        return "transfer";
     }
 
     /**
@@ -70,7 +70,7 @@ public class TransactionController {
             model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
             model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
             log.error("Controller: Error in fields");
-            return "index";
+            return "transfer";
         }
         if (result.getRawFieldValue("receiverEmail").equals("")) {
             result.rejectValue("receiverEmail", "NotBlank", "field friend Email can not be null");
@@ -86,7 +86,7 @@ public class TransactionController {
         model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: form index submitted");
 
-        return "index";
+        return "transfer";
     }
 
 }
