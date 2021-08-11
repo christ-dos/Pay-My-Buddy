@@ -5,31 +5,37 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-
+/**
+ * Class DTO that permit display data of transactions in view
+ *
+ * @author Christine Duarte
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
-public class DisplayingTransaction implements IDisplayingTransaction {
-    @Column(name = "first_name")
+@Getter
+public class DisplayingTransaction  {
+    /**
+     * Attribute that containing the first name of the receiver of the transaction
+     */
     private String firstName;
 
+    /**
+     * Attribute that containing the description of the transaction
+     */
     private String description;
 
+    /**
+     * Attribute that containing the amout of the transaction
+     */
     private Double amount;
 
     @Override
-    public String getFirstName() {
-        return firstName;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
-    public Double getAmount() {
-        return amount;
+    public String toString() {
+        return "DisplayingTransaction{" +
+                "firstName='" + firstName + '\'' +
+                ", description='" + description + '\'' +
+                ", amount=" + amount +
+                '}';
     }
 }

@@ -1,61 +1,101 @@
 package com.openclassrooms.paymybuddy.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import lombok.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+/**
+ * Class that manage the entity User
+ *
+ * @author Christine Duarte
+ */
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+    @Override
+    public String toString() {
+        return "User{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", balance=" + balance +
+                ", accountBank=" + accountBank +
+                '}';
+    }
+
+    /**
+     * A String containing the email of the user, id that identify him
+     * this field cannot be blank in the UI
+     */
     @Id
-    @NotBlank(message="User's email cannot be blank")
+    @NotBlank(message = "User's email cannot be blank")
     private String email;
 
+    /**
+     * A String containing the password
+     */
+//    @NotBlank(message = "password cannot be blank")
+//    @Max(value = 255, message = "password must be between 8 and 255")
     private String password;
 
+    /**
+     * A String containing the firstName
+     */
     @Column(name = "first_name")
     private String firstName;
 
-
+    /**
+     * A String containing the lastName
+     */
     @Column(name = "last_name")
     private String lastName;
 
-    @Min(value=0, message="User's balance cannot be negative")
+    /**
+     * A Double containing the balance
+     * this value cannot be negative
+     */
+    @Min(value = 0, message = "User's balance cannot be negative")
     private Double balance;
 
-    @Column(name="account_bank")
+    /**
+     * An Integer containing the accountBank
+     */
+    @Column(name = "account_bank")
     private Integer accountBank;
 
+    /**
+     * A list of friends that containing friends of a user,
+     * this attribute determines the relationship many to many with the table fiend
+     * and permit join the table friend to the table user in the user email
+     */
     @ManyToMany(
             cascade = CascadeType.ALL,
             fetch = FetchType.EAGER
     )
     @JoinTable(
             name = "friend",
-            joinColumns = @JoinColumn(name="user_email", referencedColumnName = "email"),
+            joinColumns = @JoinColumn(name = "user_email", referencedColumnName = "email"),
             inverseJoinColumns = @JoinColumn(name = "friend_email", referencedColumnName = "email")
     )
-    private Set<User> friends = new HashSet<>();
+    private List<User> friends = new ArrayList<>();
 
+    /**
+     * A list of users that containing users,
+     * this attribute determines the relationship many to many with the table friend
+     * and permit join the table friend to the table user in the friend email
+     */
     @ManyToMany(mappedBy = "friends")
-    private Set<User> users = new HashSet<>();
+    private List<User> users = new ArrayList<>();
 
 }

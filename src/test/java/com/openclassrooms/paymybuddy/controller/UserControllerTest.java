@@ -1,11 +1,12 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.IFriendList;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
+import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
+import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
-import com.openclassrooms.paymybuddy.repository.IUserRepository;
-import com.openclassrooms.paymybuddy.service.TransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,11 +16,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,7 +38,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
+//@SpringBootTest
 public class UserControllerTest {
+
     @Autowired
     private MockMvc mockMvcUser;
 
@@ -37,16 +48,104 @@ public class UserControllerTest {
     private UserService userServiceMock;
 
     @MockBean
-    private IUserRepository userRepositoryMock;
+    private UserDetailsService userDetailsServiceMock;
 
-    @MockBean
-    private ITransactionRepository transactionRepositoryMock;
-
-    @MockBean
-    private TransactionService transactionService;
+//    @BeforeEach
+//    public void setup() {
+//        mockMvcUser = MockMvcBuilders
+//                .webAppContextSetup(context)
+//                .apply(springSecurity())
+//                .build();
+//    }
+ /*-----------------------------------------------------------------------------------------------------
+                                     Tests View Login
+ ------------------------------------------------------------------------------------------------------*/
 
     @Test
-    public void showAddFriendViewTest_whenUrlIsAddfriend_thenReturnTwoModelsAndStatusOk() throws Exception {
+//    @WithMockUser
+    public void showLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/customlogin"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("login"))
+                .andExpect(model().attributeExists("userDetails"))
+                .andDo(print());
+    }
+
+    @WithMockUser(value = "@dada@email.fr")
+    @Test
+    public void showLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/log"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void submitLoginViewTest_whenUserNameIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
+        //GIVEN
+        MyUserDetails myUserDetails = new MyUserDetails("", "pass");
+//        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/customlogin")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .accept(MediaType.ALL)).andExpect(status().isOk())
+//                .andExpect(redirectedUrl("/customlogin"))
+//                .andExpect(MockMvcResultMatchers.redirectedUrl("/customlogin"))
+//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/customlogin")))
+                .andExpect(model().attributeExists("userDetails"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrorCode("userDetails", "username", "NotBlank"))
+                .andDo(print());
+    }
+
+    @WithMockUser(username = "dada@email.fr", password = "pass")
+    @Test
+    public void submitLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlIndex() throws Exception {
+        //GIVEN
+        String username = SecurityUtilities.userEmail;
+        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", "pass");
+        when(userDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/authentication/login")
+                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("pass"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("username", username)
+                        .param("password", "pass")
+                        .accept(MediaType.ALL)).andExpect(status().isOk())
+//                .andExpect(redirectedUrl("/index"))
+//                .andExpect(MockMvcResultMatchers.redirectedUrl("/index"))
+//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/index")))
+                .andExpect(view().name("login"))
+                .andExpect(model().attributeExists("userDetails"))
+                .andExpect(model().hasNoErrors())
+                .andDo(print());
+    }
+
+    /*-----------------------------------------------------------------------------------------------------
+                                        Tests View addfriend
+     ------------------------------------------------------------------------------------------------------*/
+
+    @WithMockUser(value = "spring")
+    @Test
+    public void showAddFriendViewTest_whenUrlIsAddAndWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/add"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @WithMockUser(value = "spring")
+    @Test
+    public void addFriendToListConnectionTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -54,148 +153,105 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().size(2))
-                .andExpect(model().attributeExists("friendLists","friendList"))
+                .andExpect(model().attributeExists("friendLists", "friendList"))
                 .andDo(print());
     }
 
-//    @Test
-//    public void showAddFriendViewTest_whenUrlIsAddfriendWithUserEmailKikine_thenReturnModelDisplayingListFriendsUserKikine() throws Exception {
-//        //GIVEN
-//        Set<IFriendList> friendSetMock;
-//        FriendList friend1 = new FriendList();
-//        FriendList friend2 = new FriendList();
-//        friendSetMock = new HashSet<>();
-//
-//        friend1.setEmail("sara@email.fr");
-//        friend1.setFirstName("François");
-//        friend1.setLastName("Dujardin");
-//
-//        friend2.setEmail("amartin@email.fr");
-//        friend2.setFirstName("Albert");
-//        friend2.setLastName("Martin");
-//
-//        friendSetMock.add(friend1);
-//        friendSetMock.add(friend2);
-//        String userEmail = "kikine@email.fr";
-//
-//        List<IFriendList> friendLists = new ArrayList<>(
-//                Arrays.asList(new FriendList("atb@email.fr", "Bela", "Doblado"),
-//                        new FriendList("frans@email.fr", "Francisco", "Cruzeiro"),
-//                        new FriendList("hleleu@email.fr", "Helena", "delemarle")));
-//
-//        when(userRepositoryMock.findFriendListByEmail(isA(String.class))).thenReturn(friendSetMock);
-//        when(userServiceMock.getFriendListByEmail(userEmail)).thenCallRealMethod();
-//        //WHEN
-//        //THEN
-//        mockMvcUser.perform(MockMvcRequestBuilders.get("/addfriend").content(userEmail)
-//                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(view().name("addfriend"))
-//                .andExpect(model().size(2))
-//                .andExpect(model().attributeExists("friendLists"))
-//                .andDo(print());
-//    }
-
+    @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanaddToFriendInList() throws Exception {
+    public void addFriendToListConnectionTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanaddToFriendInList() throws Exception {
         //GIVEN
         String friendEmailNotExistInList = "fifi@email.com";
-        String userEmail = "kikine@email.fr";
+
         User userToAdd = User.builder()
                 .email("fifi@email.com").firstName("Filipe").lastName("Dupont").build();
-
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailNotExistInList);
-        doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailNotExistInList);
         when(userServiceMock.getUserByEmail(friendEmailNotExistInList)).thenReturn(userToAdd);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .param("email", userToAdd.getEmail()))
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", userToAdd.getEmail())
+                        .param("firstName", userToAdd.getFirstName()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().hasNoErrors())
                 .andDo(print());
+//        verify(friendRepositoryMock, times(1)).save(friendAdded);
     }
 
+    @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
+    public void addFriendToListConnectionTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
-        String friendEmailAlreadyExist = "sara@email.fr";
-        String userEmail = "kikine@email.fr";
+        String friendEmailAlreadyExist = "françois@email.fr";
 
-        Set<IFriendList> friendSetMock;
-        FriendList friend1 = new FriendList();
-        FriendList friend2 = new FriendList();
-        friendSetMock = new HashSet<>();
-
-        friend1.setEmail("sara@email.fr");
-        friend1.setFirstName("François");
-        friend1.setLastName("Dujardin");
-
-        friend2.setEmail("amartin@email.fr");
-        friend2.setFirstName("Albert");
-        friend2.setLastName("Martin");
-
-        friendSetMock.add(friend1);
-        friendSetMock.add(friend2);
-
-
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailAlreadyExist);
-        doNothing().when(userServiceMock).addFriendUser(userEmail,friendEmailAlreadyExist);
-        when(userServiceMock.getFriendListByEmail(friendEmailAlreadyExist)).thenReturn(friendSetMock);
+        when(userServiceMock.addFriendCurrentUserList(friendEmailAlreadyExist)).thenThrow(new UserAlreadyExistException("user already exist in list of connections"));
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .param("email",friendEmailAlreadyExist))
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", "françois@email.fr")
+                        .param("firstName", "François")
+                        .param("lastName", "Dujardin")
+                        .param("userEmail", SecurityUtilities.userEmail))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
-                //.andExpect(model().attribute("friendList",new FriendList("sara@email.fr",null,null)))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasErrors())
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserAlreadyExist"))
                 .andDo(print());
-        //verify that addFriendUser was not called because friend already exists in DB
-        verify(userServiceMock, times(0)).addFriendUser(anyString(), anyString());
+        verify(userServiceMock, times(1)).addFriendCurrentUserList(anyString());
     }
 
+    @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
+    public void addFriendToListConnectionTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
         //GIVEN
+//        String springToken = "org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository.CSRF_TOKEN";
+//        HttpSessionCsrfTokenRepository httpSessionCsrfTokenRepository = new HttpSessionCsrfTokenRepository();
+//        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
+
         String friendEmailNotExist = "wiwi@email.fr";
-        String userEmail = "kikine@email.fr";
-
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailNotExist);
-        doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailNotExist);
-        when(userServiceMock.getUserByEmail(friendEmailNotExist)).thenReturn(null);
+        when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .param("email", friendEmailNotExist))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendList","friendLists"))
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("userEmail", SecurityUtilities.userEmail)
+                        .param("email", friendEmailNotExist)//.sessionAttr(springToken, csrfToken))
+                ).andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())
-                .andExpect(model().attributeHasFieldErrors("friendList", "email"))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserNotExistDB"))
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
-    public void submitAddFriendTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBeNull() throws Exception {
+    public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
-        String friendEmailNotExist = "";
-        String userEmail = "kikine@email.fr";
-        doNothing().when(userRepositoryMock).saveFriend(userEmail, friendEmailNotExist);
-        doNothing().when(userServiceMock).addFriendUser(userEmail, friendEmailNotExist);
-        when(userServiceMock.getUserByEmail(friendEmailNotExist)).thenReturn(null);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend")
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
-                .param("email", ""))
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", ""))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("friendList", "email"))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "NotBlank"))
+                .andDo(print());
+    }
+
+    @WithMockUser(value = "spring")
+    @Test
+    public void addFriendToListConnectionTest_whenEmailToAddAndEmailUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", "dada@email.fr"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendList"))
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UnableAddingOwnEmail"))
                 .andDo(print());
     }
 }

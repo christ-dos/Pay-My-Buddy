@@ -1,18 +1,18 @@
 package com.openclassrooms.paymybuddy.service;
 
-import com.openclassrooms.paymybuddy.DTO.IFriendList;
+import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Set;
+import java.util.List;
 
 public interface IUserService {
     Iterable<User> getUsers();
 
-    public User getUserByEmail(String email);
+    User getUserByEmail(String email);
 
-    void addFriendUser(String userEmail, String FriendEmail);
+    Friend addFriendCurrentUserList(String friendEmail);
 
+    List<FriendList> getFriendListByCurrentUserEmail();
 
-    Set<IFriendList> getFriendListByEmail(String userEmail);
 }

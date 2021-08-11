@@ -10,7 +10,7 @@
     <style>
         .error {
             color: red;
-            font-size: 0.8em;
+            font-size: 0.7em;
             font-weight: bold;
         }
     </style>
@@ -21,7 +21,7 @@
     <div class="container-fluid ">
         <div class="row align-nav">
             <div class="col-4 d-flex flex-row justify-content-start">
-                <a class="navbar-brand btn-success text-light rounded order-1 bold text-center" href="#" id="logo">Pay
+                <a class="navbar-brand btn-success text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
                     My Buddy</a>
                 <button class="navbar-toggler gray" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,20 +78,19 @@
             </div>
             <!--********Bouton New Transaction **********-->
             <!--Input which look like a button-->
-            <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary btn.block text-light bold text-center " type=button
+            <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary btn.block text-light bold text-center rounded" type=button
                    onclick=window.location.href="http://localhost:9090/index"; value="New Transaction"
                    id="btnAddConnection"/>
         </div>
         <div class="container gray  p-5">
             <!--*************Input Email****************-->
             <form action="#" method="post" th:action="@{/addfriend}" th:object="${friendList}">
-
                 <div class="row justify-content-center">
-                      <p class="col-9 col-md-9 col-lg-4 gray m-2 " th:errors="*{email}"
-                            th:errorclass="error"></p>
-                    <div class="col-12 col-md-6 col-lg-3 m-2">
+                    <div class="col-12 col-md-6 col-lg-4 m-2">
                         <input th:field="*{email}" class="form-control col-12 col-md-9 col-lg-9" type="email"
                                placeholder="Email"/>
+                        <p  th:errors="*{email}"
+                           th:errorclass="error"></p>
                     </div>
                     <!--**************Bouton Add******************-->
                     <button type="submit"
@@ -113,10 +112,10 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="friendLists: ${friendLists}">
-                <td th:text="${friendLists.email}">lili@email.fr</td>
-                <td th:text="${friendLists.firstName}">Lili</td>
-                <td th:text="${friendLists.lastName}">Mendez</td>
+            <tr th:each="friendList: ${friendLists}">
+                <td th:text="${friendList.email}">lili@email.fr</td>
+                <td th:text="${friendList.firstName}">Lili</td>
+                <td th:text="${friendList.lastName}">Mendez</td>
             </tr>
             </tbody>
         </table>

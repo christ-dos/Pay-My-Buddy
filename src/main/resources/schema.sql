@@ -18,16 +18,16 @@ CREATE TABLE user
 
 INSERT INTO user(email, password, first_name, last_name, balance, account_bank)
 VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
-       ('dada@email.fr', 'monpassword', 'Daminen', 'Sanchez', 3.50, 255896),
-       ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 22.80, 359840),
-       ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 18.98, 259873),
+       ('dada@email.fr', 'pass', 'Damien', 'Sanchez', 200, 255896),
+       ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 50, 359840),
+       ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 20.0, 259873),
        ('lili@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 783600)
 ;
 
 CREATE TABLE transaction
 (
     transaction_id TINYINT AUTO_INCREMENT NOT NULL,
-    date           DATETIME               NOT NULL,
+    date           TIMESTAMP              NOT NULL DEFAULT NOW(),
     amount         DECIMAL(8, 2)          NOT NULL,
     description    VARCHAR(300),
     fees           DECIMAL(8, 2),
@@ -36,11 +36,12 @@ CREATE TABLE transaction
     PRIMARY KEY (transaction_id)
 )
     ENGINE = innoDB;
-INSERT INTO transaction(date, amount,description,fees,emitter_email, receiver_email)
-VALUES(now(),15.0,'books',0.0,'dada@email.fr','luluM@email.fr'),
-      (now(),5.0,'diner',0.0,'dada@email.fr','ggpassain@email.fr');
-
-
+# INSERT INTO transaction(amount, description, fees, emitter_email, receiver_email)
+# VALUES (15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
+#        (5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr'),
+#        (25.0, 'cimena', 0.0, 'luluM@email.fr', 'dada@email.fr'),
+#        (5.0, 'diner', 0.0, 'lili@email.fr', 'dada@email.fr'),
+#        (25.0, 'cimena', 0.0, 'luluM@email.fr', 'lili@email.fr');
 
 CREATE TABLE transfer
 (
@@ -59,13 +60,15 @@ CREATE TABLE friend
 (
     user_email   VARCHAR(100) NOT NULL,
     friend_email VARCHAR(100) NOT NULL,
-    date_added   DATETIME     NOT NULL,
+    date_added   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_email, friend_email)
+
 )
     ENGINE = innoDB;
-INSERT INTO friend(user_email, friend_email, date_added)
-VALUES ('dada@email.fr', 'ggpassain@email.fr', now()),
-       ('dada@email.fr', 'luluM@email.fr', now());
+INSERT INTO friend(user_email, friend_email)
+VALUES ('dada@email.fr', 'ggpassain@email.fr'),
+       ('luluM@email.fr', 'dada@email.fr'),
+       ('dada@email.fr', 'luluM@email.fr');
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk
@@ -73,14 +76,14 @@ ALTER TABLE friend
             REFERENCES user (email)
             ON
                 DELETE NO ACTION
-            ON UPDATE CASCADE;
+            ON UPDATE NO ACTION;
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk1
         FOREIGN KEY (friend_email)
             REFERENCES user (email)
             ON DELETE NO ACTION
-            ON UPDATE CASCADE;
+            ON UPDATE NO ACTION;
 
 ALTER TABLE transfer
     ADD CONSTRAINT user_transfer_fk

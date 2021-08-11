@@ -1,7 +1,6 @@
-
 body{
 	margin: auto;
-	font-size: 1.2em
+	font-size: 1.1em
 }
 
 input, input::-webkit-input-placeholder{
@@ -12,19 +11,8 @@ input, input::-webkit-input-placeholder{
 .form-payMyBuddy{
 	width: 100%;
 }
-.green{
-	background-color:rgb(128,255,0); 
-}
 
-.rounded{
-	width: 150px;
-	height: 40px;
-	border-radius: 15px;
-	border:none;
-	padding: 6px;
-}
-
-.bold{ 
+.bold{
 font-weight: bold; 
 }
 
@@ -37,7 +25,4 @@ font-weight: bold;
     font-style: normal;
     font-weight: normal;
     text-decoration: inherit;
-}
-.blue-backg{
-	background-color: blue;
 }
