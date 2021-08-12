@@ -99,13 +99,13 @@
                    onclick=window.location.href="http://localhost:9090/addfriend"; value="Add Connection"
                    id="btnAddConnection"/>
         </div>
-        <div class="container gray py-5 px-4">
+        <div class="container gray py-5 px-5">
             <!--********Item select A Connection***********-->
             <form name="formSelectUserEmailReceiver" id="formSelectFriend" action="#" th:action="@{/index}"
                   th:object="${transaction}" method="post">
-                <div class="row">
+                <div class="row justify-content-center">
                     <!--*****************Input select friendEmail************-->
-                    <div class="col-12 col-md-4 col-lg-3 mb-3">
+                    <div class="col-12 col-md-4 col-lg-2 mb-3 d-flex justify-content-end">
                         <select th:field="*{receiverEmail}"  aria-label="form-select-sm"
                             id="friendEmailSelect">
                         <option selected value="">Select A Connection</option>
@@ -116,7 +116,7 @@
                        th:errorclass="error"></p>
                     </div>
                     <!--*************Input Number**************-->
-                    <div class="col-12 col-md-3 col-lg-3 mb-3 px-3 ">
+                    <div class="col-12 col-md-3 col-lg-2 mb-3 d-flex justify-content-center">
                     <input th:field="*{amount}" class="text-right" type="number"
                            id="howmuch" step="0.01"
                            placeholder="0€" min="0" max="10000">
@@ -125,16 +125,17 @@
                        th:errorclass="error"></p>
                     </div>
                     <!--*****************Input description************-->
-                    <div class="col-12 col-md-5 col-lg-4 mb-3">
+                    <div class="col-12 col-md-5 col-lg-4 mb-3" >
                      <textarea th:field="*{description}" class="form-control"
                                id="exampleFormControlTextarea1"
                                rows="1"
                                placeholder="Description"></textarea>
                     </div>
-                    <button type="submit" class="col-12 col-md-12 col-lg-2 mb-3 btn btn-block btn-success  text-light bold"
+                    <!--**************Bouton Pay******************-->
+                    <button type="submit" class="col-12 col-md-4 col-lg-2 mb-3 mx-3 btn btn-block btn-success  text-light bold"
                             id="btnPay">Pay
                     </button>
-                    <!--**************Bouton Pay******************-->
+
 
                 </div>
             </form>

@@ -100,7 +100,6 @@ public class UserController {
 
     }
 
-
     /**
      * Method GET to displaying the view addfriend mapped in "/addfriend"
      *
