@@ -62,18 +62,18 @@ public class TransactionIT {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andDo(print());
     }
 
     @Test
-    public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
+    public void showIndexViewTest_whenUrlIsIndexSlashTransferIsWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvc.perform(get("/home")
+        mockMvc.perform(get("/index/transfer")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isNotFound())
@@ -99,7 +99,7 @@ public class TransactionIT {
                         .param("amount", String.valueOf(transaction.getAmount()))
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("ggpassain@email.fr"))))
@@ -130,7 +130,7 @@ public class TransactionIT {
                         .param("amount", String.valueOf(transaction.getAmount()))
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
                 .andDo(print());
@@ -248,7 +248,7 @@ public class TransactionIT {
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andDo(print());
@@ -273,7 +273,7 @@ public class TransactionIT {
                         .param("amount", String.valueOf(transaction.getAmount()))
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("luluM@email.fr"))))
@@ -303,7 +303,7 @@ public class TransactionIT {
                         .param("amount", String.valueOf(transaction.getAmount()))
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
                 .andDo(print());

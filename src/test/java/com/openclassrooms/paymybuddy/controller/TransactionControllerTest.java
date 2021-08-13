@@ -58,7 +58,7 @@ public class TransactionControllerTest {
         //THEN
         mockMvcTransaction.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andDo(print());
@@ -72,7 +72,7 @@ public class TransactionControllerTest {
         //THEN
         mockMvcTransaction.perform(get("/index"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andDo(print());
@@ -182,7 +182,7 @@ public class TransactionControllerTest {
                         .param("description", transactionTest.getDescription())
                         .param("fees", String.valueOf(0.08))).andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("fifi@email.com"))))
                 .andExpect(model().attribute("transaction", hasProperty("emitterEmail", is("dada@email.fr"))))
@@ -208,7 +208,7 @@ public class TransactionControllerTest {
                         .param("receiverEmail", receiverEmail)
                         .param("amount", "50"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
+                .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
