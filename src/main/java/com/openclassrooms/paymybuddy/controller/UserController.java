@@ -94,7 +94,7 @@ public class UserController {
 //    @RolesAllowed({"USER"})
     @GetMapping("/home")
     public String showHomeView(Model model) {
-        log.info("Controller: The View contact displaying");
+        log.info("Controller: The View home displaying");
 
         return "home";
     }

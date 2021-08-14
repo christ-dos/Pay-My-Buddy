@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Setter
@@ -26,6 +25,9 @@ public class Transfer {
     private Double amount;
 
     private String description;
+
+    @Column(name = "post_trade_balance")
+    private Double postTradeBalance;
 
     @Column(name = "user_email")
     private String userEmail;

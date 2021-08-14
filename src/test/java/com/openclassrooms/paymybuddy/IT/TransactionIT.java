@@ -54,7 +54,7 @@ public class TransactionIT {
                                      Tests in view index in  URL /
         ------------------------------------------------------------------------------------------*/
     @Test
-    public void showIndexViewTest_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsIndexView_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -68,16 +68,31 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+
     @Test
-    public void showIndexViewTest_whenUrlIsIndexSlashTransferIsWrong_thenReturnStatusNotFound() throws Exception {
+    public void getTransactionsIndexViewTest_whenCurrentUserInSlash_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN
+        List<DisplayingTransaction> transactions = new ArrayList<>();
+        DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
+        DisplayingTransaction displayingTransaction2 = new DisplayingTransaction("Lisette", "movies tickets", 18.0);
+
+        transactions.add(displayingTransaction1);
+        transactions.add(displayingTransaction2);
+
         //WHEN
         //THEN
-        mockMvc.perform(get("/index/transfer")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
-                .andExpect(status().isNotFound())
+        mockMvc.perform(MockMvcRequestBuilders.get("/").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("receiverEmail", "dada@email.fr")
+                        .param("transactions", String.valueOf(transactions)))
+
+                .andExpect(status().isOk())
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-100.0)))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("Restaurant Saudade")))))
                 .andDo(print());
+
     }
 
     @Test
@@ -204,8 +219,24 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+
+    /*--------------------------------------------------------------------------------------------------------
+                                        Tests in  View index and URL /index
+    -----------------------------------------------------------------------------------------------------------*/
     @Test
-    public void getTransactionsHomeViewTest_whenCurrentUserInSlash_thenReturnTransactionsOfDada() throws Exception {
+    public void getTransactionsIndexView_whenUrlIsIndexSlashTransferIsWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvc.perform(get("/index/transfer")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void getTransactionsHomeViewTest_whenCurrentUserIsDadaInSlashIndex_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN
         String receiverEmail = "dada@email.fr";
         String emitterEmail = "Lisa@email.fr";
@@ -219,11 +250,8 @@ public class TransactionIT {
 
         //WHEN
         //THEN
-        mockMvc.perform(MockMvcRequestBuilders.get("/").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("receiverEmail", "dada@email.fr")
-//                        .param("emitterEmail", "dada@email.fr")
-                        .param("transactions", String.valueOf(transactions)))
-
+        mockMvc.perform(MockMvcRequestBuilders.get("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("receiverEmail", "dada@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
@@ -233,11 +261,6 @@ public class TransactionIT {
                 .andDo(print());
 
     }
-
-    /*--------------------------------------------------------------------------------------------------------
-                                        Tests in  View index and URL /index
-    -----------------------------------------------------------------------------------------------------------*/
-
 
     @Test
     public void addTransactionTest_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
@@ -377,32 +400,6 @@ public class TransactionIT {
                 .andDo(print());
     }
 
-    @Test
-    public void getTransactionsHomeViewTest_whenCurrentUserIsDadaInSlashIndex_thenReturnTransactionsOfDada() throws Exception {
-        //GIVEN
-        String receiverEmail = "dada@email.fr";
-        String emitterEmail = "Lisa@email.fr";
-
-        List<DisplayingTransaction> transactions = new ArrayList<>();
-        DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
-        DisplayingTransaction displayingTransaction2 = new DisplayingTransaction("Lisette", "movies tickets", 18.0);
-
-        transactions.add(displayingTransaction1);
-        transactions.add(displayingTransaction2);
-
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.get("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("receiverEmail", "dada@email.fr"))
-                .andExpect(status().isOk())
-                .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-100.0)))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("Restaurant Saudade")))))
-                .andDo(print());
-
-    }
 
 
 }

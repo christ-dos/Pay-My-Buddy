@@ -65,7 +65,7 @@ public class TransactionService implements ITransactionService {
     public List<DisplayingTransaction> getCurrentUserTransactionsByEmail() {
         List<Transaction> transactions = transactionRepository.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(SecurityUtilities.userEmail, SecurityUtilities.userEmail);
 
-        List<DisplayingTransaction> DisplayingListUser = transactions.stream()
+        List<DisplayingTransaction> displayingListUser = transactions.stream()
                 .map(transaction -> {
                     if (transaction.getEmitterEmail().equals(SecurityUtilities.userEmail)) {
                         User userReceiver = userRepository.findByEmail(transaction.getReceiverEmail());
@@ -76,8 +76,8 @@ public class TransactionService implements ITransactionService {
                     }
                 })
                 .collect(Collectors.toList());
-        log.info("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
-        return DisplayingListUser;
+        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
+        return displayingListUser;
     }
 
     /**

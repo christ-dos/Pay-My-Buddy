@@ -73,7 +73,7 @@ class TransactionServiceTest {
     }
 
     @Test
-    void getTransactionsByEmailTest_whenTransactionWithEmailEmitterIsKikineOrReceiverEmailIsKikine_thenReturnListDisplayingTransactionForEmailkikineWithSignNegatifIfEmitterEmailIsKikine() {
+    void getTransactionsByEmailTest_whenTransactionWithEmailEmitterIsDadaOrReceiverEmailIsDada_thenReturnListDisplayingTransactionForEmailDadaWithSignNegativeIfEmitterEmailIsDada() {
         //GIVEN
         String emitterEmail = "dada@email.fr";
 
@@ -105,7 +105,6 @@ class TransactionServiceTest {
                 .balance(30.50)
                 .accountBank(170974).build();
 
-        User userMock = mock(User.class);
         when(transactionRepositoryMock.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(isA(String.class), isA(String.class))).thenReturn(transactions);
         transactions.stream()
                 .map(transaction -> {
@@ -130,8 +129,6 @@ class TransactionServiceTest {
     @Test
     void getTransactionByEmailTest_whenEmitterEmailTransactionNotExist_thenReturnNull() {
         //GIVEN
-        String emitterEmail = "barbapapa@email.fr";
-        String receiverEmail = "teletubiz@email.fr";
         List<DisplayingTransaction> emptyList = new ArrayList<>();
         //WHEN
         List<DisplayingTransaction> transactionsResult = transactionServiceTest.getCurrentUserTransactionsByEmail();

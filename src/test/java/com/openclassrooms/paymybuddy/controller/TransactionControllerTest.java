@@ -48,11 +48,11 @@ public class TransactionControllerTest {
     private UserService userService;
 
     /*-------------------------------------------------------------------------------------------------------
-                                         Tests View Index
+                                         Tests View index
     ---------------------------------------------------------------------------------------------------------*/
     @WithMockUser(value = "spring")
     @Test
-    public void showIndexViewTest_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsIndexView_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -66,7 +66,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void showIndexViewTest_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsIndexView_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -80,7 +80,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
+    public void getTransactionsIndexView_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -91,10 +91,9 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void getTransactionsHomeViewTest_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
+    public void getTransactionsIndexView_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN
-        String receiverEmail = "dada@email.fr";
-        String emitterEmail = "Lisa@email.fr";
+
 
         List<DisplayingTransaction> transactions = new ArrayList<>();
         DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
@@ -107,56 +106,19 @@ public class TransactionControllerTest {
         when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(transactions);
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.get("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
-                .param("receiverEmail", "dada@email.fr"))
+                        .param("receiverEmail", "dada@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
+                .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().attribute("transactions",hasItem(hasProperty("firstName", is("Lisette")))))
-                .andExpect(model().attribute("transactions",hasItem(hasProperty("amount", is(-15.0)))))
-                .andExpect(model().attribute("transactions",hasItem(hasProperty("description", is("shopping  casa china")))))
-                .andExpect(model().attribute("transactions",hasItem(hasProperty("amount", is(18.0)))))
-                .andExpect(model().attribute("transactions",hasItem(hasProperty("description", is("movies tickets")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lisette")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("shopping  casa china")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(18.0)))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("movies tickets")))))
                 .andDo(print());
 
     }
-
-//    @WithMockUser(value = "spring")
-//    @Test
-//    public void addTransactionTest_whenUserReceiverIsCurrentUserAndEmitterUserIsLili_thenReturnTransactionAdddedForReceiverCurrentUser() throws Exception {
-//        //GIVEN
-//        String emitterEmail = "lili@email.fr";
-//        String receiverEmail = "dada@email.fr";
-//
-//        Transaction transactionTest = new Transaction();
-//        transactionTest.setTransactionId(2);
-//        transactionTest.setDescription("books");
-//        transactionTest.setAmount(10.0);
-//        transactionTest.setFees(0.05);
-//        transactionTest.setReceiverEmail(receiverEmail);
-//        transactionTest.setEmitterEmail(emitterEmail);
-//
-////        when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
-////        when(transactionServiceMock.addTransaction(isA(Transaction.class))).thenReturn(transactionTest);
-//        //WHEN
-//        //THEN
-//        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
-//                        .param("transactionId", String.valueOf(transactionTest.getTransactionId()))
-////                .param("username", "dada@email.fr")
-//                        .param("amount", String.valueOf(transactionTest.getAmount()))
-//                        .param("description", transactionTest.getDescription())
-//                        .param("fees", String.valueOf(transactionTest.getFees()))
-//                        .param("emitterEmail", transactionTest.getEmitterEmail())
-//                        .param("receiverEmail", transactionTest.getReceiverEmail()))
-//                .andExpect(status().isOk())
-//                .andExpect(model().hasNoErrors())
-//                .andExpect(view().name("index"))
-//                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-//                .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("dada@email.fr"))))
-//                .andExpect(model().attribute("transaction", hasProperty("emitterEmail", is("lili@email.fr"))))
-//                .andExpect(model().attribute("transaction", hasProperty("fees", is(0.05))))
-//                .andExpect(model().attribute("transaction", hasProperty("amount", is(10.0))))
-//                .andDo(print());
-//    }
 
     @WithMockUser(value = "spring")
     @Test
@@ -226,6 +188,7 @@ public class TransactionControllerTest {
                         .param("amount", "")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "NotNull"))
@@ -244,7 +207,6 @@ public class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
                 .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Max"))
                 .andDo(print());
     }
@@ -282,6 +244,5 @@ public class TransactionControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("transaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
-
 
 }

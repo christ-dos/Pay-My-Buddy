@@ -36,24 +36,29 @@ CREATE TABLE transaction
     PRIMARY KEY (transaction_id)
 )
     ENGINE = innoDB;
-# INSERT INTO transaction(amount, description, fees, emitter_email, receiver_email)
-# VALUES (15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
-#        (5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr'),
-#        (25.0, 'cimena', 0.0, 'luluM@email.fr', 'dada@email.fr'),
-#        (5.0, 'diner', 0.0, 'lili@email.fr', 'dada@email.fr'),
-#        (25.0, 'cimena', 0.0, 'luluM@email.fr', 'lili@email.fr');
+
+INSERT INTO transaction(amount, description, fees, emitter_email, receiver_email)
+VALUES (15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
+       (5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr'),
+       (25.0, 'cinema', 0.0, 'luluM@email.fr', 'dada@email.fr'),
+       (5.0, 'diner', 0.0, 'lili@email.fr', 'dada@email.fr'),
+       (25.0, 'cinema', 0.0, 'luluM@email.fr', 'lili@email.fr');
 
 CREATE TABLE transfer
 (
-    transfer_id TINYINT AUTO_INCREMENT NOT NULL,
-    date        DATETIME               NOT NULL,
-    type        VARCHAR(10)            NOT NULL,
-    amount      DECIMAL(8, 2)          NOT NULL,
-    description VARCHAR(300),
-    user_email  VARCHAR(100)           NOT NULL,
+    transfer_id        TINYINT AUTO_INCREMENT NOT NULL,
+    date               TIMESTAMP              NOT NULL default NOW(),
+    type               VARCHAR(10)            NOT NULL,
+    amount             DECIMAL(8, 2)          NOT NULL,
+    description        VARCHAR(300),
+    user_email         VARCHAR(100)           NOT NULL,
+    post_trade_balance DECIMAL(8, 2)          NOT NULL,
     PRIMARY KEY (transfer_id)
 )
     ENGINE = innoDB;
+
+# INSERT INTO transfer(amount, description, type, user_email,post_trade_balance)
+# VALUES (100.0, 'account Bank BNP', 'credit', 'dada@email.fr',200.0);
 
 
 CREATE TABLE friend

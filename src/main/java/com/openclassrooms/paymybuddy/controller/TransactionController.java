@@ -46,7 +46,7 @@ public class TransactionController {
      * @return A String containing the name of view
      */
     @GetMapping(value = {"/", "/index"})
-    public String getTransactionsHomeView(@ModelAttribute("transaction") Transaction transaction, Model model) {
+    public String getTransactionsIndexView(@ModelAttribute("transaction") Transaction transaction, Model model) {
         model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
         model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: The View index displaying");

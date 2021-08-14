@@ -39,7 +39,7 @@ public class Transaction {
      */
     @NotNull(message = "Amount cannot be equals to 0")
     @Min(value = 1, message = "Amount cannot be less than 1")
-    @Max(value = 1000, message = "amount cannot be greater than 1000")
+    @Max(value = 1000, message = "Amount cannot be greater than 1000")
     private Double amount;
 
     /**
