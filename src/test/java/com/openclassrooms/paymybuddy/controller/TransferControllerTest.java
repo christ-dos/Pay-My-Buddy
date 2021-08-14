@@ -104,18 +104,20 @@ public class TransferControllerTest {
         //WHEN
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
-                                .param("amount", String.valueOf(50.0))
-                                .param("type", "credit")
+                        .param("amount", String.valueOf(50.0))
+                        .param("type", "credit")
+                        .param("postTradeBalance", String.valueOf(120))
                 ).andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transfer"))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("amount", is(50.0))))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("type", is("credit"))))
+                .andExpect(model().attribute("displayingTransfer", hasProperty("postTradeBalance", is(120.0))))
                 .andDo(print());
     }
 
     @Test
-    public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenReturnNewBalanceDebitedfromAmount() throws Exception {
+    public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenReturnTransferAddedWithUserWithNewBalanceDebitedfromAmount() throws Exception {
         //GIVEN
         // WHEN
         // THEN
@@ -123,12 +125,14 @@ public class TransferControllerTest {
                                 .param("amount", String.valueOf(80.0))
                                 .param("type", "debit")
                                 .param("balance", String.valueOf(100.0))
+                                .param("postTradeBalance", String.valueOf(180))
 //                        .param("userEmail", SecurityUtilities.userEmail))
                 ).andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transfer"))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("amount", is(80.0))))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("type", is("debit"))))
+                .andExpect(model().attribute("displayingTransfer", hasProperty("postTradeBalance", is(180.0))))
                 .andDo(print());
     }
 
