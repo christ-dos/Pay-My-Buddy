@@ -96,7 +96,7 @@ public class TransactionIT {
     }
 
     @Test
-    public void addTransactionTest_whenURLIsSlashAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+    public void addTransactionTest_whenURLIsSlashAndBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         Transaction transaction = Transaction.builder()
                 .emitterEmail("dada@email.fr").receiverEmail("ggpassain@email.fr")
@@ -278,7 +278,7 @@ public class TransactionIT {
     }
 
     @Test
-    public void addTransactionTest_whenURLIsIndexAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+    public void addTransactionTest_whenURLIsIndexAndBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         Transaction transaction = Transaction.builder()
                 .emitterEmail("dada@email.fr").receiverEmail("luluM@email.fr")

@@ -81,12 +81,12 @@ public class TransferIT {
                 .andExpect(model().attributeExists("displayingTransfer", "transfers"))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("type", is("credit")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(20.0)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(220.0)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(109.45)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer appli")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("type", is("debit")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer la Poste")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(-50.0)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(170.0)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(59.45)))))
                 .andDo(print());
     }
 
