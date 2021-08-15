@@ -52,11 +52,11 @@
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link"   aria-current="page" href="#"><span class="navbar-brand mb-0 h1 current active">Transfer</span>
+                            <a class="nav-link"   aria-current="page" href="#"><span class="navbar-brand mb-0 h1 current active">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="#"><span class="navbar-brand mb-0 h1">Profile</span>
+                            <a class="nav-link " href="http://localhost:9090/profile"><span class="navbar-brand mb-0 h1">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
@@ -74,14 +74,14 @@
     </div>
 </nav>
 
-<!--************ link Tansfer et Home /************-->
-<div class="container-fluid gray">
+<!--************ link Transaction et Home /************-->
+<div class="container-fluid gray py-2">
     <ul class="nav">
         <li class="nav-item">
             <a class="nav-link" href="http://localhost:9090/home">Home /</a>
         </li>
-        <li class="nav-item ">
-            <a class="nav-link disabled " href="#">Transfer</a>
+        <li class="nav-item">
+            <a class="nav-link disabled " href="#">Transaction</a>
         </li>
     </ul>
 </div>
@@ -105,7 +105,7 @@
                   th:object="${transaction}" method="post">
                 <div class="row justify-content-center">
                     <!--*****************Input select friendEmail************-->
-                    <div class="col-12 col-md-5 col-lg-3 mb-3 d-flex flex-column">
+                    <div class="col-12 col-md-5 col-lg-2 mb-3 d-flex flex-column">
                         <select th:field="*{receiverEmail}"  aria-label="form-select-sm"
                             id="friendEmailSelect">
                         <option selected value="">Select A Connection</option>
@@ -116,7 +116,7 @@
                        th:errorclass="error"></p>
                     </div>
                     <!--*************Input Number**************-->
-                    <div class="col-12 col-md-2 col-lg-3 mb-3 d-flex flex-column">
+                    <div class="col-12 col-md-2 col-lg-2 mb-3 d-flex flex-column">
                     <input th:field="*{amount}" class="text-right" type="number"
                            id="howmuch" step="0.01"
                            placeholder="0€" min="0" max="10000">
@@ -132,7 +132,7 @@
                                placeholder="Description"></textarea>
                     </div>
                     <!--**************Bouton Pay******************-->
-                    <button type="submit" class="col-12 col-md-4 col-lg-3 mb-3 mx-3 btn btn-block btn-success  text-light bold"
+                    <button type="submit" class="col-12 col-md-4 col-lg-2 mb-3 mx-3 btn btn-block btn-success  text-light bold"
                             id="btnPay">Pay
                     </button>
                 </div>

@@ -29,7 +29,7 @@ public class Transfer {
     @Column(name = "post_trade_balance")
     private Double postTradeBalance;
 
-    @Column(name = "user_email")
+    @Column(name = "user_email")/* supprimer*/
     private String userEmail;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

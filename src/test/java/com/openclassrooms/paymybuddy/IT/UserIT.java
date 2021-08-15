@@ -154,7 +154,7 @@ public class UserIT {
     }
 
     @Test
-    public void addFriendToListConnectionTest_whenEmailToAddAndEmailUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
+    public void addFriendToListConnectionTest_whenEmailToAddAndCurrentUserEmailIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
         //WHEN
         //THEN

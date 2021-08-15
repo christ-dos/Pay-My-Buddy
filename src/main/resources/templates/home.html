@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org"  lang="en">
 <head>
     <meta charset="UTF-8">
     <!-- ************Bootstrap CSS ******************-->
@@ -30,11 +30,11 @@
                         </li>
                         <li class="nav-item ">
                             <a class="nav-link " aria-current="page" href="http://localhost:9090/index"><span
-                                    class="navbar-brand mb-0 h1">Transfer</span>
+                                    class="navbar-brand mb-0 h1">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="#"><span class="navbar-brand mb-0 h1">Profile</span>
+                            <a class="nav-link " href="http://localhost:9090/profile"><span class="navbar-brand mb-0 h1">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
@@ -52,15 +52,11 @@
         </div>
     </div>
 </nav>
-<!--************ link Tansfer et Home /************-->
+<!--************ link Home /************-->
 <div class="container-fluid gray py-2">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link disabled" href="#">Home /</a>
-        </li>
-        <li class="nav-item ">
-            <a class="nav-link " href="http://localhost:9090/index">Transfer</a>
-        </li>
+            <a class="nav-link disabled" href="#">Home </a>
     </ul>
 </div>
 <section>
@@ -70,8 +66,10 @@
                 <div class="card">
                     <div class="card-header bg-success text-light">Balance</div>
                     <div class="card-body">
-                        <h3 class="card-title">0.00 Euros</h3>
-                        <p class="card-text">Transfer money to and from your bank account...</p>
+                        <h3 class="card-title"><span th:inline="text">
+                            € [[${#numbers.formatDecimal(user.getBalance, 0, 'COMMA', 2, 'POINT')}]]
+                        </span></h3>
+                        <p class="card-text">Transfer money to and from your bank...</p>
                         <p class="card-text text-muted">And paid your friends...</p>
                     </div>
                     <div class="card-footer py-3 " >
@@ -83,7 +81,7 @@
                 <div class="card">
                     <div class="card-header bg-success text-light">Profile</div>
                     <div class="card-body">
-                        <h3 class="card-title">Damien Sanchez</h3>
+                        <h3 th:text=" ${user.getFirstName()} + ' ' + ${user.getLastName()}">class="card-title">Damien Sanchez</h3>
                         <p class="card-text">Consult your profile...</p>
                         <p class="card-text text-muted">update you personal data...</p>
                     </div>
@@ -94,35 +92,6 @@
             </div>
         </div>
     </div>
-
-    <!--    <div class="row">-->
-    <!--        &lt;!&ndash;    *****************Card-deck****************************&ndash;&gt;-->
-
-    <!--        <div class="card-deck">-->
-    <!--            &lt;!&ndash;    *****************Card one****************************&ndash;&gt;-->
-    <!--            <div-->
-    <!--            <div class="card">-->
-    <!--                <div class="card-header bg-success text-light">Balance</div>-->
-    <!--                <div class="card-body ">-->
-    <!--                    <h5 class="card-title py-2">0.00Euros</h5>-->
-    <!--                    &lt;!&ndash;                        <p class="card-text">Une ligne de texte dans notre première carte.</p>&ndash;&gt;-->
-    <!--                    &lt;!&ndash;                        <p class="card-text"><small class="text-muted">Ligne de texte supplémentaire</small></p>&ndash;&gt;-->
-    <!--                    <a href="#" class="btn btn-success py-2">Transfer Money</a>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--            &lt;!&ndash;    *****************Card two***************************&ndash;&gt;-->
-    <!--            <div class="card">-->
-    <!--                <div class="card-header bg-success text-light">Profile</div>-->
-    <!--                <div class="card-body">-->
-    <!--                    <h5 class="card-title py-2">Damien Sanchez</h5>-->
-    <!--                    &lt;!&ndash;                        <p class="card-text">Une ligne de texte dans notre seconde carte.</p>&ndash;&gt;-->
-    <!--                    <a href="#" class="btn btn-success py-2">Update Profile</a>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        </div>-->
-
-    <!--    </div>-->
-
 </section>
 <footer>
 

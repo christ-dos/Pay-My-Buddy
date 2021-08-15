@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -75,22 +76,22 @@ class TransactionServiceTest {
     @Test
     void getTransactionsByEmailTest_whenTransactionWithEmailEmitterIsDadaOrReceiverEmailIsDada_thenReturnListDisplayingTransactionForEmailDadaWithSignNegativeIfEmitterEmailIsDada() {
         //GIVEN
-        String emitterEmail = "dada@email.fr";
+        String emitterEmail =SecurityUtilities.userEmail;
 
         List<Transaction> transactions = new ArrayList<>();
         Transaction transaction1 = Transaction.builder()
                 .transactionId(1).amount(25.0).description("diner paula")
-                .emitterEmail("dada@email.fr").receiverEmail("lisa@email.fr")
+                .emitterEmail(emitterEmail).receiverEmail("lisa@email.fr")
                 .date(LocalDateTime.now())
                 .build();
         Transaction transaction2 = Transaction.builder()
                 .transactionId(2).amount(15.0).description("shopping  casa china")
-                .emitterEmail("dada@email.fr").receiverEmail("lisa@email.fr").
+                .emitterEmail(emitterEmail).receiverEmail("lisa@email.fr").
                 date(LocalDateTime.now())
                 .build();
         Transaction transaction3 = Transaction.builder()
                 .transactionId(3).amount(18.0).description("movies tickets")
-                .emitterEmail("lisa@email.fr").receiverEmail("dada@email.fr")
+                .emitterEmail("lisa@email.fr").receiverEmail(emitterEmail)
                 .date(LocalDateTime.now())
                 .build();
         transactions.add(transaction1);
@@ -105,16 +106,17 @@ class TransactionServiceTest {
                 .balance(30.50)
                 .accountBank(170974).build();
 
-        when(transactionRepositoryMock.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(isA(String.class), isA(String.class))).thenReturn(transactions);
-        transactions.stream()
-                .map(transaction -> {
-                    if (transaction.getEmitterEmail().equals(emitterEmail)) {
-                        return new DisplayingTransaction(userLise.getFirstName(), transaction.getDescription(), -transaction.getAmount());
-                    } else {
-                        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userLise);
-                        return new DisplayingTransaction(userLise.getFirstName(), transaction.getDescription(), transaction.getAmount());
-                    }
-                }).collect(Collectors.toList());
+        when(transactionRepositoryMock.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(isA(String.class),isA(String.class))).thenReturn(transactions);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userLise);
+//        transactions.stream()
+//                .map(transaction -> {
+//                    if (transaction.getEmitterEmail().equals(emitterEmail)) {
+//                        return new DisplayingTransaction(userLise.getFirstName(), transaction.getDescription(), -transaction.getAmount());
+//                    } else {
+//                        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userLise);
+//                        return new DisplayingTransaction(userLise.getFirstName(), transaction.getDescription(), transaction.getAmount());
+//                    }
+//                }).collect(Collectors.toList());
         //WHEN
         List<DisplayingTransaction> listTransactionsResult = transactionServiceTest.getCurrentUserTransactionsByEmail();
         //THEN
@@ -165,7 +167,6 @@ class TransactionServiceTest {
 
         //WHEN
         Transaction transactionResult = transactionServiceTest.addTransaction(transactionTest);
-        Double UserEmitterBalanceAfterTransaction = userRepositoryMock.findByEmail(transactionResult.getEmitterEmail()).getBalance();
         verify(transactionRepositoryMock, times(1))
                 .save(isA(Transaction.class));
         assertEquals("kikine@email.fr", transactionResult.getEmitterEmail());

@@ -106,7 +106,7 @@ public class UserServiceTest {
         Friend userAdded = userServiceTest.addFriendCurrentUserList(friendEmail);
         //THEN
         verify(friendRepositoryMock, times(1)).save(isA(Friend.class));
-        assertEquals("dada@email.fr", userAdded.getUserEmail());
+        assertEquals(userEmail, userAdded.getUserEmail());
         assertEquals("françois@email.fr", userAdded.getFriendEmail());
     }
 

@@ -3,10 +3,8 @@ package com.openclassrooms.paymybuddy.model;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,17 +20,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
-    @Override
-    public String toString() {
-        return "User{" +
-                "email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", balance=" + balance +
-                ", accountBank=" + accountBank +
-                '}';
-    }
 
     /**
      * A String containing the email of the user, id that identify him
@@ -98,4 +85,15 @@ public class User {
     @ManyToMany(mappedBy = "friends")
     private List<User> users = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", balance=" + balance +
+                ", accountBank=" + accountBank +
+                '}';
+    }
 }

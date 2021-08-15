@@ -62,7 +62,7 @@ public class Transaction {
      * email which emitted the transaction ,
      * it's the foreign key that linked the transaction at the user emitter
      */
-    @Column(name = "emitter_email")
+    @Column(name = "emitter_email")/* supprimer*/
     private String emitterEmail;
 
     /**
@@ -72,7 +72,7 @@ public class Transaction {
      * this field in the UI cannot be blank
      */
     @NotBlank(message = "Friend email cannot be null")
-    @Column(name = "receiver_email")
+    @Column(name = "receiver_email")/* supprimer*/
     private String receiverEmail;
 
     /**

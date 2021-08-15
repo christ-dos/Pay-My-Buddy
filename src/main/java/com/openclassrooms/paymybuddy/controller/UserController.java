@@ -93,8 +93,9 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/home")
-    public String showHomeView(Model model) {
+    public String getUserInformationHomeView(@ModelAttribute("user")User user, Model model) {
         log.info("Controller: The View home displaying");
+        model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.userEmail));
 
         return "home";
     }
@@ -106,10 +107,24 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/contact")
-    public String showContactView(Model model) {
+    public String getContactView(Model model) {
         log.info("Controller: The View contact displaying");
 
         return "contact";
+    }
+
+    /**
+     * Method GET to displaying the view for profile  in endpoint in "/profile"
+     *
+     * @param model Interface that defines a support for model attributes
+     * @return A String containing the name of view
+     */
+//    @RolesAllowed({"USER"})
+    @GetMapping("/profile")
+    public String getProfileView(Model model) {
+        log.info("Controller: The View profile displaying");
+
+        return "profile";
     }
 
     /**

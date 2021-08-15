@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
@@ -125,7 +126,7 @@ public class TransactionControllerTest {
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         String receiverEmail = "fifi@email.com";
-        String emitterEmail = "dada@email.fr";
+        String emitterEmail = SecurityUtilities.userEmail;
 
         Transaction transactionTest = new Transaction();
         transactionTest.setTransactionId(1);
@@ -147,7 +148,7 @@ public class TransactionControllerTest {
                 .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
                 .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("fifi@email.com"))))
-                .andExpect(model().attribute("transaction", hasProperty("emitterEmail", is("dada@email.fr"))))
+                .andExpect(model().attribute("transaction", hasProperty("emitterEmail", is(emitterEmail))))
                 .andExpect(model().attribute("transaction", hasProperty("fees", is(0.08))))
                 .andExpect(model().attribute("transaction", hasProperty("amount", is(16.0))))
                 .andDo(print());
