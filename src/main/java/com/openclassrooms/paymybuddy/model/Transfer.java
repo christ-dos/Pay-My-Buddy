@@ -29,11 +29,8 @@ public class Transfer {
     @Column(name = "post_trade_balance")
     private Double postTradeBalance;
 
-    @Column(name = "user_email")/* supprimer*/
-    private String userEmail;
-
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_email", insertable = false, updatable = false)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_email")
     private User user;
 
     @Override
@@ -44,7 +41,6 @@ public class Transfer {
                 ", type='" + type + '\'' +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
-                ", userEmail='" + userEmail + '\'' +
                 ", user=" + user +
                 '}';
     }

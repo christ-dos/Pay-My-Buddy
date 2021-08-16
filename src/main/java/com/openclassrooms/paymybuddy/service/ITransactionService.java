@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.model.Transaction;
 
 import javax.transaction.Transactional;
@@ -17,5 +18,5 @@ public interface ITransactionService {
     List<DisplayingTransaction> getCurrentUserTransactionsByEmail();
 
     @Transactional
-    Transaction addTransaction(Transaction transaction);
+    Transaction addTransaction(SendTransaction sendTransaction);
 }

@@ -1,6 +1,6 @@
 package com.openclassrooms.paymybuddy.controller;
 
-import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
@@ -38,15 +38,15 @@ public class TransactionController {
     private IUserService userService;
 
     /**
-     * Method GET to displaying the view index mapped in "/" and "/index"
+     * Method GET to displaying the view index mapped in "/transaction"
      *
-     * @param transaction A model DTO {@link Transaction} that displaying transactions
-     *                    informations in view : receiver's name, reason of transaction and amount
-     * @param model       Interface that defines a support for model attributes.
+     * @param sendTransaction A model DTO {@link SendTransaction} that displaying transactions
+     *                        information in view : receiver's name, reason of transaction and amount
+     * @param model           Interface that defines a support for model attributes.
      * @return A String containing the name of view
      */
-    @GetMapping(value = {"/", "/index"})
-    public String getTransactionsIndexView(@ModelAttribute("transaction") Transaction transaction, Model model) {
+    @GetMapping(value =  "/transaction")
+    public String getTransactionsIndexView(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model) {
         model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
         model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
         log.info("Controller: The View index displaying");
@@ -55,7 +55,7 @@ public class TransactionController {
     }
 
     /**
-     * Method POST that process data receiving by the view index in endpoint "/index" and "/"
+     * Method POST that process data receiving by the view index in endpoint "/transaction"
      * for adding transactions in table transaction in database
      *
      * @param transaction A model DTO {@link Transaction} that displaying transactions
@@ -64,8 +64,8 @@ public class TransactionController {
      * @param model       Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
-    @PostMapping(value = {"/", "/index"})
-    public String addTransaction(@Valid Transaction transaction, BindingResult result, Model model) {
+    @PostMapping(value = "/transaction")
+    public String addTransaction(@Valid @ModelAttribute("sendTransaction") SendTransaction sendTransaction, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
             model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
@@ -76,8 +76,8 @@ public class TransactionController {
             result.rejectValue("receiverEmail", "NotBlank", "field friend Email can not be null");
         }
         try {
-            transaction.setEmitterEmail(SecurityUtilities.userEmail);
-            transactionService.addTransaction(transaction);
+//            sendTransaction.setUserEmitter(transaction.getUserEmitter());
+            transactionService.addTransaction(sendTransaction);
         } catch (BalanceInsufficientException ex) {
             result.rejectValue("amount", "BalanceInsufficientException", ex.getMessage());
             log.error("Controller: Insufficient account balance");

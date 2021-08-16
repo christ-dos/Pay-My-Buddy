@@ -8,6 +8,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 /**
@@ -20,9 +21,10 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
     /**
      * Query that permit find transactions emitted and received by a user
      *
-     * @param emitterEmail A String containing the email of the emitter
-     * @param receiverEmail A String containing the email of the receiver
+     * @param userEmitterEmail A String containing the email of the emitter
+     * @param userReceiverEmail A String containing the email of the receiver
      * @return A list of {@link Transaction}
      */
-        List<Transaction> findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(String emitterEmail, String receiverEmail);
+        List<Transaction> findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(@NotBlank(message = "User's email cannot be blank") String userEmitterEmail, @NotBlank(message = "User's email cannot be blank") String userReceiverEmail);
+//                        List<Transaction> findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc();
 }

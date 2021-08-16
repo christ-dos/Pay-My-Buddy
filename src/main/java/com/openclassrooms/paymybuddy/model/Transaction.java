@@ -1,14 +1,10 @@
 package com.openclassrooms.paymybuddy.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -18,7 +14,9 @@ import java.time.LocalDateTime;
  * @author Christine Duarte
  */
 @Entity
-@Data
+//@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,10 +35,7 @@ public class Transaction {
      * A Double with the amount of transaction
      * the value cannot  be null, and it must be between 1 and 1000
      */
-    @NotNull(message = "Amount cannot be equals to 0")
-    @Min(value = 1, message = "Amount cannot be less than 1")
-    @Max(value = 1000, message = "Amount cannot be greater than 1000")
-    private Double amount;
+      private Double amount;
 
     /**
      * A String with the description of the transaction
@@ -62,8 +57,8 @@ public class Transaction {
      * email which emitted the transaction ,
      * it's the foreign key that linked the transaction at the user emitter
      */
-    @Column(name = "emitter_email")/* supprimer*/
-    private String emitterEmail;
+//    @Column(name = "emitter_email")/* supprimer*/
+//    private String emitterEmail;
 
     /**
      * A String containing the receiver email,
@@ -71,21 +66,33 @@ public class Transaction {
      * it's the foreign key that linked the transaction at the user receiver
      * this field in the UI cannot be blank
      */
-    @NotBlank(message = "Friend email cannot be null")
-    @Column(name = "receiver_email")/* supprimer*/
-    private String receiverEmail;
+//    @NotBlank(message = "Friend email cannot be null")
+//    @Column(name = "receiver_email")/* supprimer*/
+//    private String receiverEmail;
 
     /**
      * An Instance of User that permit joint the table transaction with the table user
      * in the column emitter_email
      * relationship type of many to one
      */
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "emitter_email", insertable = false, updatable = false)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "emitter_email")
     private User userEmitter;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_email", insertable = false, updatable = false)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "receiver_email")
     private User userReceiver;
 
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "transactionId=" + transactionId +
+                ", amount=" + amount +
+                ", description='" + description + '\'' +
+                ", fees=" + fees +
+                ", date=" + date +
+                ", userEmitter=" + userEmitter +
+                ", userReceiver=" + userReceiver +
+                '}';
+    }
 }

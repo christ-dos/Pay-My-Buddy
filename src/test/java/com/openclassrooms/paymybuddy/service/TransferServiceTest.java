@@ -56,13 +56,13 @@ public class TransferServiceTest {
         displayingTransferCredit.setType("credit");
         displayingTransferCredit.setDescription("credit payMyBuddy");
         Transfer transferToAdd = Transfer.builder().transferId(1)
-                .amount(100.0).date(LocalDateTime.now()).type("credit").userEmail(userEmail).user(userWithBalanceUpdated).build();
+                .amount(100.0).date(LocalDateTime.now()).type("credit").user(userWithBalanceUpdated).build();
         when(transferRepositoryMock.save(isA(Transfer.class))).thenReturn(transferToAdd);
-        when(userRepositoryMock.findByEmail(transferToAdd.getUserEmail())).thenReturn(user);
+        when(userRepositoryMock.findByEmail(transferToAdd.getUser().getEmail())).thenReturn(user);
         //WHEN
         Transfer transferResult = transferServiceTest.addTransfer(displayingTransferCredit);
         //THEN
-        assertEquals(userEmail, transferResult.getUserEmail());
+        assertEquals(userEmail, transferResult.getUser().getEmail());
         assertEquals(100, transferResult.getAmount());
         assertEquals("credit", transferResult.getType());
         assertEquals(589632, transferResult.getUser().getAccountBank());
@@ -87,16 +87,16 @@ public class TransferServiceTest {
                 .build();
 
         Transfer transferTestDebit = Transfer.builder().transferId(1)
-                .amount(50.0).date(LocalDateTime.now()).type("debit").userEmail(userEmail).description("transfer to BNP").user(userBalanceUpdated).build();
+                .amount(50.0).date(LocalDateTime.now()).type("debit").description("transfer to BNP").user(userBalanceUpdated).build();
         when(transferRepositoryMock.save(isA(Transfer.class))).thenReturn(transferTestDebit);
-        when(userRepositoryMock.findByEmail(transferTestDebit.getUserEmail())).thenReturn(user);
+        when(userRepositoryMock.findByEmail(transferTestDebit.getUser().getEmail())).thenReturn(user);
         //WHEN
         Transfer transferResultDebitBalanceEnough = transferServiceTest.addTransfer(displayingTransferDebit);
         //THEN
         //new balance is updated
         assertEquals("debit", transferResultDebitBalanceEnough.getType());
         assertEquals(50, transferResultDebitBalanceEnough.getUser().getBalance());
-        assertEquals(userEmail, transferTestDebit.getUserEmail());
+        assertEquals(userEmail, transferTestDebit.getUser().getEmail());
         verify(transferRepositoryMock, times(1)).save(isA(Transfer.class));
     }
 
@@ -113,8 +113,8 @@ public class TransferServiceTest {
         displayingTransferDebitBalanceInsufficient.setDescription("transfer to BNP");
 
         Transfer transferTestDebitBalanceInsufficient = Transfer.builder().transferId(1)
-                .amount(50.0).date(LocalDateTime.now()).type("debit").userEmail(userEmail).description("transfer to BNP").build();
-        when(userRepositoryMock.findByEmail(transferTestDebitBalanceInsufficient.getUserEmail())).thenReturn(user);
+                .amount(50.0).date(LocalDateTime.now()).type("debit").description("transfer to BNP").user(user).build();
+        when(userRepositoryMock.findByEmail(transferTestDebitBalanceInsufficient.getUser().getEmail())).thenReturn(user);
         //WHEN
         //THEN
         assertThrows(BalanceInsufficientException.class, () -> transferServiceTest.addTransfer(displayingTransferDebitBalanceInsufficient));
@@ -141,9 +141,9 @@ public class TransferServiceTest {
 
          List<Transfer> transfersList = new ArrayList<>();
          Transfer transfer1  = Transfer.builder()
-                         .amount(20.0).description("transfer PayMyBuddy").type("credit").userEmail(userEmail).user(userTransfer1).build();
+                         .amount(20.0).description("transfer PayMyBuddy").type("credit").user(userTransfer1).build();
         Transfer transfer2  = Transfer.builder()
-                .amount(30.0).description("transfer BNP").type("debit").userEmail(userEmail).user(userTransfer2).build();
+                .amount(30.0).description("transfer BNP").type("debit").user(userTransfer2).build();
 
         transfersList.add(transfer1);
         transfersList.add(transfer2);

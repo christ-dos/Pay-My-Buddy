@@ -50,7 +50,6 @@ public class TransferService implements ITransferService {
         Transfer transfer = new Transfer();
         transfer.setType(displayingTransfer.getType());
         transfer.setPostTradeBalance(currentUser.getBalance());
-        transfer.setUserEmail(currentUser.getEmail());
         transfer.setDescription(displayingTransfer.getDescription());
         transfer.setDate(LocalDateTime.now());
         transfer.setAmount(displayingTransfer.getAmount());

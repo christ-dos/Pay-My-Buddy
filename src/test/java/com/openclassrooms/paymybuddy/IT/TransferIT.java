@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.IT;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
@@ -81,12 +82,12 @@ public class TransferIT {
                 .andExpect(model().attributeExists("displayingTransfer", "transfers"))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("type", is("credit")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(20.0)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(109.45)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(209.95)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer appli")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("type", is("debit")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer la Poste")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(-50.0)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(59.45)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(159.95)))))
                 .andDo(print());
     }
 
@@ -95,6 +96,7 @@ public class TransferIT {
         //WHEN
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("userEmail", SecurityUtilities.userEmail)
                         .param("amount", String.valueOf(20.0))
                         .param("description", "transfer appli")
                         .param("type", "credit")

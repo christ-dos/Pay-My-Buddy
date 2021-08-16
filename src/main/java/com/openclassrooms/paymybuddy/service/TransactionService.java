@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
@@ -63,15 +64,15 @@ public class TransactionService implements ITransactionService {
      */
     @Override
     public List<DisplayingTransaction> getCurrentUserTransactionsByEmail() {
-        List<Transaction> transactions = transactionRepository.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(SecurityUtilities.userEmail, SecurityUtilities.userEmail);
+        List<Transaction> transactions = transactionRepository.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(SecurityUtilities.userEmail, SecurityUtilities.userEmail);
 
         List<DisplayingTransaction> displayingListUser = transactions.stream()
                 .map(transaction -> {
-                    if (transaction.getEmitterEmail().equals(SecurityUtilities.userEmail)) {
-                        User userReceiver = userRepository.findByEmail(transaction.getReceiverEmail());
+                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.userEmail)) {
+                        User userReceiver = userRepository.findByEmail(transaction.getUserReceiver().getEmail());
                         return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
                     } else {
-                        User userEmitter = userRepository.findByEmail(transaction.getEmitterEmail());
+                        User userEmitter = userRepository.findByEmail(transaction.getUserEmitter().getEmail());
                         return new DisplayingTransaction(userEmitter.getFirstName(), transaction.getDescription(), transaction.getAmount());
                     }
                 })
@@ -83,25 +84,25 @@ public class TransactionService implements ITransactionService {
     /**
      * Method which add a transaction in database
      *
-     * @param transaction An object {@link Transaction} to save
+     * @param sendTransaction An object {@link SendTransaction}
      * @return A {@link Transaction} object
      */
     @Transactional
     @Override
-    public Transaction addTransaction(Transaction transaction) {
-        User  userEmitterTransaction = userRepository.findByEmail(transaction.getEmitterEmail());
-        if ((transaction.getAmount() + calculateFees(transaction.getAmount())) > userEmitterTransaction.getBalance()) {
+    public Transaction addTransaction(SendTransaction sendTransaction) {
+        User  userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.userEmail);
+        if ((sendTransaction.getAmount() + calculateFees(sendTransaction.getAmount())) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
         }
-        transaction.setFees(calculateFees(transaction.getAmount()));
+        Transaction transaction = new Transaction();
+        transaction.setFees(calculateFees(sendTransaction.getAmount()));
         transaction.setDate(LocalDateTime.now());
+        transaction.setAmount(sendTransaction.getAmount());
+        transaction.setDescription(sendTransaction.getDescription());
         transaction.setUserEmitter(getUserEmitterNewBalance(userEmitterTransaction, transaction.getAmount()));
-        transaction.setUserReceiver(getUserReceiverNewBalance(transaction.getReceiverEmail(), transaction.getAmount()));
-        // user emitter save with new balance
-//        userRepository.save(getUserEmitterNewBalance(userEmitterTransaction, transaction.getAmount()));
-        // user receiver save with new balance
-//        userRepository.save(getUserReceiverNewBalance(transaction.getReceiverEmail(), transaction.getAmount()));
+        transaction.setUserReceiver(getUserReceiverNewBalance(sendTransaction.getReceiverEmail(), transaction.getAmount()));
+
         return transactionRepository.save(transaction);
     }
 

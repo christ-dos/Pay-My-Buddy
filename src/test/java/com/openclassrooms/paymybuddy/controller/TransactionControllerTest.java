@@ -1,9 +1,11 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
+import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.service.TransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
@@ -57,11 +59,11 @@ public class TransactionControllerTest {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcTransaction.perform(get("/"))
+        mockMvcTransaction.perform(get("/transaction"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andDo(print());
     }
 
@@ -71,11 +73,11 @@ public class TransactionControllerTest {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcTransaction.perform(get("/index"))
+        mockMvcTransaction.perform(get("/transaction"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andDo(print());
     }
 
@@ -106,12 +108,12 @@ public class TransactionControllerTest {
         //WHEN
         when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(transactions);
         //THEN
-        mockMvcTransaction.perform(MockMvcRequestBuilders.get("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcTransaction.perform(MockMvcRequestBuilders.get("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("receiverEmail", "dada@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lisette")))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("shopping  casa china")))))
@@ -128,29 +130,45 @@ public class TransactionControllerTest {
         String receiverEmail = "fifi@email.com";
         String emitterEmail = SecurityUtilities.userEmail;
 
+        User userEmitter = User.builder()
+                .email(SecurityUtilities.userEmail)
+                .password("monTropToppassword")
+                .firstName("Christine")
+                .lastName("Deldalle")
+                .balance(100.50)
+                .accountBank(170974).build();
+
+        User userReceiver = User.builder()
+                .email("lise@email.fr")
+                .password("monTropToppassword")
+                .firstName("lisette")
+                .lastName("Duhamel")
+                .balance(10.0)
+                .accountBank(170974).build();
+
+
         Transaction transactionTest = new Transaction();
         transactionTest.setTransactionId(1);
+        transactionTest.setUserReceiver(userReceiver);
+        transactionTest.setUserEmitter(userEmitter);
         transactionTest.setDescription("cinema");
         transactionTest.setAmount(16.0);
         transactionTest.setFees(0.08);
 
         when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
-        when(transactionServiceMock.addTransaction(isA(Transaction.class))).thenReturn(transactionTest);
+        when(transactionServiceMock.addTransaction(isA(SendTransaction.class))).thenReturn(transactionTest);
         //WHEN
         //THEN
-        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("userEmail", emitterEmail)
+        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("userEmitter", String.valueOf(userEmitter))
                         .param("receiverEmail", receiverEmail)
                         .param("amount", String.valueOf(transactionTest.getAmount()))
-                        .param("description", transactionTest.getDescription())
-                        .param("fees", String.valueOf(0.08))).andExpect(status().isOk())
+                        .param("description", transactionTest.getDescription()))
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("fifi@email.com"))))
-                .andExpect(model().attribute("transaction", hasProperty("emitterEmail", is(emitterEmail))))
-                .andExpect(model().attribute("transaction", hasProperty("fees", is(0.08))))
-                .andExpect(model().attribute("transaction", hasProperty("amount", is(16.0))))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
+                .andExpect(model().attribute("sendTransaction", hasProperty("receiverEmail", is("fifi@email.com"))))
+                .andExpect(model().attribute("sendTransaction", hasProperty("amount", is(16.0))))
                 .andDo(print());
     }
 
@@ -162,20 +180,20 @@ public class TransactionControllerTest {
         String receiverEmail = "luluM@email.fr";
         String emitterEmail = "dada@email.fr";
 
-        when(transactionServiceMock.addTransaction(isA(Transaction.class))).thenThrow(new BalanceInsufficientException("Insufficient account balance, your balance is: " + emitterEmail));
+        when(transactionServiceMock.addTransaction(isA(SendTransaction.class))).thenThrow(new BalanceInsufficientException("Insufficient account balance, your balance is: " + emitterEmail));
         //WHEN
         //THEN
-        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("balance", "20")
-                        .param("emitterEmail", emitterEmail)
+                        .param("userEmitter", emitterEmail)
                         .param("receiverEmail", receiverEmail)
                         .param("amount", "50"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "BalanceInsufficientException"))
                 .andDo(print());
     }
 
@@ -185,14 +203,14 @@ public class TransactionControllerTest {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "NotNull"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "NotNull"))
                 .andDo(print());
     }
 
@@ -202,13 +220,13 @@ public class TransactionControllerTest {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "1500")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Max"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "Max"))
                 .andDo(print());
     }
 
@@ -218,14 +236,13 @@ public class TransactionControllerTest {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "0.5")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "amount"))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Min"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "Min"))
                 .andDo(print());
     }
 
@@ -235,14 +252,14 @@ public class TransactionControllerTest {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "2")
                         .param("receiverEmail", ""))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrors("transaction", "receiverEmail"))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "receiverEmail", "NotBlank"))
+                .andExpect(model().attributeHasFieldErrors("sendTransaction", "receiverEmail"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
 
