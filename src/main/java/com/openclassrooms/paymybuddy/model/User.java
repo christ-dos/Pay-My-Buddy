@@ -5,6 +5,7 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class User {
      * this field cannot be blank in the UI
      */
     @Id
-    @NotBlank(message = "User's email cannot be blank")
+    @NotNull(message = "User's email cannot be blank")
     private String email;
 
     /**

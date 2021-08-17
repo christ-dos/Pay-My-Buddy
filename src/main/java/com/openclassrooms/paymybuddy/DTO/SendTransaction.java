@@ -16,10 +16,10 @@ import javax.validation.constraints.NotNull;
 @Getter
 public class SendTransaction {
 
-    @NotBlank
+    @NotBlank(message = "cannot be empty")
     private String receiverEmail;
 
-    @NotNull(message = "Amount cannot be equals to 0")
+    @NotNull(message = "Amount cannot be null")
     @Min(value = 1, message = "Amount cannot be less than 1")
     @Max(value = 1000, message = "Amount cannot be greater than 1000")
     private Double amount ;

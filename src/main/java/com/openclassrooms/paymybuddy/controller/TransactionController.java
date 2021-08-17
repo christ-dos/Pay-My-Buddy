@@ -58,8 +58,8 @@ public class TransactionController {
      * Method POST that process data receiving by the view index in endpoint "/transaction"
      * for adding transactions in table transaction in database
      *
-     * @param transaction A model DTO {@link Transaction} that displaying transactions
-     *                    informations in view : receiver's name, reason of transaction and amount
+     * @param sendTransaction A model DTO {@link SendTransaction} that displaying transactions
+     *                    information in view : receiver's name, reason of transaction and amount
      * @param result      An Interface that permit check validity of entries on fields with annotation @Valid
      * @param model       Interface that defines a support for model attributes
      * @return A String containing the name of view
@@ -72,11 +72,7 @@ public class TransactionController {
             log.error("Controller: Error in fields");
             return "transaction";
         }
-        if (result.getRawFieldValue("receiverEmail").equals("")) {
-            result.rejectValue("receiverEmail", "NotBlank", "field friend Email can not be null");
-        }
         try {
-//            sendTransaction.setUserEmitter(transaction.getUserEmitter());
             transactionService.addTransaction(sendTransaction);
         } catch (BalanceInsufficientException ex) {
             result.rejectValue("amount", "BalanceInsufficientException", ex.getMessage());

@@ -48,7 +48,7 @@ CREATE TABLE transfer
 (
     transfer_id        TINYINT AUTO_INCREMENT NOT NULL,
     date               TIMESTAMP              NOT NULL default NOW(),
-    type               VARCHAR(10)            NOT NULL,
+    transfer_type      ENUM ('CREDIT','DEBIT'),
     amount             DECIMAL(8, 2)          NOT NULL,
     description        VARCHAR(300),
     user_email         VARCHAR(100)           NOT NULL,
@@ -57,8 +57,8 @@ CREATE TABLE transfer
 )
     ENGINE = innoDB;
 
-# INSERT INTO transfer(amount, description, type, user_email,post_trade_balance)
-# VALUES (100.0, 'account Bank BNP', 'credit', 'dada@email.fr',200.0);
+INSERT INTO transfer(amount, description, transfer_type, user_email, post_trade_balance)
+VALUES (100.0, 'account Bank BNP', 'CREDIT', 'dada@email.fr', 200.0);
 
 
 CREATE TABLE friend

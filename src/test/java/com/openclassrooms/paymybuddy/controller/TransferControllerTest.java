@@ -2,6 +2,7 @@ package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
+import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.repository.ITransferRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.TransferService;
@@ -56,8 +57,8 @@ public class TransferControllerTest {
         mockMvcTransfer.perform(get("/transfer"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transfer"))
-                .andExpect(model().size(2))
-                .andExpect(model().attributeExists("displayingTransfer", "transfers"))
+                .andExpect(model().size(3))
+                .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes"))
                 .andDo(print());
     }
 
@@ -76,22 +77,22 @@ public class TransferControllerTest {
         //GIVEN
         List<DisplayingTransfer> displayingTransferList = new ArrayList<>();
         DisplayingTransfer displayingTransfer1 = new DisplayingTransfer(
-                "transfer payMyBuddy", "credit", 100.0, 200.0);
-        DisplayingTransfer displayingTransfer2 = new DisplayingTransfer("transfer Montepio", "debit", -50.0, 150.0);
+                "transfer payMyBuddy", TransferTypeEnum.CREDIT, 100.0, 200.0);
+        DisplayingTransfer displayingTransfer2 = new DisplayingTransfer("transfer Montepio", TransferTypeEnum.DEBIT, -50.0, 150.0);
 
         displayingTransferList.add(displayingTransfer1);
         displayingTransferList.add(displayingTransfer2);
-        when(transferServiceMock.getCurrentUserTransfers()).thenReturn(displayingTransferList);
+//        when(transferServiceMock.getCurrentUserTransfers()).thenReturn(displayingTransferList);
         //WHEN
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.get("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())).andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("displayingTransfer", "transfers"))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("type", is("debit")))))
+                .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes"))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("transferType", is(TransferTypeEnum.DEBIT)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(-50.0)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(150.0)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer Montepio")))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("type", is("credit")))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("transferType", is(TransferTypeEnum.CREDIT)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer payMyBuddy")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(100.0)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(200.0)))))
@@ -105,13 +106,14 @@ public class TransferControllerTest {
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", String.valueOf(50.0))
-                        .param("type", "credit")
-                        .param("postTradeBalance", String.valueOf(120))
-                ).andExpect(status().isOk())
+                        .param("transferType", String.valueOf(TransferTypeEnum.CREDIT))
+                        .param("postTradeBalance", String.valueOf(120)))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transfer"))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("amount", is(50.0))))
-                .andExpect(model().attribute("displayingTransfer", hasProperty("type", is("credit"))))
+                .andExpect(model().attribute("displayingTransfer", hasProperty("transferType", is(TransferTypeEnum.CREDIT))))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("postTradeBalance", is(120.0))))
                 .andDo(print());
     }
@@ -123,15 +125,16 @@ public class TransferControllerTest {
         // THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
                                 .param("amount", String.valueOf(80.0))
-                                .param("type", "debit")
+                                .param("transferType", TransferTypeEnum.DEBIT.name())
                                 .param("balance", String.valueOf(100.0))
                                 .param("postTradeBalance", String.valueOf(180))
 //                        .param("userEmail", SecurityUtilities.userEmail))
                 ).andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transfer"))
+                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes"))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("amount", is(80.0))))
-                .andExpect(model().attribute("displayingTransfer", hasProperty("type", is("debit"))))
+                .andExpect(model().attribute("displayingTransfer", hasProperty("transferType", is(TransferTypeEnum.DEBIT))))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("postTradeBalance", is(180.0))))
                 .andDo(print());
     }
@@ -144,14 +147,15 @@ public class TransferControllerTest {
         // THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
                                 .param("amount", String.valueOf(180.0))
-                                .param("type", "debit")
+                                .param("transferType", TransferTypeEnum.DEBIT.name())
                                 .param("balance", String.valueOf(100.0))
 //                        .param("userEmail", SecurityUtilities.userEmail))
                 ).andExpect(status().isOk())
                 .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes"))
                 .andExpect(view().name("transfer"))
                 .andExpect(model().attribute("displayingTransfer", hasProperty("amount", is(180.0))))
-                .andExpect(model().attribute("displayingTransfer", hasProperty("type", is("debit"))))
+                .andExpect(model().attribute("displayingTransfer", hasProperty("transferType", is(TransferTypeEnum.DEBIT))))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "amount", "BalanceInsufficient"))
                 .andDo(print());
@@ -164,8 +168,9 @@ public class TransferControllerTest {
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "")
-                        .param("type", "credit"))
+                        .param("transferType", TransferTypeEnum.CREDIT.name()))
                 .andExpect(status().isOk())
+                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "amount", "NotNull"))
@@ -179,8 +184,9 @@ public class TransferControllerTest {
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "0.0")
-                        .param("type", "credit"))
+                        .param("transferType", TransferTypeEnum.CREDIT.name()))
                 .andExpect(status().isOk())
+                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes"))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "amount", "Min"))
                 .andDo(print());
@@ -194,11 +200,12 @@ public class TransferControllerTest {
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "20")
-                        .param("type", ""))
+                        .param("transferType", ""))
                 .andExpect(status().isOk())
+                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "type", "NotBlank"))
+                .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "transferType", "NotNull"))
                 .andDo(print());
     }
 
@@ -209,12 +216,13 @@ public class TransferControllerTest {
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("amount", "")
-                        .param("type", ""))
+                        .param("transferType", ""))
                 .andExpect(status().isOk())
+                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(2))
                 .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "amount", "NotNull"))
-                .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "type", "NotBlank"))
+                .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "transferType", "NotNull"))
                 .andDo(print());
     }
 }

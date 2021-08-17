@@ -4,11 +4,15 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transfer;
+import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.ITransferRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -36,7 +40,7 @@ public class TransferService implements ITransferService {
         User currentUser = userRepository.findByEmail(SecurityUtilities.userEmail);
 
         //update of balance when transfer type is debit
-        if (displayingTransfer.getType().equalsIgnoreCase("debit")) {
+        if (displayingTransfer.getTransferType()== TransferTypeEnum.DEBIT) {
             if (currentUser.getBalance() > displayingTransfer.getAmount()) {
                 currentUser.setBalance((currentUser.getBalance()) - (displayingTransfer.getAmount()));
             } else {
@@ -48,7 +52,7 @@ public class TransferService implements ITransferService {
             currentUser.setBalance(currentUser.getBalance() + displayingTransfer.getAmount());
         }
         Transfer transfer = new Transfer();
-        transfer.setType(displayingTransfer.getType());
+        transfer.setTransferType(displayingTransfer.getTransferType());
         transfer.setPostTradeBalance(currentUser.getBalance());
         transfer.setDescription(displayingTransfer.getDescription());
         transfer.setDate(LocalDateTime.now());
@@ -58,20 +62,22 @@ public class TransferService implements ITransferService {
         return transferRepository.save(transfer);
     }
 
-    public List<DisplayingTransfer> getCurrentUserTransfers() {
-        List<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.userEmail);
+    public Page<DisplayingTransfer> getCurrentUserTransfers(Pageable pageable) {
+        Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.userEmail,pageable);
+        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.userEmail);
+        int totalElements = (int) transfers.getTotalElements();
 
-        List<DisplayingTransfer> displayingListTransfer = transfers.stream()
+                return new PageImpl<DisplayingTransfer>(transfers.stream()
                 .map(transfer -> {
-                    if (transfer.getType().equalsIgnoreCase("debit")) {
-                        return new DisplayingTransfer(transfer.getDescription(), transfer.getType(), -transfer.getAmount(), transfer.getPostTradeBalance());
+                    if (transfer.getTransferType() == TransferTypeEnum.DEBIT) {
+                        return new DisplayingTransfer(transfer.getDescription(), transfer.getTransferType(), -transfer.getAmount(), transfer.getPostTradeBalance());
                     } else {
-                        return new DisplayingTransfer(transfer.getDescription(), transfer.getType(), +transfer.getAmount(), transfer.getPostTradeBalance());
+                        return new DisplayingTransfer(transfer.getDescription(), transfer.getTransferType(), +transfer.getAmount(), transfer.getPostTradeBalance());
                     }
 
                 })
-                .collect(Collectors.toList());
-        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.userEmail);
-        return displayingListTransfer;
+                .collect(Collectors.toList()), pageable, totalElements);
+
+//        return displayingListTransfer;
     }
 }

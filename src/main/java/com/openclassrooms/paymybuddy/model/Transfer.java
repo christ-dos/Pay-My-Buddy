@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Transfer {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "transfer_id")
@@ -20,7 +21,9 @@ public class Transfer {
 
     private LocalDateTime date;
 
-    private String type;
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "transfer_type")
+    private TransferTypeEnum transferType;
 
     private Double amount;
 
@@ -38,11 +41,11 @@ public class Transfer {
         return "Transfer{" +
                 "transferId=" + transferId +
                 ", date=" + date +
-                ", type='" + type + '\'' +
+                ", transferType=" + transferType +
                 ", amount=" + amount +
                 ", description='" + description + '\'' +
+                ", postTradeBalance=" + postTradeBalance +
                 ", user=" + user +
                 '}';
     }
-
 }

@@ -105,7 +105,7 @@
                   th:object="${sendTransaction}" method="post">
                 <div class="row justify-content-center">
                     <!--*****************Input select friendEmail************-->
-                    <div class="col-12 col-md-5 col-lg-2 mb-3 d-flex flex-column">
+                    <div class="col-12 col-md-5 col-lg-3 mb-3 d-flex flex-column">
                         <select th:field="*{receiverEmail}"  aria-label="form-select-sm"
                             id="friendEmailSelect">
                         <option selected value="">Select A Connection</option>
@@ -116,7 +116,7 @@
                        th:errorclass="error"></p>
                     </div>
                     <!--*************Input Number**************-->
-                    <div class="col-12 col-md-2 col-lg-2 mb-3 d-flex flex-column">
+                    <div class="col-12 col-md-2 col-lg-3 mb-3 d-flex flex-column">
                     <input th:field="*{amount}" class="text-right" type="number"
                            id="howmuch" step="0.01"
                            placeholder="0€" min="0" max="10000">
@@ -125,7 +125,7 @@
                        th:errorclass="error"></p>
                     </div>
                     <!--*****************Input description************-->
-                    <div class="col-12 col-md-5 col-lg-4 mb-3" >
+                    <div class="col-12 col-md-5 col-lg-3 mb-3" >
                      <textarea th:field="*{description}" class="form-control"
                                id="exampleFormControlTextarea1"
                                rows="1"

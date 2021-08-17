@@ -1,5 +1,6 @@
 package com.openclassrooms.paymybuddy.DTO;
 
+import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import lombok.*;
 
 import javax.validation.constraints.Min;
@@ -12,10 +13,11 @@ import javax.validation.constraints.NotNull;
 @Getter
 public class DisplayingTransfer {
 
+
     private String description;
 
-    @NotBlank(message = "Type cannot be blank")
-    private String type;
+    @NotNull(message = "Type cannot be empty")
+    private TransferTypeEnum transferType;
 
     @Min(value = 1, message = "Amount cannot be less than 1")
     @NotNull(message = "Amount cannot be null")
@@ -27,8 +29,9 @@ public class DisplayingTransfer {
     public String toString() {
         return "DisplayingTransfer{" +
                 "description='" + description + '\'' +
-                ", type='" + type + '\'' +
+                ", transferType=" + transferType +
                 ", amount=" + amount +
+                ", postTradeBalance=" + postTradeBalance +
                 '}';
     }
 }

@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
  * @author Christine Duarte
  */
 @Entity
-//@Data
 @Getter
 @Setter
 @Builder
@@ -53,25 +52,7 @@ public class Transaction {
     private LocalDateTime date;
 
     /**
-     * A String containing the emitter email,
-     * email which emitted the transaction ,
-     * it's the foreign key that linked the transaction at the user emitter
-     */
-//    @Column(name = "emitter_email")/* supprimer*/
-//    private String emitterEmail;
-
-    /**
-     * A String containing the receiver email,
-     * email which received the transaction ,
-     * it's the foreign key that linked the transaction at the user receiver
-     * this field in the UI cannot be blank
-     */
-//    @NotBlank(message = "Friend email cannot be null")
-//    @Column(name = "receiver_email")/* supprimer*/
-//    private String receiverEmail;
-
-    /**
-     * An Instance of User that permit joint the table transaction with the table user
+     * An Instance of User emitter that permit joint the table transaction with the table user
      * in the column emitter_email
      * relationship type of many to one
      */
@@ -79,6 +60,11 @@ public class Transaction {
     @JoinColumn(name = "emitter_email")
     private User userEmitter;
 
+    /**
+     * An Instance of User receiver that permit joint the table transaction with the table user
+     * in the column receiver_email
+     * relationship type of many to one
+     */
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "receiver_email")
     private User userReceiver;
