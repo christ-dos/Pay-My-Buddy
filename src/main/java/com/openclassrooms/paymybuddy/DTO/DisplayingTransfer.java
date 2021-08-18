@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 @Getter
 public class DisplayingTransfer {
 
-
     private String description;
 
     @NotNull(message = "Type cannot be empty")

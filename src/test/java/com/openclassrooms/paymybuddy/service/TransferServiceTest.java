@@ -1,6 +1,5 @@
 package com.openclassrooms.paymybuddy.service;
 
-import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
@@ -15,14 +14,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
@@ -125,7 +125,7 @@ public class TransferServiceTest {
     }
 
     @Test
-    public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnListDisplayingTransferForDadaWithSignNegativeIfTypeIsDebit(){
+    public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnPageOfDisplayingTransferForDadaWithSignNegativeIfTypeIsDebit() {
         //GIVEN
         String userEmail = SecurityUtilities.userEmail;
         User userTransfer1 = User.builder()
@@ -142,34 +142,55 @@ public class TransferServiceTest {
                 .balance(100.0)
                 .build();
 
-         List<Transfer> transfersList = new ArrayList<>();
-         Transfer transfer1  = Transfer.builder()
-                         .amount(20.0).description("transfer PayMyBuddy").transferType(TransferTypeEnum.CREDIT).user(userTransfer1).build();
-        Transfer transfer2  = Transfer.builder()
+        Pageable pageable = PageRequest.of(0, 5);
+
+        DisplayingTransfer displayingTransferCredit = new DisplayingTransfer();
+        displayingTransferCredit.setTransferType(TransferTypeEnum.CREDIT);
+        displayingTransferCredit.setAmount(20.0);
+        displayingTransferCredit.setDescription("transfer PayMyBuddy");
+
+        DisplayingTransfer displayingTransferDebitBalanceEnough = new DisplayingTransfer();
+        displayingTransferDebitBalanceEnough.setTransferType(TransferTypeEnum.DEBIT);
+        displayingTransferDebitBalanceEnough.setAmount(30.0);
+        displayingTransferDebitBalanceEnough.setDescription("transfer BNP");
+
+        List<DisplayingTransfer> displayingTransferList = new ArrayList<>();
+        displayingTransferList.add(displayingTransferCredit);
+        displayingTransferList.add(displayingTransferDebitBalanceEnough);
+
+        Transfer transfer1 = Transfer.builder()
+                .amount(20.0).description("transfer PayMyBuddy").transferType(TransferTypeEnum.CREDIT).user(userTransfer1).build();
+        Transfer transfer2 = Transfer.builder()
                 .amount(30.0).description("transfer BNP").transferType(TransferTypeEnum.DEBIT).user(userTransfer2).build();
+        List<Transfer> transferList = new ArrayList<>();
+        transferList.add(transfer1);
+        transferList.add(transfer2);
+        Page<Transfer> transferPage = new PageImpl<>(transferList);
 
-        transfersList.add(transfer1);
-        transfersList.add(transfer2);
 
-////        when(transferRepositoryMock.findTransfersByUserEmailOrderByDateDesc(isA(String.class),isA(Pageable.class))).thenReturn(transfersList);
-////        //WHEN
-////        List<DisplayingTransfer> displayingTransfersResult = transferServiceTest.getCurrentUserTransfers();
-//        //THEN
-//        assertEquals(2,displayingTransfersResult.size());
-//        assertEquals(TransferTypeEnum.CREDIT,displayingTransfersResult.get(0).getTransferType());
-//        assertEquals(+20,displayingTransfersResult.get(0).getAmount());
-//        assertEquals(TransferTypeEnum.DEBIT,displayingTransfersResult.get(1).getTransferType());
-//        assertEquals(-30,displayingTransfersResult.get(1).getAmount());
+        when(transferRepositoryMock.findTransfersByUserEmailOrderByDateDesc(isA(String.class), isA(Pageable.class))).thenReturn(transferPage);
+        //WHEN
+        Page<DisplayingTransfer> displayingTransfersResult = transferServiceTest.getCurrentUserTransfers(pageable);
+        //THEN
+        assertEquals(2, displayingTransfersResult.stream().count());
+        assertEquals(TransferTypeEnum.CREDIT, displayingTransfersResult.getContent().get(0).getTransferType());
+        assertEquals(+20, displayingTransfersResult.getContent().get(0).getAmount());
+        assertEquals(TransferTypeEnum.DEBIT, displayingTransfersResult.getContent().get(1).getTransferType());
+        assertEquals(-30, displayingTransfersResult.getContent().get(1).getAmount());
     }
 
     @Test
-    void getCurrentUserTransfersTest_whenCurrentUserTransferNotExist_thenReturnNull() {
+    void getCurrentUserTransfersTest_whenCurrentUserTransferNotExist_thenReturnAPageEmpty() {
         //GIVEN
-//        List<DisplayingTransaction> emptyListTransfer = new ArrayList<>();
-//        //WHEN
-//        List<DisplayingTransfer> transfersResult = transferServiceTest.getCurrentUserTransfers();
-//        //THEN
-//        assertEquals(emptyListTransfer, transfersResult);
+        Pageable pageable = PageRequest.of(0,5);
+        List<Transfer> displayingTransferList = new ArrayList<>();
+        Page<Transfer> displayingTransferPageEmpty = new PageImpl<>(displayingTransferList);
+        when(transferRepositoryMock.findTransfersByUserEmailOrderByDateDesc(isA(String.class), isA(Pageable.class))).thenReturn(displayingTransferPageEmpty);
+        //WHEN
+        Page<DisplayingTransfer> transfersResult = transferServiceTest.getCurrentUserTransfers(pageable);
+        //THEN
+        //verify that the page is empty
+        assertTrue(transfersResult.getContent().isEmpty());
     }
 
 }

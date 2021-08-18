@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,8 +39,8 @@ public class TransferService implements ITransferService {
         User currentUser = userRepository.findByEmail(SecurityUtilities.userEmail);
 
         //update of balance when transfer type is debit
-        if (displayingTransfer.getTransferType()== TransferTypeEnum.DEBIT) {
-            if (currentUser.getBalance() > displayingTransfer.getAmount()) {
+        if (displayingTransfer.getTransferType() == TransferTypeEnum.DEBIT) {
+            if (currentUser.getBalance() >= displayingTransfer.getAmount()) {
                 currentUser.setBalance((currentUser.getBalance()) - (displayingTransfer.getAmount()));
             } else {
                 log.error("Service: Balance insufficient for execute the transfer");
@@ -63,11 +62,11 @@ public class TransferService implements ITransferService {
     }
 
     public Page<DisplayingTransfer> getCurrentUserTransfers(Pageable pageable) {
-        Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.userEmail,pageable);
+        Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.userEmail, pageable);
         log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.userEmail);
         int totalElements = (int) transfers.getTotalElements();
 
-                return new PageImpl<DisplayingTransfer>(transfers.stream()
+        return new PageImpl<DisplayingTransfer>(transfers.stream()
                 .map(transfer -> {
                     if (transfer.getTransferType() == TransferTypeEnum.DEBIT) {
                         return new DisplayingTransfer(transfer.getDescription(), transfer.getTransferType(), -transfer.getAmount(), transfer.getPostTradeBalance());

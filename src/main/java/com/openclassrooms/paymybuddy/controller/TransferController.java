@@ -63,23 +63,23 @@ public class TransferController {
 
     private void transferModelsPageable(Model model, @RequestParam("page") Optional<Integer> page,
                                         @RequestParam("size") Optional<Integer> size) {
-        int currentPage = page.orElse(1);
+        int currentPage = page.orElse(0);
         int pageSize = size.orElse(5);
 
-        Page<DisplayingTransfer> transfers = transferService.getCurrentUserTransfers(PageRequest.of(currentPage -1, pageSize));
+        Page<DisplayingTransfer> transfers = transferService.getCurrentUserTransfers(PageRequest.of(currentPage , pageSize));
 
         model.addAttribute("transfers", transfers);
         model.addAttribute("totalPages", transfers.getTotalPages());
         model.addAttribute("currentPage",page);
         model.addAttribute("transferTypes", TransferTypeEnum.values());
 
-        int totalPages = transfers.getTotalPages();
-        if (totalPages > 0) {
-            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-                    .boxed()
-                    .collect(Collectors.toList());
-            model.addAttribute("pageNumbers", pageNumbers);
-        }
+//        int totalPages = transfers.getTotalPages();
+//        if (totalPages > 0) {
+//            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+//                    .boxed()
+//                    .collect(Collectors.toList());
+//            model.addAttribute("pageNumbers", pageNumbers);
+//        }
 
     }
 

@@ -122,6 +122,7 @@ public class UserController {
 //    @RolesAllowed({"USER"})
     @GetMapping("/profile")
     public String getProfileView(Model model) {
+        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
         log.info("Controller: The View profile displaying");
 
         return "profile";
