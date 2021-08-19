@@ -1,11 +1,9 @@
 package com.openclassrooms.paymybuddy.controller;
 
-import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
-import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -16,20 +14,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -49,6 +41,7 @@ public class UserControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsServiceMock;
+
 
 //    @BeforeEach
 //    public void setup() {
@@ -134,18 +127,18 @@ public class UserControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void showAddFriendViewTest_whenUrlIsAddAndWrong_thenReturnStatusNotFound() throws Exception {
+    public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/add"))
-                .andExpect(status().isNotFound())
+        mockMvcUser.perform(get("/addfriend"))
+                .andExpect(status().isOk())
                 .andDo(print());
     }
 
     @WithMockUser(value = "spring")
     @Test
-    public void addFriendToListConnectionTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getListConnectionsTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -254,6 +247,96 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UnableAddingOwnEmail"))
                 .andDo(print());
     }
+
+    /*-----------------------------------------------------------------------------------------------------
+                                      Tests View profile
+   ------------------------------------------------------------------------------------------------------*/
+    @WithMockUser(value = "spring")
+    @Test
+    public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
+        //GIVEN
+        User currentUser = User.builder()
+                .email("dada@email.fr")
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .password("pass")
+                .build();
+        when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/profile")
+                        .param("email", SecurityUtilities.userEmail))
+                .andExpect(status().isOk())
+                .andExpect(view().name("profile"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanchez"))))
+                .andExpect(model().attribute("currentUser", hasProperty("password", is("pass"))))
+                .andDo(print());
+    }
+
+    @WithMockUser(value = "spring")
+    @Test
+    public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfAndWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/prof"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenCurrentUserFieldFirstNameIsBlank_thenReturnFieldErrorNotBlank() throws Exception {
+        //GIVEN
+        User currentUser = User.builder()
+                .email(SecurityUtilities.userEmail)
+                .firstName("")
+                .lastName("Duhamel")
+                .password("passpass")
+                .build();
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", currentUser.getEmail())
+                        .param("firstName", currentUser.getFirstName())
+                        .param("lastName", currentUser.getLastName())
+                        .param("password", currentUser.getPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeExists("user","currentUser"))
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenCurrentUserIskikine_thenReturnUserkikineUpdated() throws Exception {
+        //GIVEN
+        User currentUser = User.builder()
+                .email(SecurityUtilities.userEmail)
+                .firstName("Christine")
+                .lastName("Duhamel")
+                .password("passpass")
+                .build();
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", currentUser.getEmail())
+                        .param("firstName", currentUser.getFirstName())
+                        .param("lastName", currentUser.getLastName())
+                        .param("password", currentUser.getPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("user", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("user", hasProperty("firstName", is("Christine"))))
+                .andExpect(model().attribute("user", hasProperty("lastName", is("Duhamel"))))
+                .andExpect(model().attribute("user", hasProperty("password", is("passpass"))))
+                .andDo(print());
+    }
+
+
 }
 
 

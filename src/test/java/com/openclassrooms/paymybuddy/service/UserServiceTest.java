@@ -111,7 +111,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void addFriendCurrentUserListTest_whenFriendAddedfrancoisExistInDBAndIsPresentInListFriend_thenThrowsUserAlreadyExistException() {
+    public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsPresentInListFriend_thenThrowsUserAlreadyExistException() {
         //GIVEN
         String userEmail = SecurityUtilities.userEmail;
         String friendEmail = "françois@email.fr";
@@ -129,7 +129,6 @@ public class UserServiceTest {
                 new Friend(userEmail, "amartin@email.fr", LocalDateTime.now())
         ));
 
-        Friend friendToAdd = new Friend(userEmail, friendEmail, LocalDateTime.now());
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(user);
         when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(userEmail)).thenReturn(friends);
         //WHEN
@@ -164,6 +163,7 @@ public class UserServiceTest {
                 .lastName("Dujardin")
                 .balance(30.50)
                 .accountBank(170974).build();
+
         User user2 = User.builder()
                 .email("amartin@email.fr")
                 .password("monTropToppassword")
@@ -226,6 +226,37 @@ public class UserServiceTest {
         User userResult = userServiceTest.getUserByEmail(userEmail);
         //THEN
         assertNull(userResult);
+    }
+
+    @Test
+    public void addUserTest_whenUserExistInDB_thenReturnUserUpdated(){
+        //GIVEN
+        User userToUpdate = User.builder()
+                .email(SecurityUtilities.userEmail)
+                .password("pass")
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .balance(30.50)
+                .accountBank(170974).build();
+
+        User userUpdated = User.builder()
+                .email(SecurityUtilities.userEmail)
+                .firstName("Damien")
+                .lastName("Sanches")
+                .password("passpass")
+                .balance(30.50)
+                .accountBank(170974)
+                .build();
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userToUpdate);
+        when(userRepositoryMock.save(isA(User.class))).thenReturn(userUpdated);
+        //WHEN
+        User userSavedResult = userServiceTest.addUser(userUpdated);
+        //THEN
+        assertEquals(SecurityUtilities.userEmail, userSavedResult.getEmail());
+        assertEquals("Damien", userSavedResult.getFirstName());
+        assertEquals("Sanches", userSavedResult.getLastName());
+        assertEquals("passpass", userSavedResult.getPassword());
+
     }
 
 

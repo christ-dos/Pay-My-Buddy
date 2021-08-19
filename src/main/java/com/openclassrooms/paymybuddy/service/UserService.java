@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,6 +54,21 @@ public class UserService implements IUserService {
     public Iterable<User> getUsers() {
         log.info("UserService: Display list of Users");
         return userRepository.findAll();
+    }
+
+    /**
+     * Method which add a User to the table User
+     *
+     * @return A {@link User} Object
+     */
+    @Override
+    public User addUser(User user) {
+        User userToUpdate = userRepository.findByEmail(SecurityUtilities.userEmail);
+        userToUpdate.setEmail(SecurityUtilities.userEmail);
+        userToUpdate.setFirstName(user.getFirstName());
+        userToUpdate.setLastName(user.getLastName());
+        userToUpdate.setPassword(user.getPassword());
+        return userRepository.save(userToUpdate);
     }
 
     /**

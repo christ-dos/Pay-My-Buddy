@@ -15,4 +15,5 @@ public interface IUserService {
 
     List<FriendList> getFriendListByCurrentUserEmail();
 
+    User addUser(User user);
 }

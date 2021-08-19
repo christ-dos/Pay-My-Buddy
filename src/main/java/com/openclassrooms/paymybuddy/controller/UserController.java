@@ -64,6 +64,7 @@ public class UserController {
 
         return "login";
     }
+
     //    @RolesAllowed({"USER", "ADMIN"})
     @PostMapping("/login")
     public String submitLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
@@ -93,12 +94,13 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/home")
-    public String getUserInformationHomeView(@ModelAttribute("user")User user, Model model) {
+    public String getUserInformationHomeView(@ModelAttribute("user") User user, Model model) {
         log.info("Controller: The View home displaying");
         model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.userEmail));
 
         return "home";
     }
+
     /**
      * Method GET to displaying the view for contact  in endpoint in "/contact"
      *
@@ -121,9 +123,34 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/profile")
-    public String getProfileView(Model model) {
-        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
+    public String getCurrentUserInformationInProfileView( @ModelAttribute("user") User user,@ModelAttribute ("currentUser") User currentUser,
+                                                          Model model) {
+       model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
+       model.addAttribute("user", user);
         log.info("Controller: The View profile displaying");
+
+        return "profile";
+    }
+
+    /**
+     * Method POST to collect information in the view profile to update currentUser profile in endpoint in "/profile"
+     *
+     * @param model Interface that defines a support for model attributes
+     * @return A String containing the name of view
+     */
+//    @RolesAllowed({"USER"})
+    @PostMapping("/profile")
+    public String updateCurrentUserInformation(@Valid @ModelAttribute("user") User user, BindingResult result, Model model) {
+        if(result.hasFieldErrors("firstName")){
+            model.addAttribute("user",user);
+            model.addAttribute("currentUser",user);
+            log.error("Controller: Error in fields");
+            return "profile";
+        }
+        model.addAttribute("user",user);
+        model.addAttribute("currentUser",user);
+        userService.addUser(user);
+        log.info("Controller: profile updated:" + SecurityUtilities.userEmail);
 
         return "profile";
     }
