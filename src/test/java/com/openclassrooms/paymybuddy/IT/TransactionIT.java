@@ -1,6 +1,5 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -16,9 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
@@ -112,9 +108,12 @@ public class TransactionIT {
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         Transaction transaction = Transaction.builder()
-                .userEmitter(User.builder().email("dada@email.fr").build())
-                .description("sweet").amount(10.0).userReceiver(
-                        User.builder().email("ggpassain@email.fr").build()
+                .userEmitter(User.builder()
+                        .email("dada@email.fr").password("passpasspass").build())
+                        .description("sweet").amount(10.0)
+                        .userReceiver(User.builder()
+                                .email("ggpassain@email.fr").
+                                password("passpasspass").build()
                 )
                 .build();
         //WHEN
@@ -124,6 +123,7 @@ public class TransactionIT {
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
                         .param("receiverEmail", transaction.getUserReceiver().getEmail())
                         .param("amount", String.valueOf(transaction.getAmount()))
+                        .param("password", transaction.getUserEmitter().getPassword(),transaction.getUserReceiver().getPassword())
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))

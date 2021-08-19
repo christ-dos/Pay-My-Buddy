@@ -79,12 +79,12 @@
                 <h3 class="mb-0">User Information</h3>
             </div>
             <div class="card-body">
-                <form class="form" th:action="@{/profile}" th:object="${user}" action="#" role="form" autocomplete="off"
+                <form class="form" th:action="@{/profile}" th:object="${updateProfile}" action="#" role="form" autocomplete="off"
                       method="post">
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">FirstName</label>
                         <div class="col-lg-9">
-                            <input th:value="${currentUser.firstName}"  id="firstName" name="firstName"
+                            <input th:label="firstName" th:value="${currentUser.firstName}"  id="firstName" name="firstName"
                                    class="form-control" type="text" value="Jane">
                             <p th:if="${#fields.hasErrors()}"
                                th:errors="*{firstName}"
@@ -104,16 +104,15 @@
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Username</label>
                         <div class="col-lg-9">
-                            <p th:field="*{email}" th:text="${currentUser.email}">exemple@email.fr</p>
+                            <p th:text="${currentUser.email}" name="email">exemple@email.fr</p>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Password</label>
                         <div class="col-lg-9">
                             <input th:value="${currentUser.password}" id="password" name="password" class="form-control"
-                                   type="password" value="1234588555884">
+                                   type="text" value="1234588555884">
                             <p th:if="${#fields.hasAnyErrors()}"
-
                                th:errors="*{password}"
                                th:errorclass="error"></p>
                         </div>
@@ -122,8 +121,11 @@
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Confirm</label>
                         <div class="col-lg-9">
-                            <input th:value="${currentUser.password}" id="passwordConfirm" name="passwordConfirm"
-                                   class="form-control" type="password" value="1234588555884">
+                            <input th:value="${currentUser.password}" id="confirmPassword" name="confirmPassword"
+                                   class="form-control" type="text" value="1234588555884">
+                            <p th:if="${#fields.hasAnyErrors()}"
+                               th:errors="*{confirmPassword}"
+                               th:errorclass="error"></p>
                         </div>
                     </div>
                     <div class="form-group row mt-2">

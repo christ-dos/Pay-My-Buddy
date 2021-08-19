@@ -32,21 +32,20 @@ public class User {
      * A String containing the password
      */
 //    @NotBlank(message = "password cannot be blank")
-    @Size(min = 8, max = 30, message = "Password cannot be blank")
-    @Min(value = 255, message = "Password must be between 8 and 30 character")
+//    @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
     private String password;
 
     /**
      * A String containing the firstName
      */
-    @NotBlank(message = "First name cannot be blank")
+//    @NotBlank(message = "First name cannot be blank")
     @Column(name = "first_name")
     private String firstName;
 
     /**
      * A String containing the lastName
      */
-    @NotBlank(message = "Last name cannot be blank")
+//    @NotBlank(message = "Last name cannot be blank")
     @Column(name = "last_name")
     private String lastName;
 

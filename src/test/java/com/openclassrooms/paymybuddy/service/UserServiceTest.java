@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
@@ -231,6 +232,20 @@ public class UserServiceTest {
     @Test
     public void addUserTest_whenUserExistInDB_thenReturnUserUpdated(){
         //GIVEN
+//        UpdateProfile updateProfileUserToUpdate = new UpdateProfile();
+//        updateProfileUserToUpdate.setUserName(SecurityUtilities.userEmail);
+//        updateProfileUserToUpdate.setFirstName("Damien");
+//        updateProfileUserToUpdate.setLastName("Sanchez");
+//        updateProfileUserToUpdate.setPassword("pass");
+//        updateProfileUserToUpdate.setConfirmPassword("pass");
+
+        UpdateProfile updateProfileUserUpdated = new UpdateProfile();
+        updateProfileUserUpdated.setEmail(SecurityUtilities.userEmail);
+        updateProfileUserUpdated.setFirstName("Damien");
+        updateProfileUserUpdated.setLastName("Sanches");
+        updateProfileUserUpdated.setPassword("passpass");
+        updateProfileUserUpdated.setConfirmPassword("passpass");
+
         User userToUpdate = User.builder()
                 .email(SecurityUtilities.userEmail)
                 .password("pass")
@@ -247,10 +262,11 @@ public class UserServiceTest {
                 .balance(30.50)
                 .accountBank(170974)
                 .build();
+
         when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userToUpdate);
         when(userRepositoryMock.save(isA(User.class))).thenReturn(userUpdated);
         //WHEN
-        User userSavedResult = userServiceTest.addUser(userUpdated);
+        User userSavedResult = userServiceTest.addUser(updateProfileUserUpdated);
         //THEN
         assertEquals(SecurityUtilities.userEmail, userSavedResult.getEmail());
         assertEquals("Damien", userSavedResult.getFirstName());

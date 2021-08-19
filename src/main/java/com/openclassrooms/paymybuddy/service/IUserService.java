@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
 
@@ -15,5 +16,5 @@ public interface IUserService {
 
     List<FriendList> getFriendListByCurrentUserEmail();
 
-    User addUser(User user);
+    User addUser(UpdateProfile updateProfile);
 }

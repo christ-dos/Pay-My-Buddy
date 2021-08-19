@@ -1,8 +1,10 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
@@ -123,10 +125,10 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/profile")
-    public String getCurrentUserInformationInProfileView( @ModelAttribute("user") User user,@ModelAttribute ("currentUser") User currentUser,
-                                                          Model model) {
-       model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
-       model.addAttribute("user", user);
+    public String getCurrentUserInformationInProfileView(@ModelAttribute("updateProfile") UpdateProfile updateProfile, @ModelAttribute("currentUser") User currentUser,
+                                                         Model model) {
+        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
+        model.addAttribute("updateProfile", updateProfile);
         log.info("Controller: The View profile displaying");
 
         return "profile";
@@ -140,16 +142,22 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @PostMapping("/profile")
-    public String updateCurrentUserInformation(@Valid @ModelAttribute("user") User user, BindingResult result, Model model) {
-        if(result.hasFieldErrors("firstName")){
-            model.addAttribute("user",user);
-            model.addAttribute("currentUser",user);
+    public String updateCurrentUserInformation(@Valid @ModelAttribute("updateProfile") UpdateProfile updateProfile, BindingResult result, Model model) {
+        if (result.hasFieldErrors()) {
+            model.addAttribute("updateProfile", updateProfile);
+            model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
             log.error("Controller: Error in fields");
             return "profile";
         }
-        model.addAttribute("user",user);
-        model.addAttribute("currentUser",user);
-        userService.addUser(user);
+        try {
+            userService.addUser(updateProfile);
+        } catch (PasswordNotMatcherException ex) {
+            result.rejectValue("confirmPassword", "ConfirmPasswordNotMatch", ex.getMessage());
+            log.error("Controller: Confirm password not match with password");
+        }
+        model.addAttribute("updateProfile", updateProfile);
+        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
+
         log.info("Controller: profile updated:" + SecurityUtilities.userEmail);
 
         return "profile";

@@ -1,7 +1,9 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.Friend;
@@ -62,12 +64,15 @@ public class UserService implements IUserService {
      * @return A {@link User} Object
      */
     @Override
-    public User addUser(User user) {
+    public User addUser(UpdateProfile updateProfile) {
         User userToUpdate = userRepository.findByEmail(SecurityUtilities.userEmail);
+        if(updateProfile.getConfirmPassword() != updateProfile.getPassword()){
+            throw new PasswordNotMatcherException("Confirm password not match with password");
+        }
         userToUpdate.setEmail(SecurityUtilities.userEmail);
-        userToUpdate.setFirstName(user.getFirstName());
-        userToUpdate.setLastName(user.getLastName());
-        userToUpdate.setPassword(user.getPassword());
+        userToUpdate.setFirstName(updateProfile.getFirstName());
+        userToUpdate.setLastName(updateProfile.getLastName());
+        userToUpdate.setPassword(updateProfile.getConfirmPassword());
         return userRepository.save(userToUpdate);
     }
 
