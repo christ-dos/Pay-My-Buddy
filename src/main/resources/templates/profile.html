@@ -20,7 +20,7 @@
     <div class="container-fluid ">
         <div class="row align-nav">
             <div class="col-4  d-flex flex-row justify-content-start">
-                <a class="navbar-brand btn-success text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
+                <a class="navbar-brand btn-success bg-gradient text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
                     My Buddy</a>
                 <button class="navbar-toggler gray" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" aria-current="page" href="#"><span class="navbar-brand mb-0 h1 ">Transaction</span>
+                            <a class="nav-link" aria-current="page" href="http://localhost:9090/transaction"><span class="navbar-brand mb-0 h1 ">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
@@ -50,7 +50,7 @@
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" href="#"><span class="navbar-brand mb-0 h1">Log off</span>
+                            <a class="nav-link" href="http://localhost:9090/login"><span class="navbar-brand mb-0 h1">Log off</span>
                             </a>
                         </li>
                     </ul>
@@ -72,18 +72,18 @@
 </div>
 <!--*******************Card Form profile******************************-->
 <div class="container py-5">
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-8 col-lg-8 offset-md-2 pt-4">
         <!-- form user info -->
         <div class="card card-outline-secondary">
-            <div class="card-header bg-success text-light">
+            <div class="card-header bg-success bg-gradient text-light">
                 <h3 class="mb-0">User Information</h3>
             </div>
             <div class="card-body">
-                <form class="form" th:action="@{/profile}" th:object="${updateProfile}" action="#" role="form" autocomplete="off"
+                <form class="form p-2" th:action="@{/profile}" th:object="${updateProfile}" action="#" role="form" autocomplete="off"
                       method="post">
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">FirstName</label>
-                        <div class="col-lg-9">
+                        <div class="col-lg-9 py-1">
                             <input th:label="firstName" th:value="${currentUser.firstName}"  id="firstName" name="firstName"
                                    class="form-control" type="text" value="Jane">
                             <p th:if="${#fields.hasErrors()}"
@@ -93,7 +93,7 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">LastName</label>
-                        <div class="col-lg-9">
+                        <div class="col-lg-9 py-1">
                             <input th:value="${currentUser.lastName}" id="lastName" name="lastName" class="form-control"
                                    type="text" value="Bishop">
                             <p th:if="${#fields.hasErrors()}"
@@ -103,15 +103,15 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Username</label>
-                        <div class="col-lg-9">
+                        <div class="col-lg-9 py-1" >
                             <p th:text="${currentUser.email}" name="email">exemple@email.fr</p>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Password</label>
-                        <div class="col-lg-9">
+                        <div class="col-lg-9 py-1">
                             <input th:value="${currentUser.password}" id="password" name="password" class="form-control"
-                                   type="text" value="1234588555884">
+                                   type="password" value="1234588555884">
                             <p th:if="${#fields.hasAnyErrors()}"
                                th:errors="*{password}"
                                th:errorclass="error"></p>
@@ -120,9 +120,9 @@
                     </div>
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Confirm</label>
-                        <div class="col-lg-9">
+                        <div class="col-lg-9 py-1">
                             <input th:value="${currentUser.password}" id="confirmPassword" name="confirmPassword"
-                                   class="form-control" type="text" value="1234588555884">
+                                   class="form-control" type="password" value="1234588555884">
                             <p th:if="${#fields.hasAnyErrors()}"
                                th:errors="*{confirmPassword}"
                                th:errorclass="error"></p>
@@ -130,9 +130,9 @@
                     </div>
                     <div class="form-group row mt-2">
                         <label class="col-lg-3 col-form-label form-control-label"></label>
-                        <div class="col-lg-9">
-                            <input type="reset" class="btn btn-secondary" value="Cancel">
-                            <input type="submit" class="btn btn-success" value="Save Changes">
+                        <div class="col-lg-9 py-1">
+                            <input type="reset" class="btn btn-secondary bg-gradient" value="Cancel">
+                            <input type="submit" class="btn btn-success bg-gradient" value="Save Changes">
                         </div>
                     </div>
                 </form>
@@ -147,6 +147,6 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 <!--***************footer******************-->
-<footer></footer>
+<footer class="text-center text-secondary fs-6">Copyright 2021 PayMyBuddy</footer>
 </body>
 </html>

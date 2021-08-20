@@ -26,4 +26,5 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
      * @return A list of {@link Transaction}
      */
         List<Transaction> findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(@NotBlank(message = "User's email cannot be blank") String userEmitterEmail, @NotBlank(message = "User's email cannot be blank") String userReceiverEmail);
+
 }

@@ -8,6 +8,7 @@ import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class UserController {
      */
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private ITransactionService transactionService;
 
 //    @Autowired
 //    private UserDetailsService userDetailsService;
@@ -97,8 +101,11 @@ public class UserController {
 //    @RolesAllowed({"USER"})
     @GetMapping("/home")
     public String getUserInformationHomeView(@ModelAttribute("user") User user, Model model) {
+        FriendList lastFriendAdded = userService.getFriendListByCurrentUserEmail().get(0);
         log.info("Controller: The View home displaying");
         model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.userEmail));
+        model.addAttribute("lastBuddy",lastFriendAdded);
+        model.addAttribute("lastTransaction" , transactionService.getCurrentUserTransactionsByEmail().get(0));
 
         return "home";
     }
@@ -152,13 +159,12 @@ public class UserController {
         try {
             userService.addUser(updateProfile);
         } catch (PasswordNotMatcherException ex) {
+            log.error("Controller: Confirm not match with password");
             result.rejectValue("confirmPassword", "ConfirmPasswordNotMatch", ex.getMessage());
-            log.error("Controller: Confirm password not match with password");
         }
         model.addAttribute("updateProfile", updateProfile);
         model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
-
-        log.info("Controller: profile updated:" + SecurityUtilities.userEmail);
+        log.debug("Controller: profile updated:" + SecurityUtilities.userEmail);
 
         return "profile";
     }

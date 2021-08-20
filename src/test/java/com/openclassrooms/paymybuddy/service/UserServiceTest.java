@@ -3,6 +3,7 @@ package com.openclassrooms.paymybuddy.service;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.Friend;
@@ -232,13 +233,6 @@ public class UserServiceTest {
     @Test
     public void addUserTest_whenUserExistInDB_thenReturnUserUpdated(){
         //GIVEN
-//        UpdateProfile updateProfileUserToUpdate = new UpdateProfile();
-//        updateProfileUserToUpdate.setUserName(SecurityUtilities.userEmail);
-//        updateProfileUserToUpdate.setFirstName("Damien");
-//        updateProfileUserToUpdate.setLastName("Sanchez");
-//        updateProfileUserToUpdate.setPassword("pass");
-//        updateProfileUserToUpdate.setConfirmPassword("pass");
-
         UpdateProfile updateProfileUserUpdated = new UpdateProfile();
         updateProfileUserUpdated.setEmail(SecurityUtilities.userEmail);
         updateProfileUserUpdated.setFirstName("Damien");
@@ -272,8 +266,31 @@ public class UserServiceTest {
         assertEquals("Damien", userSavedResult.getFirstName());
         assertEquals("Sanches", userSavedResult.getLastName());
         assertEquals("passpass", userSavedResult.getPassword());
+        verify(userRepositoryMock, times(1)).save(isA(User.class));
 
     }
 
+    @Test
+    public void addUserTest_whenPasswordNotMatchWithConfirmPassword_thenThrowsPasswordNotMatcherException() {
+        //GIVEN
+        User currentUser = User.builder()
+                .email(SecurityUtilities.userEmail)
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .password("passpass")
+                .build();
+
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Damien");
+        updateProfileCurrentUser.setLastName("Sanchez");
+        updateProfileCurrentUser.setPassword("passpasspass");
+        updateProfileCurrentUser.setConfirmPassword("monpassword");
+
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(currentUser);
+        //WHEN
+        //THEN
+        assertThrows(PasswordNotMatcherException.class, () -> userServiceTest.addUser(updateProfileCurrentUser));
+        verify(userRepositoryMock, times(0)).save(isA(User.class));
+    }
 
 }

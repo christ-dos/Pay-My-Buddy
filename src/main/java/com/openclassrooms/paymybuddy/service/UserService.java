@@ -66,13 +66,15 @@ public class UserService implements IUserService {
     @Override
     public User addUser(UpdateProfile updateProfile) {
         User userToUpdate = userRepository.findByEmail(SecurityUtilities.userEmail);
-        if(updateProfile.getConfirmPassword() != updateProfile.getPassword()){
-            throw new PasswordNotMatcherException("Confirm password not match with password");
+        if(!updateProfile.getConfirmPassword().equals(updateProfile.getPassword())){
+            log.error("Service: confirmPassword not match password");
+            throw new PasswordNotMatcherException("Confirm not match with password");
         }
         userToUpdate.setEmail(SecurityUtilities.userEmail);
         userToUpdate.setFirstName(updateProfile.getFirstName());
         userToUpdate.setLastName(updateProfile.getLastName());
         userToUpdate.setPassword(updateProfile.getConfirmPassword());
+        log.debug("Service:Current user updated");
         return userRepository.save(userToUpdate);
     }
 

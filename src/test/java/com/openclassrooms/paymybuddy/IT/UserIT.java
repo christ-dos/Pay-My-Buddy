@@ -1,7 +1,11 @@
 package com.openclassrooms.paymybuddy.IT;
 
+import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -18,6 +23,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -44,7 +51,7 @@ public class UserIT {
     }
 
        /*------------------------------------------------------------------------------------------------------------
-                                    Integration tests in view addfriend
+                                    Integration tests view addfriend
     --------------------------------------------------------------------------------------------------------------*/
     @Test
     public void showAddFriendViewTest_thenStatusOk() throws Exception {
@@ -189,6 +196,237 @@ public class UserIT {
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Mendes")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("lili@email.fr")))))
 
+                .andDo(print());
+    }
+      /*------------------------------------------------------------------------------------------------------------
+                                    Integration tests  view profile
+    --------------------------------------------------------------------------------------------------------------*/
+      @Test
+      public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
+          //GIVEN
+          //WHEN
+          //THEN
+          mockMvc.perform(get("/profile")
+                          .param("email", SecurityUtilities.userEmail))
+                  .andExpect(status().isOk())
+                  .andExpect(view().name("profile"))
+                  .andExpect(model().size(2))
+                  .andExpect(model().hasNoErrors())
+                  .andExpect(model().attributeExists("currentUser", "updateProfile"))
+                  .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
+                  .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
+                  .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanches"))))
+                  .andExpect(model().attribute("currentUser", hasProperty("password", is("passpasspass"))))
+                  .andDo(print());
+      }
+
+    @WithMockUser(value = "spring")
+    @Test
+    public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfAndWrong_thenReturnStatusNotFound() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvc.perform(get("/prof"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenCurrentUserIsDada_thenReturnUserDadaUpdated() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Damien");
+        updateProfileCurrentUser.setLastName("Sanches");
+        updateProfileCurrentUser.setPassword("passpasspass");
+        updateProfileCurrentUser.setConfirmPassword("passpasspass");
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", "dada@email.fr")
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attribute("updateProfile", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("updateProfile", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("updateProfile", hasProperty("lastName", is("Sanches"))))
+                .andExpect(model().attribute("updateProfile", hasProperty("password", is("passpasspass"))))
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("");
+        updateProfileCurrentUser.setLastName("Duhamel");
+        updateProfileCurrentUser.setPassword("passpasspass");
+        updateProfileCurrentUser.setConfirmPassword("passpasspass");
+
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "firstName", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Christine");
+        updateProfileCurrentUser.setLastName("");
+        updateProfileCurrentUser.setPassword("passpasspass");
+        updateProfileCurrentUser.setConfirmPassword("passpasspass");
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "lastName", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Christine");
+        updateProfileCurrentUser.setLastName("Duhamel");
+        updateProfileCurrentUser.setPassword("pass");
+        updateProfileCurrentUser.setConfirmPassword("pass");
+
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(2))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "Size"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "Size"))
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Christine");
+        updateProfileCurrentUser.setLastName("Duhamel");
+        updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspass");
+        updateProfileCurrentUser.setConfirmPassword("passpasspasspasspasspasspasspass");
+
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(2))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "Size"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "Size"))
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Christine");
+        updateProfileCurrentUser.setLastName("Duhamel");
+        updateProfileCurrentUser.setPassword("        ");
+        updateProfileCurrentUser.setConfirmPassword("passpass");
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(2))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "NotBlank"))
+                .andDo(print());
+
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Damien");
+        updateProfileCurrentUser.setLastName("Sanchez");
+        updateProfileCurrentUser.setPassword("passpass");
+        updateProfileCurrentUser.setConfirmPassword("         ");
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void updateCurrentUserInformationTest_whenConfirmPassWordNotMatchWithPassword_thenThrowsPasswordNotMatcherException() throws Exception {
+        //GIVEN
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Damien");
+        updateProfileCurrentUser.setLastName("Sanchez");
+        updateProfileCurrentUser.setPassword("password");
+        updateProfileCurrentUser.setConfirmPassword("passwordnotmatch");
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "ConfirmPasswordNotMatch"))
                 .andDo(print());
     }
 }

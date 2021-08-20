@@ -3,6 +3,7 @@ package com.openclassrooms.paymybuddy.controller;
 import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
@@ -172,7 +173,6 @@ public class UserControllerTest {
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().hasNoErrors())
                 .andDo(print());
-//        verify(friendRepositoryMock, times(1)).save(friendAdded);
     }
 
     @WithMockUser(value = "spring")
@@ -221,7 +221,6 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
     @Test
     public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
@@ -236,7 +235,6 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
     @Test
     public void addFriendToListConnectionTest_whenEmailToAddAndEmailCurrentUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
@@ -254,7 +252,6 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                       Tests View profile
    ------------------------------------------------------------------------------------------------------*/
-    @WithMockUser(value = "spring")
     @Test
     public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
@@ -293,7 +290,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsKikine_thenReturnUserKikineUpdated() throws Exception {
+    public void updateCurrentUserInformationTest_whenCurrentUserIsDada_thenReturnUserDadaUpdated() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -303,8 +300,8 @@ public class UserControllerTest {
                 .build();
 
         UpdateProfile updateProfileCurrentUser = new UpdateProfile();
-        updateProfileCurrentUser.setFirstName("Christine");
-        updateProfileCurrentUser.setLastName("Duhamel");
+        updateProfileCurrentUser.setFirstName("Damien");
+        updateProfileCurrentUser.setLastName("Sanchez");
         updateProfileCurrentUser.setPassword("passpasspass");
         updateProfileCurrentUser.setConfirmPassword("passpasspass");
 
@@ -316,21 +313,19 @@ public class UserControllerTest {
                         .param("firstName", updateProfileCurrentUser.getFirstName())
                         .param("lastName", updateProfileCurrentUser.getLastName())
                         .param("password", updateProfileCurrentUser.getPassword())
-                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword())
-                )
-
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("updateProfile", "currentUser"))
                 .andExpect(model().attribute("updateProfile", hasProperty("email", is("dada@email.fr"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("firstName", is("Christine"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("lastName", is("Duhamel"))))
+                .andExpect(model().attribute("updateProfile", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("updateProfile", hasProperty("lastName", is("Sanchez"))))
                 .andExpect(model().attribute("updateProfile", hasProperty("password", is("passpasspass"))))
                 .andDo(print());
     }
 
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserFieldFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
+    public void updateCurrentUserInformationTest_whenFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -363,7 +358,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserFieldLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
+    public void updateCurrentUserInformationTest_whenLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -395,9 +390,8 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsKikineAndPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
+    public void updateCurrentUserInformationTest_whenPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -431,7 +425,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsKikineAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
+    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -465,7 +459,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsKikineAndPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
+    public void updateCurrentUserInformationTest_whenPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -477,7 +471,7 @@ public class UserControllerTest {
         UpdateProfile updateProfileCurrentUser = new UpdateProfile();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
-        updateProfileCurrentUser.setPassword("");
+        updateProfileCurrentUser.setPassword("        ");
         updateProfileCurrentUser.setConfirmPassword("passpass");
 
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
@@ -487,19 +481,17 @@ public class UserControllerTest {
                         .param("email", updateProfileCurrentUser.getEmail())
                         .param("firstName", updateProfileCurrentUser.getFirstName())
                         .param("lastName", updateProfileCurrentUser.getLastName())
-//                        .param("password", updateProfileCurrentUser.getPassword())
-                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                        .param("password", updateProfileCurrentUser.getPassword()))
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
-                .andExpect(model().errorCount(1))
+                .andExpect(model().errorCount(2))
                 .andExpect(model().attributeExists("updateProfile", "currentUser"))
                 .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "NotBlank"))
                 .andDo(print());
-
     }
 
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsKikineAndConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
+    public void updateCurrentUserInformationTest_whenConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -509,8 +501,8 @@ public class UserControllerTest {
                 .build();
 
         UpdateProfile updateProfileCurrentUser = new UpdateProfile();
-        updateProfileCurrentUser.setFirstName("Christine");
-        updateProfileCurrentUser.setLastName("Duhamel");
+        updateProfileCurrentUser.setFirstName("Damien");
+        updateProfileCurrentUser.setLastName("Sanchez");
         updateProfileCurrentUser.setPassword("passpass");
         updateProfileCurrentUser.setConfirmPassword("         ");
 
@@ -531,7 +523,39 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void updateCurrentUserInformationTest_ConfirmPassWordNotMatchWithPassword_thenThrowsPasswordNotMatcherException() throws Exception {
+        //GIVEN
+        User currentUser = User.builder()
+                .email("dada@email.fr")
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .password("pass")
+                .build();
 
+        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        updateProfileCurrentUser.setFirstName("Damien");
+        updateProfileCurrentUser.setLastName("Sanchez");
+        updateProfileCurrentUser.setPassword("password");
+        updateProfileCurrentUser.setConfirmPassword("passwordnotmatch");
+
+        when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
+        when(userServiceMock.addUser(isA(UpdateProfile.class))).thenThrow(new PasswordNotMatcherException("confirmPassword not match with password"));
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", updateProfileCurrentUser.getEmail())
+                        .param("firstName", updateProfileCurrentUser.getFirstName())
+                        .param("lastName", updateProfileCurrentUser.getLastName())
+                        .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
+                .andExpect(status().isOk())
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().attributeExists("updateProfile", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "ConfirmPasswordNotMatch"))
+                .andDo(print());
+    }
 
 }
 
