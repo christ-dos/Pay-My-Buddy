@@ -158,20 +158,20 @@
         </table>
         <!--**********Navigation pagination**********  -->
         <nav aria-label="Page navigation example">
-            <ul class="pagination pagination-lg justify-content-center">
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Previous">
+            <ul th:if="${totalPagesTransaction > 1}" class="pagination pagination-lg justify-content-center">
+                <li th:if="${transactions.hasPrevious()}" class="page-item">
+                    <a th:href="@{/transaction(page=${transactions.number -1},size=${transactions.size})}" class="page-link" href="#" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                         <span class="sr-only"></span>
                     </a>
                 </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">4</a></li>
-                <li class="page-item"><a class="page-link" href="#">5</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
+                <li  th:each="i : ${#numbers.sequence(0,totalPagesTransaction -1)}" class="page-item">
+                    <a th:href="@{/transaction(page=${i},size=${transactions.size})}" th:text="${i}"
+                       th:classappend="${currentPage}==${i} ?'active':''" class="page-link" href="#">1
+                    </a>
+                </li>
+                <li th:if="${transactions.hasNext()}"  class="page-item">
+                    <a th:href="@{/transaction(page=${transactions.number+1},size=${transactions.size})}" class="page-link" href="#" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only"></span>
                     </a>

@@ -10,11 +10,13 @@ import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -63,10 +65,13 @@ public class TransactionService implements ITransactionService {
      * @return A list of {@link DisplayingTransaction}, a data transfer object
      */
     @Override
-    public List<DisplayingTransaction> getCurrentUserTransactionsByEmail() {
-        List<Transaction> transactions = transactionRepository.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(SecurityUtilities.userEmail, SecurityUtilities.userEmail);
+    public Page<DisplayingTransaction> getCurrentUserTransactionsByEmail(Pageable pageable) {
+        Page<Transaction> transactions = transactionRepository.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(
+                SecurityUtilities.userEmail, SecurityUtilities.userEmail, pageable);
+        int totalElements = (int) transactions.getTotalElements();
+        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
 
-        List<DisplayingTransaction> displayingListUser = transactions.stream()
+        return new PageImpl<DisplayingTransaction>(transactions.stream()
                 .map(transaction -> {
                     if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.userEmail)) {
                         User userReceiver = userRepository.findByEmail(transaction.getUserReceiver().getEmail());
@@ -75,10 +80,8 @@ public class TransactionService implements ITransactionService {
                         User userEmitter = userRepository.findByEmail(transaction.getUserEmitter().getEmail());
                         return new DisplayingTransaction(userEmitter.getFirstName(), transaction.getDescription(), transaction.getAmount());
                     }
-                })
-                .collect(Collectors.toList());
-        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
-        return displayingListUser;
+                }).collect(Collectors.toList()), pageable, totalElements);
+        //        return displayingListUser;
     }
 
     /**
@@ -90,7 +93,7 @@ public class TransactionService implements ITransactionService {
     @Transactional
     @Override
     public Transaction addTransaction(SendTransaction sendTransaction) {
-        User  userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.userEmail);
+        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.userEmail);
         if ((sendTransaction.getAmount() + calculateFees(sendTransaction.getAmount())) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());

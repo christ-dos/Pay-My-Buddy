@@ -58,8 +58,9 @@ public class TransactionIT {
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().size(3))
-                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
+                .andExpect(model().size(8))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
+                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
                 .andDo(print());
     }
 
@@ -79,22 +80,14 @@ public class TransactionIT {
     @Test
     public void getTransactionsViewTransactionTest_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN
-//        List<DisplayingTransaction> transactions = new ArrayList<>();
-//        DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
-//        DisplayingTransaction displayingTransaction2 = new DisplayingTransaction("Lisette", "movies tickets", 18.0);
-//
-//        transactions.add(displayingTransaction1);
-//        transactions.add(displayingTransaction2);
-
         //WHEN
         //THEN
         mockMvc.perform(MockMvcRequestBuilders.get("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("receiverEmail", "dada@email.fr"))
-//                        .param("transactions", String.valueOf(transactions)))
-
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
+                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("books")))))

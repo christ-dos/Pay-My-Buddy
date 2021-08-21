@@ -2,6 +2,8 @@ package com.openclassrooms.paymybuddy.repository;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.model.Transaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -25,6 +27,6 @@ public interface ITransactionRepository extends CrudRepository<Transaction, Inte
      * @param userReceiverEmail A String containing the email of the receiver
      * @return A list of {@link Transaction}
      */
-        List<Transaction> findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(@NotBlank(message = "User's email cannot be blank") String userEmitterEmail, @NotBlank(message = "User's email cannot be blank") String userReceiverEmail);
+        Page<Transaction> findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(@NotBlank(message = "User's email cannot be blank") String userEmitterEmail, @NotBlank(message = "User's email cannot be blank") String userReceiverEmail, Pageable pageable);
 
 }

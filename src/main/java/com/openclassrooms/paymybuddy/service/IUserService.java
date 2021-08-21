@@ -16,10 +16,6 @@ public interface IUserService {
 
     User getUserByEmail(String email);
 
-//    Friend addFriendCurrentUserList(String friendEmail);
-
-//    List<FriendList> getFriendListByCurrentUserEmail();
-
     User addUser(UpdateProfile updateProfile);
 
     Page<FriendList> getFriendListByCurrentUserEmail(Pageable pageable);

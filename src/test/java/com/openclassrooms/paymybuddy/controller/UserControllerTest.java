@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -180,10 +181,11 @@ public class UserControllerTest {
         displayingTransactions.add(displayingTransaction);
 
         Page<FriendList> friendListPage = new PageImpl<>(friendLists);
+        Page<DisplayingTransaction> displayingTransactionsPage = new PageImpl<>(displayingTransactions);
 
         when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(friendListPage);
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
-        when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(displayingTransactions);
+        when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")
@@ -222,10 +224,11 @@ public class UserControllerTest {
         displayingTransactions.add(null);
 
         Page<FriendList> friendListPage = new PageImpl<>(friendLists);
+        Page<DisplayingTransaction> displayingTransactionPage= new PageImpl<>(displayingTransactions);
 
         when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(friendListPage);
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
-        when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(displayingTransactions);
+        when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionPage);
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")

@@ -114,7 +114,7 @@ public class UserController {
         DisplayingTransaction lastTransaction = null;
         try {
             lastFriendAdded = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize)).getContent().get(0);
-            lastTransaction = transactionService.getCurrentUserTransactionsByEmail().get(0);
+            lastTransaction = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage , pageSize)).getContent().get(0);
         } catch (IndexOutOfBoundsException ex) {
             log.error("Controller: Empty list");
         }
