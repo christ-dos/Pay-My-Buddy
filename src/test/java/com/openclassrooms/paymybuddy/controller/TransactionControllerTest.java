@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
@@ -9,6 +10,8 @@ import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.service.TransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +29,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
@@ -50,6 +57,25 @@ public class TransactionControllerTest {
     @MockBean
     private UserService userService;
 
+    private Pageable pageable;
+
+    private PageImpl displayingFriendsPage;
+
+    @BeforeEach
+    public void setupPerTest() {
+        pageable = PageRequest.of(0, 5);
+
+        List<FriendList> friendListPageTest = new ArrayList<>();
+        friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
+        friendListPageTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
+        friendListPageTest.add(new FriendList("baltazar@email.fr", "Baltazar", "Delobel"));
+        friendListPageTest.add(new FriendList("barnabé@email.fr", "Barnabé", "Vincent"));
+        friendListPageTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
+        friendListPageTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
+        displayingFriendsPage = new PageImpl<>(friendListPageTest);
+
+    }
+
     /*-------------------------------------------------------------------------------------------------------
                                          Tests View index
     ---------------------------------------------------------------------------------------------------------*/
@@ -57,12 +83,15 @@ public class TransactionControllerTest {
     @Test
     public void getTransactionsIndexView_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(get("/transaction"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
+                .andExpect(model().attribute("friendList", Matchers.hasProperty("totalPages", is(1))))
+                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
                 .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andDo(print());
     }
@@ -71,6 +100,7 @@ public class TransactionControllerTest {
     @Test
     public void getTransactionsIndexView_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(get("/transaction"))
@@ -78,6 +108,8 @@ public class TransactionControllerTest {
                 .andExpect(view().name("transaction"))
                 .andExpect(model().size(3))
                 .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
+                .andExpect(model().attribute("totalPages", is(1)))
+                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
                 .andDo(print());
     }
 
@@ -96,8 +128,6 @@ public class TransactionControllerTest {
     @Test
     public void getTransactionsIndexView_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN
-
-
         List<DisplayingTransaction> transactions = new ArrayList<>();
         DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
         DisplayingTransaction displayingTransaction2 = new DisplayingTransaction("Lisette", "movies tickets", 18.0);
@@ -106,6 +136,7 @@ public class TransactionControllerTest {
         transactions.add(displayingTransaction2);
 
         //WHEN
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(transactions);
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.get("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -114,6 +145,8 @@ public class TransactionControllerTest {
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transaction"))
                 .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
+                .andExpect(model().attribute("totalPages", is(1)))
+                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lisette")))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("shopping  casa china")))))
@@ -155,6 +188,7 @@ public class TransactionControllerTest {
         transactionTest.setAmount(16.0);
         transactionTest.setFees(0.08);
 
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
         when(transactionServiceMock.addTransaction(isA(SendTransaction.class))).thenReturn(transactionTest);
         //WHEN
@@ -180,6 +214,7 @@ public class TransactionControllerTest {
         String receiverEmail = "luluM@email.fr";
         String emitterEmail = "dada@email.fr";
 
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         when(transactionServiceMock.addTransaction(isA(SendTransaction.class))).thenThrow(new BalanceInsufficientException("Insufficient account balance, your balance is: " + emitterEmail));
         //WHEN
         //THEN
@@ -201,6 +236,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -218,6 +254,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -234,6 +271,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -250,6 +288,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
+        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.post("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())

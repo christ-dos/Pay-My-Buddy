@@ -153,7 +153,6 @@ public class TransferServiceTest {
         transferList.add(transfer2);
         Page<Transfer> transferPage = new PageImpl<>(transferList);
 
-
         when(transferRepositoryMock.findTransfersByUserEmailOrderByDateDesc(isA(String.class), isA(Pageable.class))).thenReturn(transferPage);
         //WHEN
         Page<DisplayingTransfer> displayingTransfersResult = transferServiceTest.getCurrentUserTransfers(pageable);

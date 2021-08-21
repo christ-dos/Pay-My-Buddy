@@ -13,6 +13,8 @@ import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,8 +22,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 /**
  * Class Controller that manage users'requests
@@ -101,19 +105,23 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/home")
-    public String getUserInformationHomeView(@ModelAttribute("user") User user, Model model) {
+    public String getUserInformationHomeView(@ModelAttribute("user") User user, Model model, @RequestParam("page") Optional<Integer> page,
+                                             @RequestParam("size") Optional<Integer> size) {
+        int currentPage = page.orElse(0);
+        int pageSize = size.orElse(5);
+
         FriendList lastFriendAdded = null;
         DisplayingTransaction lastTransaction = null;
         try {
-            lastFriendAdded = userService.getFriendListByCurrentUserEmail().get(0);
+            lastFriendAdded = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize)).getContent().get(0);
             lastTransaction = transactionService.getCurrentUserTransactionsByEmail().get(0);
         } catch (IndexOutOfBoundsException ex) {
             log.error("Controller: Empty list");
         }
         log.info("Controller: The View home displaying");
         model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.userEmail));
-        model.addAttribute("lastBuddy",lastFriendAdded);
-        model.addAttribute("lastTransaction" ,lastTransaction);
+        model.addAttribute("lastBuddy", lastFriendAdded);
+        model.addAttribute("lastTransaction", lastTransaction);
 
         return "home";
     }
@@ -185,9 +193,21 @@ public class UserController {
      * @return A String containing the name of view
      */
     @GetMapping({"/addfriend"})
-    public String getListConnections(@ModelAttribute("friendList") FriendList friendList, Model model) {
-        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
+    public String getListConnections(@ModelAttribute("friendList") FriendList friendList, Model model,
+                                     @RequestParam("page") Optional<Integer> page,
+                                     @RequestParam("size") Optional<Integer> size) {
+
+        int currentPage = page.orElse(0);
+        int pageSize = size.orElse(5);
+
+        Page<FriendList> friendLists = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize));
+
+        model.addAttribute("friendLists", friendLists);
+        model.addAttribute("totalPages", friendLists.getTotalPages());
+        model.addAttribute("currentPage", page);
+
         log.info("Controller: The View addfriend displaying");
+
         return "addfriend";
     }
 
@@ -201,20 +221,30 @@ public class UserController {
      * @return A String containing the name of view
      */
     @PostMapping(value = "/addfriend")
-    public String addFriendToListConnection(@Valid FriendList friendList, BindingResult result, Model model) {
+    public String addFriendToListConnection(@Valid FriendList friendList, BindingResult result, Model model, @RequestParam("page") Optional<Integer> page,
+                                            @RequestParam("size") Optional<Integer> size) {
+        int currentPage = page.orElse(0);
+        int pageSize = size.orElse(5);
+
+        Page<FriendList> friendLists = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize));
+
         if (result.hasErrors()) {
-            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
+            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize)));
+            model.addAttribute("totalPages", friendLists.getTotalPages());
+            model.addAttribute("currentPage", page);
             log.error("Controller: Error in fields");
             return "addfriend";
         }
         if (result.getRawFieldValue("email").equals(SecurityUtilities.userEmail)) {
             result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
-            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
+            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize)));
+            model.addAttribute("totalPages", friendLists.getTotalPages());
+            model.addAttribute("currentPage", page);
             log.error("Controller: Invalid addition with email: " + SecurityUtilities.userEmail);
             return "addfriend";
         }
         try {
-            userService.addFriendCurrentUserList(friendList.getEmail());
+            userService.addFriendCurrentUserList(friendList.getEmail(), PageRequest.of(currentPage, pageSize));
         } catch (UserAlreadyExistException e1) {
             result.rejectValue("email", "UserAlreadyExist", e1.getMessage());
             log.error("Controller: User already exist in your list");
@@ -222,10 +252,13 @@ public class UserController {
             result.rejectValue("email", "UserNotExistDB", e2.getMessage());
             log.error("Controller: User Email not exist in data base");
         }
-        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
+        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize)));
+        model.addAttribute("totalPages", friendLists.getTotalPages());
+        model.addAttribute("currentPage", page);
         log.info("Controller: form addFriend submitted");
 
         return "addfriend";
     }
+
 
 }

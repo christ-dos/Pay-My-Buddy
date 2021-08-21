@@ -11,6 +11,8 @@ import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -27,8 +33,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -52,14 +61,29 @@ public class UserControllerTest {
     @MockBean
     private ITransactionService transactionServiceMock;
 
+    private Pageable pageable;
 
-//    @BeforeEach
-//    public void setup() {
+    private Page<FriendList> displayingFriendsPage;
+
+
+    @BeforeEach
+    public void setupPerTest() {
 //        mockMvcUser = MockMvcBuilders
 //                .webAppContextSetup(context)
 //                .apply(springSecurity())
 //                .build();
-//    }
+        pageable = PageRequest.of(0, 5);
+
+        List<FriendList> friendListPageTest = new ArrayList<>();
+        friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
+        friendListPageTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
+        friendListPageTest.add(new FriendList("baltazar@email.fr", "Baltazar", "Delobel"));
+        friendListPageTest.add(new FriendList("barnabé@email.fr", "Barnabé", "Vincent"));
+        friendListPageTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
+        friendListPageTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
+        displayingFriendsPage = new PageImpl<>(friendListPageTest);
+
+    }
  /*-----------------------------------------------------------------------------------------------------
                                      Tests View Login
  ------------------------------------------------------------------------------------------------------*/
@@ -155,7 +179,9 @@ public class UserControllerTest {
                 "Elisabeth", "books", 5.0);
         displayingTransactions.add(displayingTransaction);
 
-        when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
+        Page<FriendList> friendListPage = new PageImpl<>(friendLists);
+
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(friendListPage);
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(displayingTransactions);
         //WHEN
@@ -165,15 +191,15 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("user","lastBuddy","lastTransaction"))
-                .andExpect(model().attribute("user",hasProperty("email",is("dada@email.fr"))))
-                .andExpect(model().attribute("user",hasProperty("balance",is(100.0))))
-                .andExpect(model().attribute("user",hasProperty("firstName",is("Damien"))))
-                .andExpect(model().attribute("user",hasProperty("lastName",is("Sanchez"))))
-                .andExpect(model().attribute("lastBuddy",hasProperty("firstName",is("Elisabeth"))))
-                .andExpect(model().attribute("lastBuddy",hasProperty("lastName",is("Duhamel"))))
-                .andExpect(model().attribute("lastTransaction",hasProperty("firstName",is("Elisabeth"))))
-                .andExpect(model().attribute("lastTransaction",hasProperty("amount",is(5.0))))
+                .andExpect(model().attributeExists("user", "lastBuddy", "lastTransaction"))
+                .andExpect(model().attribute("user", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("user", hasProperty("balance", is(100.0))))
+                .andExpect(model().attribute("user", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("user", hasProperty("lastName", is("Sanchez"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("firstName", is("Elisabeth"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("lastName", is("Duhamel"))))
+                .andExpect(model().attribute("lastTransaction", hasProperty("firstName", is("Elisabeth"))))
+                .andExpect(model().attribute("lastTransaction", hasProperty("amount", is(5.0))))
                 .andDo(print());
 
     }
@@ -195,7 +221,9 @@ public class UserControllerTest {
         List<DisplayingTransaction> displayingTransactions = new ArrayList<>();
         displayingTransactions.add(null);
 
-        when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
+        Page<FriendList> friendListPage = new PageImpl<>(friendLists);
+
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(friendListPage);
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(displayingTransactions);
         //WHEN
@@ -206,12 +234,12 @@ public class UserControllerTest {
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("user",hasProperty("email",is("dada@email.fr"))))
-                .andExpect(model().attribute("user",hasProperty("balance",is(100.0))))
-                .andExpect(model().attribute("user",hasProperty("firstName",is("Damien"))))
-                .andExpect(model().attribute("user",hasProperty("lastName",is("Sanchez"))))
-                .andExpect(model().attribute("lastBuddy",nullValue()))
-                .andExpect(model().attribute("lastTransaction",nullValue()))
+                .andExpect(model().attribute("user", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("user", hasProperty("balance", is(100.0))))
+                .andExpect(model().attribute("user", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("user", hasProperty("lastName", is("Sanchez"))))
+                .andExpect(model().attribute("lastBuddy", nullValue()))
+                .andExpect(model().attribute("lastTransaction", nullValue()))
                 .andDo(print());
     }
 
@@ -223,10 +251,21 @@ public class UserControllerTest {
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/addfriend"))
+        mockMvcUser.perform(get("/addfriend")
+                        .param("size", String.valueOf(5))
+                        .param("page", String.valueOf(0)))
                 .andExpect(status().isOk())
+                .andExpect(model().attributeExists("friendLists", "totalPages", "currentPage"))
+                .andExpect(model().attribute("totalPages", is(1)))
+                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
+                .andExpect(model().attribute("friendLists", Matchers.isA(Page.class)))
+                .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(6L))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Christine")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Desouza")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("marion@email.fr")))))
                 .andDo(print());
     }
 
@@ -234,25 +273,27 @@ public class UserControllerTest {
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(get("/addfriend"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
-                .andExpect(model().size(2))
+                .andExpect(model().size(4))
                 .andExpect(model().attributeExists("friendLists", "friendList"))
                 .andDo(print());
     }
 
     @WithMockUser(value = "spring")
     @Test
-    public void addFriendToListConnectionTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanaddToFriendInList() throws Exception {
+    public void addFriendToListConnectionTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanAddToFriendInList() throws Exception {
         //GIVEN
         String friendEmailNotExistInList = "fifi@email.com";
 
         User userToAdd = User.builder()
                 .email("fifi@email.com").firstName("Filipe").lastName("Dupont").build();
         when(userServiceMock.getUserByEmail(friendEmailNotExistInList)).thenReturn(userToAdd);
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -270,8 +311,8 @@ public class UserControllerTest {
     public void addFriendToListConnectionTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
         String friendEmailAlreadyExist = "françois@email.fr";
-
-        when(userServiceMock.addFriendCurrentUserList(friendEmailAlreadyExist)).thenThrow(new UserAlreadyExistException("user already exist in list of connections"));
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.addFriendCurrentUserList(friendEmailAlreadyExist, pageable)).thenThrow(new UserAlreadyExistException("user already exist in list of connections"));
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -282,11 +323,12 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
+                .andExpect(model().attribute("totalPages", is(1)))
+                .andExpect(model().attribute("currentPage", is(Optional.empty())))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasErrors())
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserAlreadyExist"))
                 .andDo(print());
-        verify(userServiceMock, times(1)).addFriendCurrentUserList(anyString());
     }
 
     @WithMockUser(value = "spring")
@@ -298,7 +340,8 @@ public class UserControllerTest {
 //        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
 
         String friendEmailNotExist = "wiwi@email.fr";
-        when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
+        when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist, pageable)).thenThrow(new UserNotFoundException("User's email not exist"));
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -314,6 +357,8 @@ public class UserControllerTest {
     @Test
     public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -328,6 +373,7 @@ public class UserControllerTest {
     @Test
     public void addFriendToListConnectionTest_whenEmailToAddAndEmailCurrentUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
+        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())

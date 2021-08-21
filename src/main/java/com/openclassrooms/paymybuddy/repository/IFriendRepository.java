@@ -2,6 +2,8 @@ package com.openclassrooms.paymybuddy.repository;
 
 import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.FriendId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +23,5 @@ public interface IFriendRepository extends CrudRepository<Friend, FriendId> {
      * @param userEmail A String containing the email of the user
      * @return A list of {@link Friend} object
      */
-    List<Friend> findByUserEmailOrderByDateAddedDesc(String userEmail);
+    Page<Friend> findByUserEmailOrderByDateAddedDesc(String userEmail, Pageable pageable);
 }

@@ -7,6 +7,7 @@ import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.Friend;
+import com.openclassrooms.paymybuddy.model.Transfer;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IFriendRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
@@ -15,6 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,15 +43,18 @@ public class UserServiceTest {
 
     private UserService userServiceTest;
 
+    private Pageable pageable;
+
 
     @BeforeEach
     public void setPerTest() {
 
         userServiceTest = new UserService(userRepositoryMock, friendRepositoryMock);
+        pageable = PageRequest.of(0, 5);
     }
 
     @Test
-    public void getUserstest_thenReturnListWithTwoElements() {
+    public void getUsersTest_thenReturnListWithTwoElements() {
         //GIVEN
         List<User> usersSetMock = new ArrayList<>(Arrays.asList(
                 User.builder()
@@ -82,7 +90,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void addFriendCurrentUserListTest_whenFriendAddedfrancoisExistInDBButIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
+    public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
         //GIVEN
         String userEmail = SecurityUtilities.userEmail;
         String friendEmail = "françois@email.fr";
@@ -101,11 +109,14 @@ public class UserServiceTest {
         ));
 
         Friend friendToAdd = new Friend(userEmail, friendEmail, LocalDateTime.now());
+
+        Page<Friend> friendsPage = new PageImpl<>(friends);
+
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(user);
-        when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(userEmail)).thenReturn(friends);
+        when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(isA(String.class), isA(Pageable.class))).thenReturn(friendsPage);
         when(friendRepositoryMock.save(isA(Friend.class))).thenReturn(friendToAdd);
         //WHEN
-        Friend userAdded = userServiceTest.addFriendCurrentUserList(friendEmail);
+        Friend userAdded = userServiceTest.addFriendCurrentUserList(friendEmail,pageable);
         //THEN
         verify(friendRepositoryMock, times(1)).save(isA(Friend.class));
         assertEquals(userEmail, userAdded.getUserEmail());
@@ -131,11 +142,13 @@ public class UserServiceTest {
                 new Friend(userEmail, "amartin@email.fr", LocalDateTime.now())
         ));
 
+        Page<Friend> friendsPage = new PageImpl<>(friends);
+
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(user);
-        when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(userEmail)).thenReturn(friends);
+        when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(isA(String.class),isA(Pageable.class))).thenReturn(friendsPage);
         //WHEN
         //THEN
-        assertThrows(UserAlreadyExistException.class, () -> userServiceTest.addFriendCurrentUserList(friendEmail));
+        assertThrows(UserAlreadyExistException.class, () -> userServiceTest.addFriendCurrentUserList(friendEmail,pageable));
         verify(friendRepositoryMock, times(0)).save(isA(Friend.class));
     }
 
@@ -148,7 +161,7 @@ public class UserServiceTest {
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(null);
         //WHEN
         //THEN
-        assertThrows(UserNotFoundException.class, () -> userServiceTest.addFriendCurrentUserList(friendEmail));
+        assertThrows(UserNotFoundException.class, () -> userServiceTest.addFriendCurrentUserList(friendEmail,pageable));
         verify(friendRepositoryMock, times(0)).save(isA(Friend.class));
     }
 
@@ -156,7 +169,7 @@ public class UserServiceTest {
     @Test
     public void getFriendListByEmailTest_whenUserEmailIsCurrentUser_thenReturnListFriend() {
         //GIVEN
-        String user = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.userEmail;
 
         User user1 = User.builder()
                 .email("françois@email.fr")
@@ -179,21 +192,23 @@ public class UserServiceTest {
                 new Friend("kikine@email.fr", "amartin@email.fr", LocalDateTime.now())
         ));
         User userMock = mock(User.class);
-        when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(user)).thenReturn(friends);
+        Page<Friend> friendsPage = new PageImpl<>(friends);
+
+        when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(isA(String.class),isA(Pageable.class))).thenReturn(friendsPage);
         friends.stream().map(friend -> {
             when(userRepositoryMock.findByEmail(anyString())).thenReturn(user1, user2);
             return new FriendList(userMock.getEmail(), userMock.getFirstName(), userMock.getLastName());
         }).collect(Collectors.toList());
         //WHEN
-        List<FriendList> resultListFriend = userServiceTest.getFriendListByCurrentUserEmail();
+        Page<FriendList> resultListFriend = userServiceTest.getFriendListByCurrentUserEmail(pageable);
         //THEN
-        assertEquals(2, resultListFriend.size());
-        assertEquals("françois@email.fr", resultListFriend.get(0).getEmail());
-        assertEquals("François", resultListFriend.get(0).getFirstName());
-        assertEquals("Dujardin", resultListFriend.get(0).getLastName());
-        assertEquals("amartin@email.fr", resultListFriend.get(1).getEmail());
-        assertEquals("Albert", resultListFriend.get(1).getFirstName());
-        assertEquals("Martin", resultListFriend.get(1).getLastName());
+        assertEquals(2, resultListFriend.stream().count());
+        assertEquals("françois@email.fr", resultListFriend.getContent().get(0).getEmail());
+        assertEquals("François", resultListFriend.getContent().get(0).getFirstName());
+        assertEquals("Dujardin", resultListFriend.getContent().get(0).getLastName());
+        assertEquals("amartin@email.fr", resultListFriend.getContent().get(1).getEmail());
+        assertEquals("Albert", resultListFriend.getContent().get(1).getFirstName());
+        assertEquals("Martin", resultListFriend.getContent().get(1).getLastName());
         verify(userRepositoryMock, times(2)).findByEmail(any(String.class));
     }
 

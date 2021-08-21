@@ -6,6 +6,7 @@ import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.repository.ITransferRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.service.TransferService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,8 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,12 +51,13 @@ public class TransferControllerTest {
     @MockBean
     private IUserRepository userRepositoryMock;
 
-    Page<DisplayingTransfer> displayingTransferPage;
+    private Page<DisplayingTransfer> displayingTransferPage;
 
     @BeforeEach
     public void setPertest(){
 
         List<DisplayingTransfer> displayingTransferList = new ArrayList<>();
+
         DisplayingTransfer displayingTransferCredit = new DisplayingTransfer();
         displayingTransferCredit.setTransferType(TransferTypeEnum.CREDIT);
         displayingTransferCredit.setAmount(50.0);
@@ -117,6 +118,7 @@ public class TransferControllerTest {
                 .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes", "totalPages", "currentPage"))
                 .andExpect(model().attribute("totalPages", is(1)))
                 .andExpect(model().attribute("currentPage", is(Optional.of(0))))
+                .andExpect(model().attribute("transfers", Matchers.hasProperty("totalElements",equalTo(2L))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("transferType", is(TransferTypeEnum.CREDIT)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(50.0)))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(150.0)))))

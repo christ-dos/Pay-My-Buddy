@@ -7,14 +7,17 @@ import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 /**
  * Class Controller that manage transactions requests
@@ -46,9 +49,13 @@ public class TransactionController {
      * @return A String containing the name of view
      */
     @GetMapping(value =  "/transaction")
-    public String getTransactionsIndexView(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model) {
+    public String getTransactionsViewTransaction(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model,@RequestParam("page") Optional<Integer> page,
+                                                 @RequestParam("size") Optional<Integer> size) {
+        int currentPage = page.orElse(0);
+        int pageSize = size.orElse(5);
+
         model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
-        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
+        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage , pageSize)));
         log.info("Controller: The View index displaying");
 
         return "transaction";
@@ -65,10 +72,14 @@ public class TransactionController {
      * @return A String containing the name of view
      */
     @PostMapping(value = "/transaction")
-    public String addTransaction(@Valid @ModelAttribute("sendTransaction") SendTransaction sendTransaction, BindingResult result, Model model) {
+    public String addTransaction(@Valid @ModelAttribute("sendTransaction") SendTransaction sendTransaction, BindingResult result, Model model,  @RequestParam("page") Optional<Integer> page,
+                                 @RequestParam("size") Optional<Integer> size) {
+        int currentPage = page.orElse(0);
+        int pageSize = size.orElse(5);
+
         if (result.hasErrors()) {
             model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
-            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
+            model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage , pageSize)));
             log.error("Controller: Error in fields");
             return "transaction";
         }
@@ -79,7 +90,7 @@ public class TransactionController {
             log.error("Controller: Insufficient account balance");
         }
         model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail());
-        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail());
+        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage , pageSize)));
         log.info("Controller: form index submitted");
 
         return "transaction";

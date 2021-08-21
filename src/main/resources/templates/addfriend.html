@@ -21,7 +21,8 @@
     <div class="container-fluid ">
         <div class="row align-nav">
             <div class="col-4 d-flex flex-row justify-content-start">
-                <a class="navbar-brand btn-success bg-gradient text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
+                <a class="navbar-brand btn-success bg-gradient text-light rounded order-1 bold text-center p-2" href="#"
+                   id="logo">Pay
                     My Buddy</a>
                 <button class="navbar-toggler gray" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,15 +37,18 @@
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " aria-current="page" href="http://localhost:9090/transaction"><span class="navbar-brand mb-0 h1">Transaction</span>
+                            <a class="nav-link " aria-current="page" href="http://localhost:9090/transaction"><span
+                                    class="navbar-brand mb-0 h1">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/profile"><span class="navbar-brand mb-0 h1">Profile</span>
+                            <a class="nav-link " href="http://localhost:9090/profile"><span
+                                    class="navbar-brand mb-0 h1">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/contact"><span class="navbar-brand mb-0 h1">Contact</span>
+                            <a class="nav-link " href="http://localhost:9090/contact"><span
+                                    class="navbar-brand mb-0 h1">Contact</span>
                             </a>
                         </li>
                         <li class="nav-item ">
@@ -81,7 +85,8 @@
             </div>
             <!--********Button New Transaction **********-->
             <!--Input which look like a button-->
-            <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary bg-gradient btn.block text-light bold text-center rounded" type=button
+            <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary bg-gradient btn.block text-light bold text-center rounded"
+                   type=button
                    onclick=window.location.href="http://localhost:9090/transaction"; value="New Transaction"
                    id="btnAddConnection"/>
         </div>
@@ -92,12 +97,13 @@
                     <div class="col-12 col-md-6 col-lg-4 m-2">
                         <input th:field="*{email}" class="form-control col-12 col-md-9 col-lg-9" type="email"
                                placeholder="Email"/>
-                        <p  th:errors="*{email}"
+                        <p th:errors="*{email}"
                            th:errorclass="error"></p>
                     </div>
                     <!--**************Bouton Add******************-->
                     <button type="submit"
-                            class="col-12 col-md-3 col-lg-2 m-2 btn btn-success bg-gradient btn-block text-light bold " id="btnAdd">
+                            class="col-12 col-md-3 col-lg-2 m-2 btn btn-success bg-gradient btn-block text-light bold "
+                            id="btnAdd">
                         Add
                     </button>
 
@@ -123,21 +129,21 @@
             </tbody>
         </table>
         <!--**********Navigation pagination**********  -->
-        <nav aria-label="Page navigation example">
-            <ul class="pagination pagination-lg justify-content-center">
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Previous">
+        <nav aria-label="Page navigation">
+            <ul th:if="${friendLists.getTotalPages() > 1}" class="pagination pagination-lg justify-content-center">
+                <li th:if="${friendLists.hasPrevious()}" class="page-item">
+                    <a th:href="@{/addfriend(page=${friendLists.number -1},size=${friendLists.size})}" class="page-link"
+                       href="#" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                         <span class="sr-only"></span>
                     </a>
                 </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">4</a></li>
-                <li class="page-item"><a class="page-link" href="#">5</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
+                <li th:each="i : ${#numbers.sequence(0,friendLists.totalPages -1)}" class="page-item">
+                    <a th:href="@{/addfriend(page=${i},size=${friendLists.size})}" th:text="${i}" class="page-link" href="#"
+                       th:classappend="${currentPage}==${i}? 'active' : ''">1</a></li>
+
+                <li th:if="${friendLists.hasNext()}" class="page-item">
+                    <a th:href="@{/addfriend(page=${friendLists.number +1},size=${friendLists.size})}" class="page-link" href="#" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only"></span>
                     </a>

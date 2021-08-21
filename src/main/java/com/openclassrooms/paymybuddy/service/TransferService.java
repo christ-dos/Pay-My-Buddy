@@ -63,8 +63,8 @@ public class TransferService implements ITransferService {
 
     public Page<DisplayingTransfer> getCurrentUserTransfers(Pageable pageable) {
         Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.userEmail, pageable);
-        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.userEmail);
         int totalElements = (int) transfers.getTotalElements();
+        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.userEmail);
 
         return new PageImpl<DisplayingTransfer>(transfers.stream()
                 .map(transfer -> {
@@ -74,9 +74,6 @@ public class TransferService implements ITransferService {
                         return new DisplayingTransfer(transfer.getDescription(), transfer.getTransferType(), +transfer.getAmount(), transfer.getPostTradeBalance());
                     }
 
-                })
-                .collect(Collectors.toList()), pageable, totalElements);
-
-//        return displayingListTransfer;
+                }).collect(Collectors.toList()), pageable, totalElements);
     }
 }

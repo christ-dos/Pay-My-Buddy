@@ -4,17 +4,23 @@ import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface IUserService {
     Iterable<User> getUsers();
 
+    Friend addFriendCurrentUserList(String friendEmail, Pageable pageable);
+
     User getUserByEmail(String email);
 
-    Friend addFriendCurrentUserList(String friendEmail);
+//    Friend addFriendCurrentUserList(String friendEmail);
 
-    List<FriendList> getFriendListByCurrentUserEmail();
+//    List<FriendList> getFriendListByCurrentUserEmail();
 
     User addUser(UpdateProfile updateProfile);
+
+    Page<FriendList> getFriendListByCurrentUserEmail(Pageable pageable);
 }
