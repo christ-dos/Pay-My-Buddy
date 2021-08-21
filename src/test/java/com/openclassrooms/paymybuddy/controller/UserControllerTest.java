@@ -1,5 +1,7 @@
 package com.openclassrooms.paymybuddy.controller;
 
+import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
@@ -7,6 +9,7 @@ import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +25,8 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -45,6 +49,9 @@ public class UserControllerTest {
 
     @MockBean
     private UserDetailsService userDetailsServiceMock;
+
+    @MockBean
+    private ITransactionService transactionServiceMock;
 
 
 //    @BeforeEach
@@ -126,6 +133,53 @@ public class UserControllerTest {
     }
 
     /*-----------------------------------------------------------------------------------------------------
+                                     Tests View home
+     ------------------------------------------------------------------------------------------------------*/
+    @Test
+    public void getUserInformationHomeViewTest_whenCurrentUserIsDada_thenReturnFirstNameDamienAndLastNameSanchez() throws Exception {
+        //GIVEN
+        User currentUser = User.builder()
+                .email("dada@email.fr")
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .password("passpass")
+                .balance(100.0)
+                .build();
+
+        List<FriendList> friendLists = new ArrayList<>();
+        FriendList friendList = new FriendList(
+                "lili@email.fr", "Elisabeth", "Duhamel");
+        friendLists.add(friendList);
+
+        List<DisplayingTransaction> displayingTransactions = new ArrayList<>();
+        DisplayingTransaction displayingTransaction = new DisplayingTransaction(
+                "Elisabeth", "books", 5.0);
+        displayingTransactions.add(displayingTransaction);
+
+        when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
+        when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
+        when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(displayingTransactions);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/home")
+                        .param("user", String.valueOf(currentUser)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("home"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("user","lastBuddy","lastTransaction"))
+                .andExpect(model().attribute("user",hasProperty("email",is("dada@email.fr"))))
+                .andExpect(model().attribute("user",hasProperty("balance",is(100.0))))
+                .andExpect(model().attribute("user",hasProperty("firstName",is("Damien"))))
+                .andExpect(model().attribute("user",hasProperty("lastName",is("Sanchez"))))
+                .andExpect(model().attribute("lastBuddy",hasProperty("firstName",is("Elisabeth"))))
+                .andExpect(model().attribute("lastBuddy",hasProperty("lastName",is("Duhamel"))))
+                .andExpect(model().attribute("lastTransaction",hasProperty("firstName",is("Elisabeth"))))
+                .andExpect(model().attribute("lastTransaction",hasProperty("amount",is(5.0))))
+                .andDo(print());
+
+    }
+
+    /*-----------------------------------------------------------------------------------------------------
                                         Tests View addfriend
      ------------------------------------------------------------------------------------------------------*/
 
@@ -142,7 +196,7 @@ public class UserControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void getListConnectionsTest_whenUrlIsAddfriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN

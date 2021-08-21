@@ -1,5 +1,7 @@
 package com.openclassrooms.paymybuddy.IT;
 
+import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
@@ -20,6 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
@@ -49,8 +54,50 @@ public class UserIT {
                 .apply(springSecurity())
                 .build();
     }
+/*------------------------------------------------------------------------------------------------------------
+                                    Integration tests view home
+    --------------------------------------------------------------------------------------------------------------*/
+    @Test
+    public void getUserInformationHomeViewTest_whenCurrentUserIsDada_thenReturnFirstNameDamienAndLastNameSanchez() throws Exception {
+        //GIVEN
+//        User currentUser = User.builder()
+//                .email("dada@email.fr")
+//                .firstName("Damien")
+//                .lastName("Sanchez")
+//                .password("passpass")
+//                .balance(100.0)
+//                .build();
 
-       /*------------------------------------------------------------------------------------------------------------
+//        List<FriendList> friendLists = new ArrayList<>();
+//        FriendList friendList = new FriendList(
+//                "lili@email.fr", "Elisabeth", "Duhamel");
+//        friendLists.add(friendList);
+//
+//        List<DisplayingTransaction> displayingTransactions = new ArrayList<>();
+//        DisplayingTransaction displayingTransaction = new DisplayingTransaction(
+//                "Elisabeth", "books", 5.0);
+//        displayingTransactions.add(displayingTransaction);
+
+        //WHEN
+        //THEN
+        mockMvc.perform(get("/home")
+                        .param("email", SecurityUtilities.userEmail))
+                .andExpect(status().isOk())
+                .andExpect(view().name("home"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("user","lastBuddy","lastTransaction"))
+                .andExpect(model().attribute("user",hasProperty("email", Matchers.is("dada@email.fr"))))
+                .andExpect(model().attribute("user",hasProperty("balance", Matchers.is(200.0))))
+                .andExpect(model().attribute("user",hasProperty("firstName", Matchers.is("Damien"))))
+                .andExpect(model().attribute("user",hasProperty("lastName", Matchers.is("Sanches"))))
+                .andExpect(model().attribute("lastBuddy",hasProperty("firstName", Matchers.is("Geraldine"))))
+                .andExpect(model().attribute("lastBuddy",hasProperty("lastName", Matchers.is("Passain"))))
+                .andExpect(model().attribute("lastTransaction",hasProperty("firstName", Matchers.is("Lubin"))))
+                .andExpect(model().attribute("lastTransaction",hasProperty("amount", Matchers.is(-15.0))))
+                .andDo(print());
+    }
+
+    /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view addfriend
     --------------------------------------------------------------------------------------------------------------*/
     @Test

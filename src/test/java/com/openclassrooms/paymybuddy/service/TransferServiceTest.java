@@ -144,20 +144,6 @@ public class TransferServiceTest {
 
         Pageable pageable = PageRequest.of(0, 5);
 
-        DisplayingTransfer displayingTransferCredit = new DisplayingTransfer();
-        displayingTransferCredit.setTransferType(TransferTypeEnum.CREDIT);
-        displayingTransferCredit.setAmount(20.0);
-        displayingTransferCredit.setDescription("transfer PayMyBuddy");
-
-        DisplayingTransfer displayingTransferDebitBalanceEnough = new DisplayingTransfer();
-        displayingTransferDebitBalanceEnough.setTransferType(TransferTypeEnum.DEBIT);
-        displayingTransferDebitBalanceEnough.setAmount(30.0);
-        displayingTransferDebitBalanceEnough.setDescription("transfer BNP");
-
-        List<DisplayingTransfer> displayingTransferList = new ArrayList<>();
-        displayingTransferList.add(displayingTransferCredit);
-        displayingTransferList.add(displayingTransferDebitBalanceEnough);
-
         Transfer transfer1 = Transfer.builder()
                 .amount(20.0).description("transfer PayMyBuddy").transferType(TransferTypeEnum.CREDIT).user(userTransfer1).build();
         Transfer transfer2 = Transfer.builder()
