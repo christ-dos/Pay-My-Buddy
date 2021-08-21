@@ -28,8 +28,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -177,6 +176,43 @@ public class UserControllerTest {
                 .andExpect(model().attribute("lastTransaction",hasProperty("amount",is(5.0))))
                 .andDo(print());
 
+    }
+
+    @Test
+    public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
+        //GIVEN
+        User currentUser = User.builder()
+                .email("dada@email.fr")
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .password("passpass")
+                .balance(100.0)
+                .build();
+
+        List<FriendList> friendLists = new ArrayList<>();
+        friendLists.add(null);
+
+        List<DisplayingTransaction> displayingTransactions = new ArrayList<>();
+        displayingTransactions.add(null);
+
+        when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
+        when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
+        when(transactionServiceMock.getCurrentUserTransactionsByEmail()).thenReturn(displayingTransactions);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(get("/home")
+                        .param("user", String.valueOf(currentUser)))
+                .andExpect(status().isOk())
+                .andExpect(view().name("home"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("user",hasProperty("email",is("dada@email.fr"))))
+                .andExpect(model().attribute("user",hasProperty("balance",is(100.0))))
+                .andExpect(model().attribute("user",hasProperty("firstName",is("Damien"))))
+                .andExpect(model().attribute("user",hasProperty("lastName",is("Sanchez"))))
+                .andExpect(model().attribute("lastBuddy",nullValue()))
+                .andExpect(model().attribute("lastTransaction",nullValue()))
+                .andDo(print());
     }
 
     /*-----------------------------------------------------------------------------------------------------

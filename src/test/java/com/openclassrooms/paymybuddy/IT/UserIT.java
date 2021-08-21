@@ -60,24 +60,6 @@ public class UserIT {
     @Test
     public void getUserInformationHomeViewTest_whenCurrentUserIsDada_thenReturnFirstNameDamienAndLastNameSanchez() throws Exception {
         //GIVEN
-//        User currentUser = User.builder()
-//                .email("dada@email.fr")
-//                .firstName("Damien")
-//                .lastName("Sanchez")
-//                .password("passpass")
-//                .balance(100.0)
-//                .build();
-
-//        List<FriendList> friendLists = new ArrayList<>();
-//        FriendList friendList = new FriendList(
-//                "lili@email.fr", "Elisabeth", "Duhamel");
-//        friendLists.add(friendList);
-//
-//        List<DisplayingTransaction> displayingTransactions = new ArrayList<>();
-//        DisplayingTransaction displayingTransaction = new DisplayingTransaction(
-//                "Elisabeth", "books", 5.0);
-//        displayingTransactions.add(displayingTransaction);
-
         //WHEN
         //THEN
         mockMvc.perform(get("/home")
@@ -90,12 +72,40 @@ public class UserIT {
                 .andExpect(model().attribute("user",hasProperty("balance", Matchers.is(200.0))))
                 .andExpect(model().attribute("user",hasProperty("firstName", Matchers.is("Damien"))))
                 .andExpect(model().attribute("user",hasProperty("lastName", Matchers.is("Sanches"))))
-                .andExpect(model().attribute("lastBuddy",hasProperty("firstName", Matchers.is("Geraldine"))))
-                .andExpect(model().attribute("lastBuddy",hasProperty("lastName", Matchers.is("Passain"))))
+                .andExpect(model().attribute("lastBuddy",hasProperty("firstName", Matchers.is("Elisabeth"))))
+                .andExpect(model().attribute("lastBuddy",hasProperty("lastName", Matchers.is("Dupond"))))
                 .andExpect(model().attribute("lastTransaction",hasProperty("firstName", Matchers.is("Lubin"))))
                 .andExpect(model().attribute("lastTransaction",hasProperty("amount", Matchers.is(-15.0))))
                 .andDo(print());
     }
+
+    @Test
+    public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
+        //GIVEN
+        User currentUser = User.builder()
+                .email("emptylist@email.fr")
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .password("passpass")
+                .balance(100.0)
+                .build();
+        //WHEN
+        //THEN
+        mockMvc.perform(get("/home")
+                        .param("email", String.valueOf(currentUser.getEmail())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("home"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("user",hasProperty("email", Matchers.is("dada@email.fr"))))
+                .andExpect(model().attribute("user",hasProperty("balance", Matchers.is(200.0))))
+                .andExpect(model().attribute("user",hasProperty("firstName", Matchers.is("Damien"))))
+                .andExpect(model().attribute("user",hasProperty("lastName", Matchers.is("Sanches"))))
+                .andExpect(model().attribute("lastBuddy",nullValue()))
+                .andExpect(model().attribute("lastTransaction",nullValue()))
+                .andDo(print());
+    }
+
 
     /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view addfriend
@@ -234,7 +244,6 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("friendLists"))
-//                .andExpect(model().attribute("friendLists",hasItems(iterableWithSize(3))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("ggpassain@email.fr")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Geraldine")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Passain")))))

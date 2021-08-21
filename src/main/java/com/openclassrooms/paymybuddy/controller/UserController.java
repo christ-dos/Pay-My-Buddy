@@ -1,5 +1,6 @@
 package com.openclassrooms.paymybuddy.controller;
 
+import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
@@ -101,11 +102,18 @@ public class UserController {
 //    @RolesAllowed({"USER"})
     @GetMapping("/home")
     public String getUserInformationHomeView(@ModelAttribute("user") User user, Model model) {
-        FriendList lastFriendAdded = userService.getFriendListByCurrentUserEmail().get(0);
+        FriendList lastFriendAdded = null;
+        DisplayingTransaction lastTransaction = null;
+        try {
+            lastFriendAdded = userService.getFriendListByCurrentUserEmail().get(0);
+            lastTransaction = transactionService.getCurrentUserTransactionsByEmail().get(0);
+        } catch (IndexOutOfBoundsException ex) {
+            log.error("Controller: Empty list");
+        }
         log.info("Controller: The View home displaying");
         model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.userEmail));
         model.addAttribute("lastBuddy",lastFriendAdded);
-        model.addAttribute("lastTransaction" , transactionService.getCurrentUserTransactionsByEmail().get(0));
+        model.addAttribute("lastTransaction" ,lastTransaction);
 
         return "home";
     }
