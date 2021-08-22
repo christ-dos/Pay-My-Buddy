@@ -61,7 +61,6 @@
         </div>
     </div>
 </nav>
-
 <!--************ link Addfriend et Home /************-->
 <div class="container-fluid gray py-2">
     <ul class="nav">
@@ -78,17 +77,19 @@
 </div>
 <section>
     <!--************* Add Friend******************-->
-    <div class="container col-10 p-3">
-        <div class="row justify-content-between p-3 pb-0">
+    <div class="container px-2 pt-4">
+        <div class="row justify-content-between">
             <div class="col-sm-12 col-md-6 col-lg-8">
                 <h5>Add Friend</h5>
             </div>
             <!--********Button New Transaction **********-->
             <!--Input which look like a button-->
-            <input class=" col-sm-12 col-md-4 col-lg-2 btn-primary bg-gradient btn.block text-light bold text-center rounded"
-                   type=button
-                   onclick=window.location.href="http://localhost:9090/transaction"; value="New Transaction"
-                   id="btnAddConnection"/>
+            <div class="col-sm-12 col-md-6 col-lg-2 d-flex justify-content-end">
+                <input class="btn-primary bg-gradient btn.block text-light bold text-center rounded"
+                       type=button
+                       onclick=window.location.href="http://localhost:9090/transaction"; value="New Transaction"
+                       id="btnAddConnection"/>
+            </div>
         </div>
         <div class="container gray  p-5">
             <!--*************Input Email****************-->
@@ -100,7 +101,7 @@
                         <p th:errors="*{email}"
                            th:errorclass="error"></p>
                     </div>
-                    <!--**************Bouton Add******************-->
+                    <!--**************Button Add******************-->
                     <button type="submit"
                             class="col-12 col-md-3 col-lg-2 m-2 btn btn-success bg-gradient btn-block text-light bold "
                             id="btnAdd">
@@ -111,7 +112,7 @@
             </form>
         </div>
         <!-- ***************Table******************-->
-        <h5>My Connections</h5>
+        <h5 class="mt-4">My Connections</h5>
         <table class="table table-condensed table-striped borderless mb-0">
             <thead class="thead-light btn-success bg-gradient text-light bold ">
             <tr>
@@ -139,11 +140,13 @@
                     </a>
                 </li>
                 <li th:each="i : ${#numbers.sequence(0,friendLists.totalPages -1)}" class="page-item">
-                    <a th:href="@{/addfriend(page=${i},size=${friendLists.size})}" th:text="${i}" class="page-link" href="#"
+                    <a th:href="@{/addfriend(page=${i},size=${friendLists.size})}" th:text="${i}" class="page-link"
+                       href="#"
                        th:classappend="${currentPage}==${i}? 'active' : ''">1</a></li>
 
                 <li th:if="${friendLists.hasNext()}" class="page-item">
-                    <a th:href="@{/addfriend(page=${friendLists.number +1},size=${friendLists.size})}" class="page-link" href="#" aria-label="Next">
+                    <a th:href="@{/addfriend(page=${friendLists.number +1},size=${friendLists.size})}" class="page-link"
+                       href="#" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only"></span>
                     </a>
@@ -159,7 +162,7 @@
         crossorigin="anonymous"></script>
 
 <!--***************footer******************-->
-<footer class="text-center text-secondary fs-6">Copyright 2021 PayMyBuddy</footer>
+<footer class="text-center text-secondary fs-6 pt-2">Copyright 2021 PayMyBuddy</footer>
 
 </body>
 </html>

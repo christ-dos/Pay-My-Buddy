@@ -53,18 +53,13 @@ public class TransactionController {
     @GetMapping(value = "/transaction")
     public String getTransactionsViewTransaction(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model, @RequestParam("page") Optional<Integer> page,
                                                  @RequestParam("size") Optional<Integer> size) {
-        int currentPage = page.orElse(0);
-        int pageSize = size.orElse(5);
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(2);
 
-        Page<DisplayingTransaction> displayingTransaction = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage, pageSize));
-        Page<FriendList> friendList = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize));
+        Page<DisplayingTransaction> displayingTransaction = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage - 1, pageSize));
+        Page<FriendList> friendLists = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage -1, pageSize));
 
-        getModelsTransaction(model, page, currentPage, pageSize, displayingTransaction, friendList);
-//        model.addAttribute("transactions", displayingTransaction);
-//        model.addAttribute("friendLists", friendList);
-//        model.addAttribute("totalPagesTransaction", displayingTransaction.getTotalPages());
-//        model.addAttribute("totalPagesFriendLists", friendList.getTotalPages());
-//        model.addAttribute("currentPage", page);
+        getModelsTransaction(model, currentPage, pageSize, displayingTransaction, friendLists);
         log.info("Controller: The View index displaying");
 
         return "transaction";
@@ -83,15 +78,14 @@ public class TransactionController {
     @PostMapping(value = "/transaction")
     public String addTransaction(@Valid @ModelAttribute("sendTransaction") SendTransaction sendTransaction, BindingResult result, Model model, @RequestParam("page") Optional<Integer> page,
                                  @RequestParam("size") Optional<Integer> size) {
-        int currentPage = page.orElse(0);
-        int pageSize = size.orElse(5);
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(2);
 
-        Page<DisplayingTransaction> displayingTransaction = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage, pageSize));
-        Page<FriendList> friendList = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize));
-
+        Page<DisplayingTransaction> displayingTransaction = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage -1, pageSize));
+        Page<FriendList> friendLists = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage - 1, pageSize));
 
         if (result.hasErrors()) {
-            getModelsTransaction(model, page, currentPage, pageSize, displayingTransaction, friendList);
+            getModelsTransaction(model, currentPage, pageSize, displayingTransaction, friendLists);
             log.error("Controller: Error in fields");
             return "transaction";
         }
@@ -101,20 +95,20 @@ public class TransactionController {
             result.rejectValue("amount", "BalanceInsufficientException", ex.getMessage());
             log.error("Controller: Insufficient account balance");
         }
-        getModelsTransaction(model, page, currentPage, pageSize, displayingTransaction, friendList);
+        getModelsTransaction(model, currentPage, pageSize, displayingTransaction, friendLists);
         log.info("Controller: form index submitted");
 
         return "transaction";
     }
 
-    private void getModelsTransaction(Model model, @RequestParam("page") Optional<Integer> page, int currentPage, int pageSize, Page<DisplayingTransaction> displayingTransactionPage, Page<FriendList> friendListPage) {
-        model.addAttribute("transactions", transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage, pageSize)));
+    private void getModelsTransaction(Model model, int currentPage, int pageSize, Page<DisplayingTransaction> displayingTransactionPage, Page<FriendList> friendListPage) {
+        model.addAttribute("transactions", displayingTransactionPage);
         model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize)));
-        model.addAttribute("displayingTransaction", displayingTransactionPage);
+//        model.addAttribute("displayingTransaction", displayingTransactionPage);
         model.addAttribute("friendListPage", friendListPage);
         model.addAttribute("totalPagesTransaction", displayingTransactionPage.getTotalPages());
         model.addAttribute("totalPagesFriendLists", friendListPage.getTotalPages());
-        model.addAttribute("currentPage", page);
+        model.addAttribute("currentPage", currentPage);
     }
 
 }

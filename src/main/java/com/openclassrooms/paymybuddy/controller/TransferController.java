@@ -73,14 +73,6 @@ public class TransferController {
         model.addAttribute("currentPage",page);
         model.addAttribute("transferTypes", TransferTypeEnum.values());
 
-//        int totalPages = transfers.getTotalPages();
-//        if (totalPages > 0) {
-//            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
-//                    .boxed()
-//                    .collect(Collectors.toList());
-//            model.addAttribute("pageNumbers", pageNumbers);
-//        }
-
     }
 
 }

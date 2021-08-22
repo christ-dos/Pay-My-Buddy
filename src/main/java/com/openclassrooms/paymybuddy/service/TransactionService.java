@@ -81,7 +81,6 @@ public class TransactionService implements ITransactionService {
                         return new DisplayingTransaction(userEmitter.getFirstName(), transaction.getDescription(), transaction.getAmount());
                     }
                 }).collect(Collectors.toList()), pageable, totalElements);
-        //        return displayingListUser;
     }
 
     /**
