@@ -4,7 +4,7 @@
     <!-- **********Required meta tags ****************-->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Page qui permet de procéder aux paiments sur l'application"/>
+    <meta name="description" content="Page that permit make payments only with an e-mail address"/>
 
     <!-- *******Twitter Card data********* -->
     <meta name="twitter:card" value="summary">
@@ -21,7 +21,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/css/style.css">
-    <title>Pay My Buddy</title>
+    <title>Transaction</title>
     <style>
         .error {
             color: red;
@@ -36,7 +36,8 @@
     <div class="container-fluid ">
         <div class="row align-nav">
             <div class="col-4  d-flex flex-row justify-content-start">
-                <a class="navbar-brand btn-success text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
+                <a class="navbar-brand btn-success bg-gradient text-light rounded order-1 bold text-center p-2" href="#"
+                   id="logo">Pay
                     My Buddy</a>
                 <button class="navbar-toggler gray" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,19 +49,22 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav p-0">
                         <li class="nav-item">
-                            <a class="nav-link  " href="http://localhost:9090/index"><span class="navbar-brand mb-0 h1">Home</span>
+                            <a class="nav-link" href="http://localhost:9090/home"><span class="navbar-brand mb-0 h1 ">Home</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " aria-current="page" href="#"><span class="navbar-brand mb-0 h1">Transfer</span>
+                            <a class="nav-link" aria-current="page" href="#"><span
+                                    class="navbar-brand mb-0 h1 current active">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="#"><span class="navbar-brand mb-0 h1">Profile</span>
+                            <a class="nav-link " href="http://localhost:9090/profile"><span
+                                    class="navbar-brand mb-0 h1">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="#"><span class="navbar-brand mb-0 h1">Contact</span>
+                            <a class="nav-link " href="http://localhost:9090/contact"><span
+                                    class="navbar-brand mb-0 h1">Contact</span>
                             </a>
                         </li>
                         <li class="nav-item ">
@@ -74,75 +78,77 @@
     </div>
 </nav>
 
-<!--************ link Tansfer et Home /************-->
-<div class="container-fluid gray">
+<!--************ link Transaction et Home /************-->
+<div class="container-fluid gray py-2">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link link-primay link-warning:forcus" href="http://localhost:9090/index">Home /</a>
+            <a class="nav-link" href="http://localhost:9090/home">Home /</a>
         </li>
-        <li class="nav-item ">
-            <a class="nav-link" href="#">Transfer</a>
+        <li class="nav-item">
+            <a class="nav-link disabled " href="#">Transaction</a>
         </li>
     </ul>
 </div>
 <section>
-    <!--************* Add Connection******************-->
-    <div class="container col-10 p-3">
-        <div class="row justify-content-between p-3 pb-0">
+    <!--************* transaction ******************-->
+    <div class="container px-2 pt-4">
+        <div class="row justify-content-between">
             <div class="col-sm-12 col-md-6 col-lg-8">
                 <h5>Send Money</h5>
             </div>
-            <!--********Bouton Add Connection**********-->
+            <!--********Button new Transaction**********-->
             <!--Input which look like a button-->
-            <input class="col-sm-12 col-md-4 col-lg-2 btn-primary btn-block text-light bold text-center rounded"
-                   type=button
-                   onclick=window.location.href="http://localhost:9090/addfriend"; value="Add Connection"
-                   id="btnAddConnection"/>
+            <div class="col-sm-12 col-md-6 col-lg-2 d-flex justify-content-end">
+                <input class="btn-primary bg-gradient btn-block text-light bold text-center rounded"
+                       type=button
+                       onclick=window.location.href="http://localhost:9090/addfriend"; value="Add Connection"
+                       id="btnAddConnection"/>
+            </div>
         </div>
-        <div class="container gray py-5 px-4">
+        <div class="container gray p-5">
             <!--********Item select A Connection***********-->
-            <form name="formSelectUserEmailReceiver" id="formSelectFriend" action="#" th:action="@{/index}"
-                  th:object="${transaction}" method="post">
-                <div class="row">
+            <form name="formSelectUserEmailReceiver" id="formSelectFriend" action="#" th:action="@{/transaction}"
+                  th:object="${sendTransaction}" method="post">
+                <div class="row justify-content-center">
                     <!--*****************Input select friendEmail************-->
-                    <div class="col-12 col-md-4 col-lg-3 mb-3">
-                        <select th:field="*{receiverEmail}"  aria-label="form-select-sm"
-                            id="friendEmailSelect">
-                        <option selected value="">Select A Connection</option>
-                        <option th:each="friend: ${friendLists}" th:value="${friend.email}"
-                                th:text="${friend.email}"/>
-                    </select>
-                    <p th:errors="*{receiverEmail}"
-                       th:errorclass="error"></p>
+                    <div class="col-12 col-md-5 col-lg-3 mb-3 d-flex flex-column">
+                        <select th:field="*{receiverEmail}" aria-label="form-select-sm"
+                                id="friendEmailSelect" class="form-select">
+                            <option selected value="">Select A Connection</option>
+                            <option th:each="friend: ${friendLists}" th:value="${friend.email}"
+                                    th:text="${friend.email}"></option>
+                        </select>
+                        <p th:errors="*{receiverEmail}"
+                           th:errorclass="error"></p>
                     </div>
                     <!--*************Input Number**************-->
-                    <div class="col-12 col-md-3 col-lg-3 mb-3 px-3 ">
-                    <input th:field="*{amount}" class="text-right" type="number"
-                           id="howmuch" step="0.01"
-                           placeholder="0€" min="0" max="10000">
-                    <p th:if="${#fields.hasAnyErrors()}"
-                       th:errors="*{amount}"
-                       th:errorclass="error"></p>
+                    <div class="col-12 col-md-2 col-lg-3 mb-3 d-flex flex-column">
+                        <input th:field="*{amount}" class="text-right form-control" type="number"
+                               id="howmuch" step="0.01"
+                               placeholder="0€" min="0" max="10000">
+                        <p th:if="${#fields.hasAnyErrors()}"
+                           th:errors="*{amount}"
+                           th:errorclass="error"></p>
                     </div>
                     <!--*****************Input description************-->
-                    <div class="col-12 col-md-5 col-lg-4 mb-3">
+                    <div class="col-12 col-md-5 col-lg-3 mb-3">
                      <textarea th:field="*{description}" class="form-control"
                                id="exampleFormControlTextarea1"
                                rows="1"
                                placeholder="Description"></textarea>
                     </div>
-                    <button type="submit" class="col-12 col-md-12 col-lg-2 mb-3 btn btn-block btn-success  text-light bold"
+                    <!--**************Button Pay******************-->
+                    <button type="submit"
+                            class="col-12 col-md-4 col-lg-2 mb-3 mx-3 btn btn-block btn-success bg-gradient text-light bold"
                             id="btnPay">Pay
                     </button>
-                    <!--**************Bouton Pay******************-->
-
                 </div>
             </form>
         </div>
-        <h5 class="my-3">My Transactions</h5>
+        <h5 class="mt-4">My Transactions</h5>
         <!-- ***************Table******************-->
         <table class="table table-condensed table-striped borderless mb-0">
-            <thead class="thead-light btn-success text-light bold ">
+            <thead class="thead-light btn-success bg-gradient text-light bold ">
             <tr>
                 <th scope="col" class=" pt-4 pb-4">Connections</th>
                 <th scope="col" class=" pt-4 pb-4">Description</th>
@@ -153,26 +159,31 @@
             <tr th:each="transaction: ${transactions}">
                 <td th:text="${transaction.firstName}">Heyley</td>
                 <td th:text="${transaction.description}">Restaurant bill Share</td>
-                <td th:text="${transaction.amount}">10€</td>
+                <td th:inline="text"> [[${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 2, 'POINT')}]] €</td>
             </tr>
             </tbody>
         </table>
+    </div>
+    <div>
         <!--**********Navigation pagination**********  -->
         <nav aria-label="Page navigation example">
-            <ul class="pagination pagination-lg justify-content-center">
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Previous">
+            <ul th:if="${totalPagesTransaction > 0}" class="pagination pagination-lg justify-content-center">
+                <li th:if="${transactions.hasPrevious()}" class="page-item">
+                    <a th:href="@{/transaction(page = ${currentPage - 1}, size= ${transactions.size})}" class="page-link"
+                       href="#" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                         <span class="sr-only"></span>
                     </a>
                 </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">4</a></li>
-                <li class="page-item"><a class="page-link" href="#">5</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
+                <li th:each="i : ${#numbers.sequence(1, totalPagesTransaction)}"
+                    th:classappend="${currentPage} == ${i} ? 'active' : ''" class="page-item">
+                    <a th:href="@{/transaction(page= ${i}, size= ${transactions.size})}" th:text="${i}"
+                       class="page-link" href="#">1
+                    </a>
+                </li>
+                <li th:if="${transactions.hasNext()}" class="page-item">
+                    <a th:href="@{/transaction(page= ${currentPage + 1}, size= ${transactions.size})}" class="page-link"
+                       href="#" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only"></span>
                     </a>
@@ -186,6 +197,6 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
 <!--***************footer******************-->
-<footer></footer>
+<footer class="text-center text-secondary fs-6 pt-2">Copyright 2021 PayMyBuddy</footer>
 </body>
 </html>

@@ -15,13 +15,7 @@ import javax.transaction.Transactional;
  * @author Christine Duarte
  */
 @SpringBootApplication
-public class PayMyBuddyApplication implements CommandLineRunner {
-
-//    @Autowired
-//    private ITransactionRepository transactionrepo;
-
-//    @Autowired
-//    private UserService userService;
+public class PayMyBuddyApplication {
 
     /**
      * Method main that initiate the application
@@ -32,24 +26,6 @@ public class PayMyBuddyApplication implements CommandLineRunner {
         SpringApplication.run(PayMyBuddyApplication.class, args);
     }
 
-    @Override
-    @Transactional
-    public void run(String... args) throws Exception {
-
-        System.out.println("Hello World !");
-
-//        User user  = userRepository.findUserByEmailByEmail("dada@email.fr");
-//        System.out.println(user);
-        // List<User> list = user.getFriends();
-        // list.forEach(x-> x.getFriends().forEach(y-> System.out.println("coucou:" + y.getEmail())));
-//        List<Transaction> liTrans = transactionrepo.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc("dada@email.fr", "dada@email.fr");
-//        liTrans.forEach(x -> System.out.println(x.getReceiverEmail()));
-//        User user = userService.getUserByEmail("ggpassain@email.fr");
-//        List<User> users =  user.getUsers();
-//        users.forEach(x->System.out.println(x.getEmail()));
-//        Friend friend1 =  new Friend("dada@email.fr","lili@email.fr",LocalDateTime.now());
-//        System.out.println(friendRepository.save(friend1));
-    }
 }
 
 

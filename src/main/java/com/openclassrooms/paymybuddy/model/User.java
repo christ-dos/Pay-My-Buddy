@@ -3,10 +3,7 @@ package com.openclassrooms.paymybuddy.model;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,42 +19,33 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
-    @Override
-    public String toString() {
-        return "User{" +
-                "email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", balance=" + balance +
-                ", accountBank=" + accountBank +
-                '}';
-    }
 
     /**
      * A String containing the email of the user, id that identify him
      * this field cannot be blank in the UI
      */
     @Id
-    @NotBlank(message = "User's email cannot be blank")
+    @NotNull(message = "User's email cannot be null")
     private String email;
 
     /**
      * A String containing the password
      */
 //    @NotBlank(message = "password cannot be blank")
-//    @Max(value = 255, message = "password must be between 8 and 255")
+//    @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
     private String password;
 
     /**
      * A String containing the firstName
      */
+//    @NotBlank(message = "First name cannot be blank")
     @Column(name = "first_name")
     private String firstName;
 
     /**
      * A String containing the lastName
      */
+//    @NotBlank(message = "Last name cannot be blank")
     @Column(name = "last_name")
     private String lastName;
 
@@ -98,4 +86,15 @@ public class User {
     @ManyToMany(mappedBy = "friends")
     private List<User> users = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", balance=" + balance +
+                ", accountBank=" + accountBank +
+                '}';
+    }
 }

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- ************Bootstrap CSS ******************-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>PayMyBuddy</title>
+    <style>
+        .lightGreen800 {background: #689F38;}
+        .lightGreen600 {background: #7CB342;}
+        .lightGreen900 {background: #558B2F;}
+        .lightGreen400{background: #9CCC65;}
+
+    </style>
+</head>
+<body>
+<!-- **************************Navigation bar ***********************************-->
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid ">
+        <div class="row align-nav">
+            <div class="col-4 d-flex flex-row justify-content-start">
+                <a class="navbar-brand btn-success bg-gradient text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
+                    My Buddy</a>
+                <button class="navbar-toggler gray" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+            <div class="col-4 d-flex justify-content-end">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav p-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><span class="navbar-brand mb-0 h1 current active">Home</span>
+                            </a>
+                        </li>
+                        <li class="nav-item ">
+                            <a class="nav-link " aria-current="page" href="http://localhost:9090/transaction"><span
+                                    class="navbar-brand mb-0 h1">Transaction</span>
+                            </a>
+                        </li>
+                        <li class="nav-item ">
+                            <a class="nav-link " href="http://localhost:9090/profile"><span
+                                    class="navbar-brand mb-0 h1">Profile</span>
+                            </a>
+                        </li>
+                        <li class="nav-item ">
+                            <a class="nav-link " href="http://localhost:9090/contact"><span
+                                    class="navbar-brand mb-0 h1">Contact</span>
+                            </a>
+                        </li>
+                        <li class="nav-item ">
+                            <a class="nav-link" href="http://localhost:9090/login"><span class="navbar-brand mb-0 h1">Log off</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!--************ link Home /************-->
+<div class="container-fluid gray py-2">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link disabled" href="#">Home</a>
+    </ul>
+</div>
+<section>
+<div class="container py-2">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-4">
+            <!--******************Card Balance ****************************-->
+            <div class="card">
+                <div class="card-header lightGreen400 bg-gradient text-light">My Balance</div>
+                <div class="card-body">
+                    <h3 class="card-title"><span th:inline="text">
+                             [[${#numbers.formatDecimal(user.getBalance, 0, 'COMMA', 2, 'POINT')}]] €
+                        </span></h3>
+                    <p class="card-text text-truncate">Consult your Balance </p>
+                    <p class="card-text text-muted text-truncate">Transfer money to and from your bank</p>
+                </div>
+                <div class="card-footer py-3 ">
+                    <a href="http://localhost:9090/transfer" class="btn text-light lightGreen400 bg-gradient btn-block">Go
+                        To Transfer</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-4">
+            <!--****************Card Profile****************************-->
+            <div class="card">
+                <div class="card-header lightGreen600 bg-gradient text-light">My Profile</div>
+                <div class="card-body">
+                    <h3 th:text=" ${user.getFirstName()} + ' ' + ${user.getLastName()}" class="card-title text-truncate"></h3>
+                    <p class="card-text text-truncate" >Consult your profile</p>
+                    <p class="card-text text-muted text-truncate">And update your personal data</p>
+                </div>
+                <div class="card-footer py-3">
+                    <a href="http://localhost:9090/profile" class="btn text-light lightGreen600 bg-gradient">Go to
+                        Profile</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-4">
+            <!--******************Card My Transaction ****************************-->
+            <div class="card">
+                <div class="card-header lightGreen800 bg-gradient text-light">My Transactions</div>
+                <div class="card-body">
+                    <h3 th:text="${lastTransaction != null}? ${lastTransaction.getFirstName()}  + ' : ' + ${lastTransaction.getAmount() + ' €'} : 'none'" class="card-title text-truncate"></h3>
+                    <p class="card-text text-truncate">A debt to a buddy</p>
+                    <p class="card-text text-muted text-truncate">Easy! PayMyBuddy is the solution</p>
+                </div>
+                <div class="card-footer py-3 ">
+                    <a href="http://localhost:9090/transaction" class="btn text-light lightGreen800 bg-gradient  btn-block">Go
+                        To Transaction</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 col-lg-4 p-4">
+            <!--****************Card my buddies ****************************-->
+            <div class="card">
+                <div class="card-header lightGreen900 bg-gradient text-light">My Buddies</div>
+                <div class="card-body">
+                    <h3 class="text-truncate" th:text=" ${lastBuddy != null}? ${lastBuddy.getFirstName()}
+                    + ' ' + ${lastBuddy.getLastName()} : 'none'"></h3>
+                    <p class="card-text text-truncate">Adds a buddy</p>
+                    <p class="card-text text-muted text-truncate">And begins to pay him back</p>
+                </div>
+                <div class="card-footer py-3">
+                    <a href="http://localhost:9090/addfriend" class="btn text-light lightGreen900 bg-gradient">Go to
+                        Add A Buddy</a>.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- *******Option 1: Bootstrap Bundle with Popper ***********-->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+<!--***************footer******************-->
+    <footer class="text-center text-secondary fs-6">Copyright 2021 PayMyBuddy</footer>
+</body>
+</html>

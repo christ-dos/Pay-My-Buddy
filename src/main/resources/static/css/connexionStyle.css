@@ -1,11 +1,9 @@
-body{
-	margin: auto;
-	font-size: 1.1em
-}
-
 input, input::-webkit-input-placeholder{
 	font-size: 18px;
 	height: 50px;
+}
+.gray{
+	background-color:rgba(196,196,196,0.2);
 }
 
 .form-payMyBuddy{

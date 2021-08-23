@@ -1,7 +1,9 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.FriendList;
+import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.Friend;
@@ -10,6 +12,9 @@ import com.openclassrooms.paymybuddy.repository.IFriendRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -56,6 +61,38 @@ public class UserService implements IUserService {
     }
 
     /**
+     * Method which add a User to the table User
+     *
+     * @return A {@link User} Object
+     */
+    @Override
+    public User addUser(UpdateProfile updateProfile) {
+        User userToUpdate = userRepository.findByEmail(SecurityUtilities.userEmail);
+        if (!updateProfile.getConfirmPassword().equals(updateProfile.getPassword())) {
+            log.error("Service: confirmPassword not match password");
+            throw new PasswordNotMatcherException("Confirm not match with password");
+        }
+        userToUpdate.setEmail(SecurityUtilities.userEmail);
+        userToUpdate.setFirstName(updateProfile.getFirstName());
+        userToUpdate.setLastName(updateProfile.getLastName());
+        userToUpdate.setPassword(updateProfile.getConfirmPassword());
+        log.debug("Service:Current user updated");
+        return userRepository.save(userToUpdate);
+    }
+
+    /**
+     * Method which get a user by email
+     *
+     * @param email item unique that permit identifies the user
+     * @return A User
+     */
+    public User getUserByEmail(String email) {
+        log.debug("UserService: User found with email: " + email);
+
+        return userRepository.findByEmail(email);
+    }
+
+    /**
      * Method which add a User friend to the table friend
      *
      * @param friendEmail email of the friend that will be added to the list
@@ -78,32 +115,35 @@ public class UserService implements IUserService {
     }
 
     /**
-     * Method which get a user by email
-     *
-     * @param email item unique that permit identifies the user
-     * @return A User
-     */
-    public User getUserByEmail(String email) {
-        log.debug("UserService: User found with email: " + email);
-
-        return userRepository.findByEmail(email);
-    }
-
-    /**
      * Method which get list of friend recorded by a user
      *
      * @return A list of {@link FriendList} a DTO model
      * to displaying the email, first name and last name of the friend added
      */
     @Override
+    public Page<FriendList> getFriendListByCurrentUserEmailPaged(Pageable pageable) {
+        Page<Friend> friendListsByEmail = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail, pageable);
+        int totalElements = (int) friendListsByEmail.getTotalElements();
+        log.debug("UserService: friend list  paged found for current user: " + SecurityUtilities.userEmail);
+
+        return new PageImpl<FriendList>(friendListsByEmail.stream()
+                .map(friend -> {
+                    User user = userRepository.findByEmail(friend.getFriendEmail());
+                    return new FriendList(user.getEmail(), user.getFirstName(), user.getLastName());
+                }).collect(Collectors.toList()), pageable, totalElements);
+    }
+
+    @Override
     public List<FriendList> getFriendListByCurrentUserEmail() {
-        List<Friend> friendListsByEmail = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail);
+        Page<Friend> friendListsByEmailPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail,null);
+        List<Friend> friendListsByEmail = friendListsByEmailPaged.getContent();
         log.debug("UserService: friend list found for current user: " + SecurityUtilities.userEmail);
 
-        return friendListsByEmail.stream().map(friend -> {
-            User user = userRepository.findByEmail(friend.getFriendEmail());
-            return new FriendList(user.getEmail(), user.getFirstName(), user.getLastName());
-        }).collect(Collectors.toList());
+        return friendListsByEmail.stream()
+                .map(friend -> {
+                    User user = userRepository.findByEmail(friend.getFriendEmail());
+                    return new FriendList(user.getEmail(), user.getFirstName(), user.getLastName());
+                }).collect(Collectors.toList());
     }
 
     /**
@@ -113,8 +153,9 @@ public class UserService implements IUserService {
      * @return true if the friend already exist in list else return false
      */
     private Boolean friendAlreadyExistsInList(String friendEmail) {
-        List<Friend> listFriend = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail);
-        for (Friend friend : listFriend) {
+        Page<Friend> listFriendPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail, null);
+        List<Friend> listFriends = listFriendPaged.getContent();
+        for (Friend friend : listFriends) {
             if (friend.getFriendEmail().equals(friendEmail)) {
                 return true;
             }

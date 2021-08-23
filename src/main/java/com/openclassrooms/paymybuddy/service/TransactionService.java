@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
@@ -9,11 +10,13 @@ import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -62,46 +65,46 @@ public class TransactionService implements ITransactionService {
      * @return A list of {@link DisplayingTransaction}, a data transfer object
      */
     @Override
-    public List<DisplayingTransaction> getCurrentUserTransactionsByEmail() {
-        List<Transaction> transactions = transactionRepository.findTransactionsByEmitterEmailOrReceiverEmailOrderByDateDesc(SecurityUtilities.userEmail, SecurityUtilities.userEmail);
+    public Page<DisplayingTransaction> getCurrentUserTransactionsByEmail(Pageable pageable) {
+        Page<Transaction> transactions = transactionRepository.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(
+                SecurityUtilities.userEmail, SecurityUtilities.userEmail, pageable);
+        int totalElements = (int) transactions.getTotalElements();
+        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
 
-        List<DisplayingTransaction> DisplayingListUser = transactions.stream()
+        return new PageImpl<DisplayingTransaction>(transactions.stream()
                 .map(transaction -> {
-                    if (transaction.getEmitterEmail().equals(SecurityUtilities.userEmail)) {
-                        User userReceiver = userRepository.findByEmail(transaction.getReceiverEmail());
+                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.userEmail)) {
+                        User userReceiver = userRepository.findByEmail(transaction.getUserReceiver().getEmail());
                         return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
                     } else {
-                        User userEmitter = userRepository.findByEmail(transaction.getEmitterEmail());
+                        User userEmitter = userRepository.findByEmail(transaction.getUserEmitter().getEmail());
                         return new DisplayingTransaction(userEmitter.getFirstName(), transaction.getDescription(), transaction.getAmount());
                     }
-                })
-                .collect(Collectors.toList());
-        log.info("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
-        return DisplayingListUser;
+                }).collect(Collectors.toList()), pageable, totalElements);
     }
 
     /**
      * Method which add a transaction in database
      *
-     * @param transaction An object {@link Transaction} to save
+     * @param sendTransaction An object {@link SendTransaction}
      * @return A {@link Transaction} object
      */
     @Transactional
     @Override
-    public Transaction addTransaction(Transaction transaction) {
-        User  userEmitterTransaction = userRepository.findByEmail(transaction.getEmitterEmail());
-        if ((transaction.getAmount() + calculateFees(transaction.getAmount())) > userEmitterTransaction.getBalance()) {
+    public Transaction addTransaction(SendTransaction sendTransaction) {
+        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.userEmail);
+        if ((sendTransaction.getAmount() + calculateFees(sendTransaction.getAmount())) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
         }
-        transaction.setFees(calculateFees(transaction.getAmount()));
+        Transaction transaction = new Transaction();
+        transaction.setFees(calculateFees(sendTransaction.getAmount()));
         transaction.setDate(LocalDateTime.now());
+        transaction.setAmount(sendTransaction.getAmount());
+        transaction.setDescription(sendTransaction.getDescription());
         transaction.setUserEmitter(getUserEmitterNewBalance(userEmitterTransaction, transaction.getAmount()));
-        transaction.setUserReceiver(getUserReceiverNewBalance(transaction.getReceiverEmail(), transaction.getAmount()));
-        // user emitter save with new balance
-//        userRepository.save(getUserEmitterNewBalance(userEmitterTransaction, transaction.getAmount()));
-        // user receiver save with new balance
-//        userRepository.save(getUserReceiverNewBalance(transaction.getReceiverEmail(), transaction.getAmount()));
+        transaction.setUserReceiver(getUserReceiverNewBalance(sendTransaction.getReceiverEmail(), transaction.getAmount()));
+
         return transactionRepository.save(transaction);
     }
 

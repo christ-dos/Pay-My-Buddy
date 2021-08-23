@@ -1,6 +1,6 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
+import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import org.junit.Before;
@@ -15,9 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
@@ -48,361 +45,177 @@ public class TransactionIT {
     }
 
     /*--------------------------------------------------------------------------------------------------
-                                   Integration tests View index
-   ------------------------------------------------------------------------------------------------------
-         -----------------------------------------------------------------------------------------
-                                     Tests in view index in  URL /
-        ------------------------------------------------------------------------------------------*/
+                                   Integration tests View transaction
+   ----------------------------------------------------------------------------------------------------*/
+
     @Test
-    public void showIndexViewTest_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsViewTransactionTest_whenUrlIsSlashtransferAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvc.perform(get("/")
+        mockMvc.perform(get("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().size(3))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(view().name("transaction"))
+                .andExpect(model().size(6))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists",
+                        "friendListPage", "totalPagesTransaction", "currentPage"))
                 .andDo(print());
     }
 
     @Test
-    public void showIndexViewTest_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
-        //GIVEN
-        //WHEN
-        //THEN
-        mockMvc.perform(get("/home")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
-                .andExpect(status().isNotFound())
-                .andDo(print());
-    }
-
-    @Test
-    public void addTransactionTest_whenURLIsSlashAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
-        //GIVEN
-        Transaction transaction = Transaction.builder()
-                .emitterEmail("dada@email.fr").receiverEmail("ggpassain@email.fr")
-                .description("sweet").amount(10.0).userReceiver(
-                        User.builder().email("ggpassain@email.fr").build()
-                )
-                .build();
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("emitterEmail", transaction.getEmitterEmail())
-                        .param("receiverEmail", transaction.getReceiverEmail())
-                        .param("amount", String.valueOf(transaction.getAmount()))
-                        .param("description", transaction.getDescription()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().hasNoErrors())
-                .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("ggpassain@email.fr"))))
-                .andExpect(model().attribute("transaction", hasProperty("fees", is(0.05))))
-                .andExpect(model().attribute("transaction", hasProperty("amount", is(10.0))))
-                .andExpect(model().attribute("transaction", hasProperty("userReceiver",
-                        hasProperty("balance", is(60.0)))))
-                .andExpect(model().attribute("transaction", hasProperty("userEmitter",
-                        hasProperty("balance", is(89.45)))))
-                .andDo(print());
-    }
-
-    @Test
-    public void addTransactionTest_whenURLIsSlashAndBalanceIsInsufficient_thenReturnFieldErrorBalanceInsufficientException() throws Exception {
-        //GIVEN
-        Transaction transaction = new Transaction();
-        transaction.setEmitterEmail("dada@email.fr");
-        transaction.setReceiverEmail("luluM@email.fr");
-        transaction.setDescription("Movies tickets");
-        transaction.setAmount(250.0);
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("userEmail", transaction.getEmitterEmail())
-                        .param("receiverEmail", transaction.getReceiverEmail())
-                        .param("amount", String.valueOf(transaction.getAmount()))
-                        .param("description", transaction.getDescription()))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
-                .andDo(print());
-    }
-
-    @Test
-    public void addTransactionTest_whenUrlIsSlashAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
-        //GIVEN
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("amount", "")
-                        .param("receiverEmail", "luluM@email.fr"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "NotNull"))
-                .andDo(print());
-    }
-
-    @Test
-    public void addTransactionTest_whenUrlIsSlashAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
-        //GIVEN
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("amount", "1500")
-                        .param("receiverEmail", "luluM@email.fr"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Max"))
-                .andDo(print());
-    }
-
-    @Test
-    public void addTransactionTest_whenUlrIsSlashAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
-        //GIVEN
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("amount", "0.5")
-                        .param("receiverEmail", "luluM@email.fr"))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Min"))
-                .andDo(print());
-    }
-
-    @Test
-    public void addTransactionTest_whenUrlIsSlashAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
-        //GIVEN
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("amount", "2")
-                        .param("receiverEmail", ""))
-                .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "receiverEmail", "NotBlank"))
-                .andDo(print());
-    }
-
-    @Test
-    public void getTransactionsHomeViewTest_whenCurrentUserInSlash_thenReturnTransactionsOfDada() throws Exception {
-        //GIVEN
-        String receiverEmail = "dada@email.fr";
-        String emitterEmail = "Lisa@email.fr";
-
-        List<DisplayingTransaction> transactions = new ArrayList<>();
-        DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
-        DisplayingTransaction displayingTransaction2 = new DisplayingTransaction("Lisette", "movies tickets", 18.0);
-
-        transactions.add(displayingTransaction1);
-        transactions.add(displayingTransaction2);
-
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.get("/").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("receiverEmail", "dada@email.fr")
-//                        .param("emitterEmail", "dada@email.fr")
-                        .param("transactions", String.valueOf(transactions)))
-
-                .andExpect(status().isOk())
-                .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-100.0)))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("Restaurant Saudade")))))
-                .andDo(print());
-
-    }
-
-    /*--------------------------------------------------------------------------------------------------------
-                                        Tests in  View index and URL /index
-    -----------------------------------------------------------------------------------------------------------*/
-
-
-    @Test
-    public void addTransactionTest_whenUrlIsIndexAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsViewTransactionTest_whenIsAWrongUrlSlashIndex_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
         mockMvc.perform(get("/index")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+
+    @Test
+    public void getTransactionsViewTransactionTest_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.get("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("receiverEmail", "dada@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().size(3))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "friendListPage", "totalPagesTransaction", "currentPage"))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("books")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Geraldine")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-5.0)))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("diner")))))
                 .andDo(print());
     }
 
     @Test
-    public void addTransactionTest_whenURLIsIndexAndBalanceIsEnough_thenWeCanAddTransaction() throws Exception {
+    public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         Transaction transaction = Transaction.builder()
-                .emitterEmail("dada@email.fr").receiverEmail("luluM@email.fr")
-                .description("Restaurant Saudade").amount(100.0).userReceiver(
-                        User.builder().email("luluM@email.fr").build()
+                .userEmitter(User.builder()
+                        .email("dada@email.fr").password("passpasspass").build())
+                        .description("sweet").amount(10.0)
+                        .userReceiver(User.builder()
+                                .email("ggpassain@email.fr").
+                                password("passpasspass").build()
                 )
                 .build();
         //WHEN
         //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("emitterEmail", transaction.getEmitterEmail())
-                        .param("receiverEmail", transaction.getReceiverEmail())
+                        .param("receiverEmail", transaction.getUserReceiver().getEmail())
                         .param("amount", String.valueOf(transaction.getAmount()))
+                        .param("password", transaction.getUserEmitter().getPassword(),transaction.getUserReceiver().getPassword())
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(view().name("transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attribute("transaction", hasProperty("receiverEmail", is("luluM@email.fr"))))
-                .andExpect(model().attribute("transaction", hasProperty("fees", is(0.5))))
-                .andExpect(model().attribute("transaction", hasProperty("amount", is(100.0))))
-                .andExpect(model().attribute("transaction", hasProperty("userReceiver",
-                        hasProperty("balance", is(120.0)))))
-                .andExpect(model().attribute("transaction", hasProperty("userEmitter",
-                        hasProperty("balance", is(99.50)))))
-                .andDo(print());
+                .andExpect(model().attribute("sendTransaction", hasProperty("receiverEmail", is("ggpassain@email.fr"))))
+                .andExpect(model().attribute("sendTransaction", hasProperty("amount", is(10.0))))
+                .andExpect(model().attribute("sendTransaction", hasProperty("description", is("sweet")))).andDo(print());
     }
 
     @Test
-    public void addTransactionTest_whenURLIsIndexBalanceIsInsufficient_thenReturnFieldErrorBalanceInsufficientException() throws Exception {
+    public void addTransactionTest_whenBalanceIsInsufficient_thenReturnFieldErrorBalanceInsufficientException() throws Exception {
         //GIVEN
-        Transaction transaction = Transaction.builder()
-                .emitterEmail("dada@email.fr").receiverEmail("luluM@email.fr")
-                .description("Movies tickets").amount(250.0)
-                .build();
+        Transaction transaction = new Transaction();
+        transaction.setUserEmitter(User.builder().email(SecurityUtilities.userEmail).build());
+        transaction.setUserReceiver(User.builder().email("luluM@email.fr").build());
+        transaction.setDescription("Movies tickets");
+        transaction.setAmount(200.0);
         //WHEN
         //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("userEmail", transaction.getEmitterEmail())
-                        .param("receiverEmail", transaction.getReceiverEmail())
+                        .param("userEmail", transaction.getUserEmitter().getEmail())
+                        .param("receiverEmail", transaction.getUserReceiver().getEmail())
                         .param("amount", String.valueOf(transaction.getAmount()))
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "BalanceInsufficientException"))
+                .andExpect(view().name("transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "BalanceInsufficientException"))
                 .andDo(print());
     }
 
     @Test
-    public void addTransactionTest_whenUrlIsIndexAndAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
+    public void addTransactionTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
                         .param("amount", "")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "NotNull"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "NotNull"))
                 .andDo(print());
     }
 
     @Test
-    public void addTransactionTest_whenUrlIsIndexAndAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
+    public void addTransactionTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
                         .param("amount", "1500")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Max"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "Max"))
                 .andDo(print());
     }
 
     @Test
-    public void addTransactionTest_whenUrlIsIndexAndAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
+    public void addTransactionTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
                         .param("amount", "0.5")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "amount", "Min"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "Min"))
                 .andDo(print());
     }
 
     @Test
-    public void addTransactionTest_whenUrlIsIndexAndValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
+    public void addTransactionTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvc.perform(MockMvcRequestBuilders.post("/index")
+        mockMvc.perform(MockMvcRequestBuilders.post("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
                         .param("amount", "2")
-                        .param("receiverEmail", ""))
+                        .param("userReceiver", ""))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
+                .andExpect(model().attributeExists("friendLists", "transactions", "sendTransaction"))
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("transaction", "receiverEmail", "NotBlank"))
+                .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
-
-    @Test
-    public void getTransactionsHomeViewTest_whenCurrentUserIsDadaInSlashIndex_thenReturnTransactionsOfDada() throws Exception {
-        //GIVEN
-        String receiverEmail = "dada@email.fr";
-        String emitterEmail = "Lisa@email.fr";
-
-        List<DisplayingTransaction> transactions = new ArrayList<>();
-        DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
-        DisplayingTransaction displayingTransaction2 = new DisplayingTransaction("Lisette", "movies tickets", 18.0);
-
-        transactions.add(displayingTransaction1);
-        transactions.add(displayingTransaction2);
-
-        //WHEN
-        //THEN
-        mockMvc.perform(MockMvcRequestBuilders.get("/index").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("receiverEmail", "dada@email.fr"))
-                .andExpect(status().isOk())
-                .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("friendLists", "transactions", "transaction"))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-100.0)))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("Restaurant Saudade")))))
-                .andDo(print());
-
-    }
-
 
 }

@@ -26,7 +26,7 @@ public class DisplayingTransaction  {
     private String description;
 
     /**
-     * Attribute that containing the amout of the transaction
+     * Attribute that containing the amount of the transaction
      */
     private Double amount;
 
