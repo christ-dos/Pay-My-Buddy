@@ -76,7 +76,7 @@
                 <div class="card-header lightGreen400 bg-gradient text-light">My Balance</div>
                 <div class="card-body">
                     <h3 class="card-title"><span th:inline="text">
-                            € [[${#numbers.formatDecimal(user.getBalance, 0, 'COMMA', 2, 'POINT')}]]
+                             [[${#numbers.formatDecimal(user.getBalance, 0, 'COMMA', 2, 'POINT')}]] €
                         </span></h3>
                     <p class="card-text text-truncate">Consult your Balance </p>
                     <p class="card-text text-muted text-truncate">Transfer money to and from your bank</p>
@@ -111,7 +111,7 @@
             <div class="card">
                 <div class="card-header lightGreen800 bg-gradient text-light">My Transactions</div>
                 <div class="card-body">
-                    <h3 th:text="${lastTransaction != null}? ${lastTransaction.getFirstName()}  + ' : ' + ${'€' + lastTransaction.getAmount()} : 'none'" class="card-title text-truncate"></h3>
+                    <h3 th:text="${lastTransaction != null}? ${lastTransaction.getFirstName()}  + ' : ' + ${lastTransaction.getAmount() + ' €'} : 'none'" class="card-title text-truncate"></h3>
                     <p class="card-text text-truncate">A debt to a buddy</p>
                     <p class="card-text text-muted text-truncate">Easy! PayMyBuddy is the solution</p>
                 </div>

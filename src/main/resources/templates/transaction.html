@@ -159,7 +159,7 @@
             <tr th:each="transaction: ${transactions}">
                 <td th:text="${transaction.firstName}">Heyley</td>
                 <td th:text="${transaction.description}">Restaurant bill Share</td>
-                <td th:text="${transaction.amount}">10€</td>
+                <td th:inline="text"> [[${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 2, 'POINT')}]] €</td>
             </tr>
             </tbody>
         </table>
@@ -169,7 +169,7 @@
         <nav aria-label="Page navigation example">
             <ul th:if="${totalPagesTransaction > 0}" class="pagination pagination-lg justify-content-center">
                 <li th:if="${transactions.hasPrevious()}" class="page-item">
-                    <a th:href="@{/transaction(page = ${currentPage - 1}, size=${transactions.size})}" class="page-link"
+                    <a th:href="@{/transaction(page = ${currentPage - 1}, size= ${transactions.size})}" class="page-link"
                        href="#" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                         <span class="sr-only"></span>
@@ -177,12 +177,12 @@
                 </li>
                 <li th:each="i : ${#numbers.sequence(1, totalPagesTransaction)}"
                     th:classappend="${currentPage} == ${i} ? 'active' : ''" class="page-item">
-                    <a th:href="@{/transaction(page=${i},size=${transactions.size})}" th:text="${i}"
+                    <a th:href="@{/transaction(page= ${i}, size= ${transactions.size})}" th:text="${i}"
                        class="page-link" href="#">1
                     </a>
                 </li>
                 <li th:if="${transactions.hasNext()}" class="page-item">
-                    <a th:href="@{/transaction(page=${currentPage + 1},size=${transactions.size})}" class="page-link"
+                    <a th:href="@{/transaction(page= ${currentPage + 1}, size= ${transactions.size})}" class="page-link"
                        href="#" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only"></span>

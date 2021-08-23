@@ -81,28 +81,6 @@ public class UserService implements IUserService {
     }
 
     /**
-     * Method which add a User friend to the table friend
-     *
-     * @param friendEmail email of the friend that will be added to the list
-     * @return A user Object
-     */
-    @Override
-    public Friend addFriendCurrentUserList(String friendEmail, Pageable pageable) {
-        Friend friendToAdd = new Friend(SecurityUtilities.userEmail, friendEmail, LocalDateTime.now());
-        if (!userEmailIsPresentDataBase(friendEmail)) {
-            log.error("Service: User's email not Exist in data base");
-            throw new UserNotFoundException("User's email not exist");
-        }
-        if (friendAlreadyExistsInList(friendEmail, pageable)) {
-            log.error("Service: user's email already exists in friend list");
-            throw new UserAlreadyExistException("user already exist in list of connections");
-        }
-        log.debug("Service: friend User added with email: " + friendEmail);
-
-        return friendRepository.save(friendToAdd);
-    }
-
-    /**
      * Method which get a user by email
      *
      * @param email item unique that permit identifies the user
@@ -115,16 +93,38 @@ public class UserService implements IUserService {
     }
 
     /**
+     * Method which add a User friend to the table friend
+     *
+     * @param friendEmail email of the friend that will be added to the list
+     * @return A user Object
+     */
+    @Override
+    public Friend addFriendCurrentUserList(String friendEmail) {
+        Friend friendToAdd = new Friend(SecurityUtilities.userEmail, friendEmail, LocalDateTime.now());
+        if (!userEmailIsPresentDataBase(friendEmail)) {
+            log.error("Service: User's email not Exist in data base");
+            throw new UserNotFoundException("User's email not exist");
+        }
+        if (friendAlreadyExistsInList(friendEmail)) {
+            log.error("Service: user's email already exists in friend list");
+            throw new UserAlreadyExistException("user already exist in list of connections");
+        }
+        log.debug("Service: friend User added with email: " + friendEmail);
+
+        return friendRepository.save(friendToAdd);
+    }
+
+    /**
      * Method which get list of friend recorded by a user
      *
      * @return A list of {@link FriendList} a DTO model
      * to displaying the email, first name and last name of the friend added
      */
     @Override
-    public Page<FriendList> getFriendListByCurrentUserEmail(Pageable pageable) {
+    public Page<FriendList> getFriendListByCurrentUserEmailPaged(Pageable pageable) {
         Page<Friend> friendListsByEmail = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail, pageable);
         int totalElements = (int) friendListsByEmail.getTotalElements();
-        log.debug("UserService: friend list found for current user: " + SecurityUtilities.userEmail);
+        log.debug("UserService: friend list  paged found for current user: " + SecurityUtilities.userEmail);
 
         return new PageImpl<FriendList>(friendListsByEmail.stream()
                 .map(friend -> {
@@ -133,15 +133,29 @@ public class UserService implements IUserService {
                 }).collect(Collectors.toList()), pageable, totalElements);
     }
 
+    @Override
+    public List<FriendList> getFriendListByCurrentUserEmail() {
+        Page<Friend> friendListsByEmailPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail,null);
+        List<Friend> friendListsByEmail = friendListsByEmailPaged.getContent();
+        log.debug("UserService: friend list found for current user: " + SecurityUtilities.userEmail);
+
+        return friendListsByEmail.stream()
+                .map(friend -> {
+                    User user = userRepository.findByEmail(friend.getFriendEmail());
+                    return new FriendList(user.getEmail(), user.getFirstName(), user.getLastName());
+                }).collect(Collectors.toList());
+    }
+
     /**
      * Private method that verify if the friend already exist in the list
      *
      * @param friendEmail A string containing the email of the friend
      * @return true if the friend already exist in list else return false
      */
-    private Boolean friendAlreadyExistsInList(String friendEmail, Pageable pageable) {
-        Page<Friend> listFriend = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail, pageable);
-        for (Friend friend : listFriend) {
+    private Boolean friendAlreadyExistsInList(String friendEmail) {
+        Page<Friend> listFriendPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail, null);
+        List<Friend> listFriends = listFriendPaged.getContent();
+        for (Friend friend : listFriends) {
             if (friend.getFriendEmail().equals(friendEmail)) {
                 return true;
             }

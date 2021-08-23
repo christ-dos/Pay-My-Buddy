@@ -12,11 +12,13 @@ import java.util.List;
 public interface IUserService {
     Iterable<User> getUsers();
 
-    Friend addFriendCurrentUserList(String friendEmail, Pageable pageable);
+    Friend addFriendCurrentUserList(String friendEmail);
 
     User getUserByEmail(String email);
 
     User addUser(UpdateProfile updateProfile);
 
-    Page<FriendList> getFriendListByCurrentUserEmail(Pageable pageable);
+    Page<FriendList> getFriendListByCurrentUserEmailPaged(Pageable pageable);
+
+    List<FriendList> getFriendListByCurrentUserEmail();
 }

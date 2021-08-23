@@ -240,18 +240,18 @@ public class UserIT {
         //THEN
         mockMvc.perform(MockMvcRequestBuilders.get("/addfriend")
                 .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
+                .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
+                        .param("email", SecurityUtilities.userEmail))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("friendLists"))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("ggpassain@email.fr")))))
+                .andExpect(model().attributeExists("friendLists", "friendList","totalPages","currentPage"))
+                .andExpect(model().attribute("totalPages", is(2)))
+                .andExpect(model().attribute("currentPage", is(1)))
+                .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(3L))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Geraldine")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Passain")))))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("luluM@email.fr")))))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Lubin")))))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Mendes")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("ggpassain@email.fr")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("lili@email.fr")))))
-
                 .andDo(print());
     }
       /*------------------------------------------------------------------------------------------------------------

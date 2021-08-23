@@ -25,7 +25,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -34,7 +33,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
@@ -183,7 +181,7 @@ public class UserControllerTest {
         Page<FriendList> friendListPage = new PageImpl<>(friendLists);
         Page<DisplayingTransaction> displayingTransactionsPage = new PageImpl<>(displayingTransactions);
 
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(friendListPage);
+        when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
@@ -226,7 +224,7 @@ public class UserControllerTest {
         Page<FriendList> friendListPage = new PageImpl<>(friendLists);
         Page<DisplayingTransaction> displayingTransactionPage= new PageImpl<>(displayingTransactions);
 
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(friendListPage);
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(friendListPage);
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionPage);
         //WHEN
@@ -254,16 +252,16 @@ public class UserControllerTest {
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(get("/addfriend")
                         .param("size", String.valueOf(5))
-                        .param("page", String.valueOf(0)))
+                        .param("page", String.valueOf(1)))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendLists", "totalPages", "currentPage"))
                 .andExpect(model().attribute("totalPages", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attribute("friendLists", Matchers.isA(Page.class)))
                 .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(6L))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Christine")))))
@@ -276,7 +274,7 @@ public class UserControllerTest {
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(get("/addfriend"))
@@ -296,7 +294,7 @@ public class UserControllerTest {
         User userToAdd = User.builder()
                 .email("fifi@email.com").firstName("Filipe").lastName("Dupont").build();
         when(userServiceMock.getUserByEmail(friendEmailNotExistInList)).thenReturn(userToAdd);
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -314,8 +312,8 @@ public class UserControllerTest {
     public void addFriendToListConnectionTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
         String friendEmailAlreadyExist = "françois@email.fr";
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
-        when(userServiceMock.addFriendCurrentUserList(friendEmailAlreadyExist, pageable)).thenThrow(new UserAlreadyExistException("user already exist in list of connections"));
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.addFriendCurrentUserList(friendEmailAlreadyExist)).thenThrow(new UserAlreadyExistException("user already exist in list of connections"));
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -327,7 +325,7 @@ public class UserControllerTest {
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attribute("totalPages", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.empty())))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasErrors())
                 .andExpect(model().attributeHasFieldErrorCode("friendList", "email", "UserAlreadyExist"))
@@ -343,8 +341,8 @@ public class UserControllerTest {
 //        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
 
         String friendEmailNotExist = "wiwi@email.fr";
-        when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist, pageable)).thenThrow(new UserNotFoundException("User's email not exist"));
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -360,7 +358,7 @@ public class UserControllerTest {
     @Test
     public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
 
         //WHEN
         //THEN
@@ -376,7 +374,7 @@ public class UserControllerTest {
     @Test
     public void addFriendToListConnectionTest_whenEmailToAddAndEmailCurrentUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
-        when(userServiceMock.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())

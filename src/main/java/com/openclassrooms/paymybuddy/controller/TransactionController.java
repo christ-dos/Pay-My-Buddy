@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -53,13 +54,7 @@ public class TransactionController {
     @GetMapping(value = "/transaction")
     public String getTransactionsViewTransaction(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model, @RequestParam("page") Optional<Integer> page,
                                                  @RequestParam("size") Optional<Integer> size) {
-        int currentPage = page.orElse(1);
-        int pageSize = size.orElse(2);
-
-        Page<DisplayingTransaction> displayingTransaction = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage - 1, pageSize));
-        Page<FriendList> friendLists = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage -1, pageSize));
-
-        getModelsTransaction(model, currentPage, pageSize, displayingTransaction, friendLists);
+        getModelsTransaction(model, page, size);
         log.info("Controller: The View index displaying");
 
         return "transaction";
@@ -78,14 +73,9 @@ public class TransactionController {
     @PostMapping(value = "/transaction")
     public String addTransaction(@Valid @ModelAttribute("sendTransaction") SendTransaction sendTransaction, BindingResult result, Model model, @RequestParam("page") Optional<Integer> page,
                                  @RequestParam("size") Optional<Integer> size) {
-        int currentPage = page.orElse(1);
-        int pageSize = size.orElse(2);
-
-        Page<DisplayingTransaction> displayingTransaction = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage -1, pageSize));
-        Page<FriendList> friendLists = userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage - 1, pageSize));
 
         if (result.hasErrors()) {
-            getModelsTransaction(model, currentPage, pageSize, displayingTransaction, friendLists);
+            getModelsTransaction(model, page, size);
             log.error("Controller: Error in fields");
             return "transaction";
         }
@@ -95,19 +85,25 @@ public class TransactionController {
             result.rejectValue("amount", "BalanceInsufficientException", ex.getMessage());
             log.error("Controller: Insufficient account balance");
         }
-        getModelsTransaction(model, currentPage, pageSize, displayingTransaction, friendLists);
+        getModelsTransaction(model, page, size);
         log.info("Controller: form index submitted");
 
         return "transaction";
     }
 
-    private void getModelsTransaction(Model model, int currentPage, int pageSize, Page<DisplayingTransaction> displayingTransactionPage, Page<FriendList> friendListPage) {
+    private void getModelsTransaction(Model model, Optional<Integer> page, Optional<Integer> size) {
+
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(2);
+
+        Page<DisplayingTransaction> displayingTransactionPage = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage -1, pageSize));
+        Page<FriendList> friendListsPage = userService.getFriendListByCurrentUserEmailPaged(PageRequest.of(currentPage - 1, pageSize));
+        List<FriendList> friendLists = userService.getFriendListByCurrentUserEmail();
+
         model.addAttribute("transactions", displayingTransactionPage);
-        model.addAttribute("friendLists", userService.getFriendListByCurrentUserEmail(PageRequest.of(currentPage, pageSize)));
-//        model.addAttribute("displayingTransaction", displayingTransactionPage);
-        model.addAttribute("friendListPage", friendListPage);
+        model.addAttribute("friendLists",friendLists);
+        model.addAttribute("friendListPage", friendListsPage);
         model.addAttribute("totalPagesTransaction", displayingTransactionPage.getTotalPages());
-        model.addAttribute("totalPagesFriendLists", friendListPage.getTotalPages());
         model.addAttribute("currentPage", currentPage);
     }
 

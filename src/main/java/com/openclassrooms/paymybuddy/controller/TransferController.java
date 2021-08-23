@@ -34,7 +34,9 @@ public class TransferController {
     public String getTransfersViewTransfer(@ModelAttribute("displayingTransfer") DisplayingTransfer displayingTransfer, Model model,
                                            @RequestParam("page") Optional<Integer> page,
                                            @RequestParam("size") Optional<Integer> size) {
+
         transferModelsPageable(model, page, size);
+
         log.info("Controller: The View transfer displaying");
 
         return "transfer";
@@ -61,17 +63,17 @@ public class TransferController {
         return "transfer";
     }
 
-    private void transferModelsPageable(Model model, @RequestParam("page") Optional<Integer> page,
-                                        @RequestParam("size") Optional<Integer> size) {
-        int currentPage = page.orElse(0);
-        int pageSize = size.orElse(5);
+    private void transferModelsPageable(Model model, Optional<Integer> page, Optional<Integer> size) {
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(2);
 
-        Page<DisplayingTransfer> transfers = transferService.getCurrentUserTransfers(PageRequest.of(currentPage , pageSize));
+        Page<DisplayingTransfer> transfers = transferService.getCurrentUserTransfers(PageRequest.of(currentPage -1, pageSize));
 
         model.addAttribute("transfers", transfers);
         model.addAttribute("totalPages", transfers.getTotalPages());
-        model.addAttribute("currentPage",page);
+        model.addAttribute("currentPage",currentPage);
         model.addAttribute("transferTypes", TransferTypeEnum.values());
+        model.addAttribute("totalElements",transfers.getTotalElements());
 
     }
 

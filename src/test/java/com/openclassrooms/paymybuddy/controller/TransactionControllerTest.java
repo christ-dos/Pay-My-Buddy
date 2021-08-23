@@ -59,7 +59,7 @@ public class TransactionControllerTest {
 
     private Pageable pageable;
 
-    private PageImpl<FriendList> displayingFriendsPage;
+    private List<FriendList> friendListTest;
 
     private PageImpl<DisplayingTransaction> displayingTransactionsPage;
 
@@ -67,15 +67,15 @@ public class TransactionControllerTest {
     public void setupPerTest() {
         pageable = PageRequest.of(0, 5);
 
-        List<FriendList> friendListPageTest = new ArrayList<>();
-        friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
-        friendListPageTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
-        friendListPageTest.add(new FriendList("baltazar@email.fr", "Baltazar", "Delobel"));
-        friendListPageTest.add(new FriendList("barnabé@email.fr", "Barnabé", "Vincent"));
-        friendListPageTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
-        friendListPageTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
+        friendListTest = new ArrayList<>();
+        friendListTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
+        friendListTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
+        friendListTest.add(new FriendList("baltazar@email.fr", "Baltazar", "Delobel"));
+        friendListTest.add(new FriendList("barnabé@email.fr", "Barnabé", "Vincent"));
+        friendListTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
+        friendListTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
 
-        displayingFriendsPage = new PageImpl<>(friendListPageTest);
+//        displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
         List<DisplayingTransaction> displayingTransactionsList = new ArrayList<>();
         displayingTransactionsList.add(new DisplayingTransaction("Lisette", "books", 15.0));
@@ -86,61 +86,57 @@ public class TransactionControllerTest {
     }
 
     /*-------------------------------------------------------------------------------------------------------
-                                         Tests View index
+                                         Tests View transaction
     ---------------------------------------------------------------------------------------------------------*/
     @WithMockUser(value = "spring")
     @Test
-    public void getTransactionsIndexView_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsTransactionView_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(get("/transaction")
                         .param("size", String.valueOf(5))
-                        .param("page", String.valueOf(0)))
+                        .param("page", String.valueOf(1)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().size(8))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().size(6))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
-                .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalPages", is(1))))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attribute("transactions", Matchers.hasProperty("totalPages", is(1))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lisette")))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(20.0)))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Wiliam")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("wiwi@email.fr")))))
-
-                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andDo(print());
     }
 
     @WithMockUser(value = "spring")
     @Test
-    public void getTransactionsIndexView_whenUrlIsTransactionAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsTransactionView_whenUrlIsTransactionAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
         //THEN
         mockMvcTransaction.perform(get("/transaction")
                         .param("size", String.valueOf(5))
-                        .param("page", String.valueOf(0)))
+                        .param("page", String.valueOf(1)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().size(8))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().size(6))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andDo(print());
     }
 
     @WithMockUser(value = "spring")
     @Test
-    public void getTransactionsIndexView_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
+    public void getTransactionsTransactionView_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -151,7 +147,7 @@ public class TransactionControllerTest {
 
     @WithMockUser(value = "spring")
     @Test
-    public void getTransactionsIndexView_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
+    public void getTransactionsTransactionView_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN
         List<DisplayingTransaction> displayingTransactions = new ArrayList<>();
         DisplayingTransaction displayingTransaction1 = new DisplayingTransaction("Lisette", "shopping  casa china", -15.0);
@@ -163,20 +159,19 @@ public class TransactionControllerTest {
         displayingTransactionsPage = new PageImpl<>(displayingTransactions);
 
         //WHEN
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //THEN
         mockMvcTransaction.perform(MockMvcRequestBuilders.get("/transaction").with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("receiverEmail", "dada@email.fr")
                         .param("size", String.valueOf(5))
-                        .param("page", String.valueOf(0)))
+                        .param("page", String.valueOf(1)))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lisette")))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("shopping  casa china")))))
@@ -218,7 +213,7 @@ public class TransactionControllerTest {
         transactionTest.setAmount(16.0);
         transactionTest.setFees(0.08);
 
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
         when(transactionServiceMock.addTransaction(isA(SendTransaction.class))).thenReturn(transactionTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
@@ -230,13 +225,12 @@ public class TransactionControllerTest {
                         .param("amount", String.valueOf(transactionTest.getAmount()))
                         .param("description", transactionTest.getDescription())
                         .param("size", String.valueOf(5))
-                        .param("page", String.valueOf(0)))
+                        .param("page", String.valueOf(1)))
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.of(0))))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attribute("sendTransaction", hasProperty("receiverEmail", is("fifi@email.com"))))
                 .andExpect(model().attribute("sendTransaction", hasProperty("amount", is(16.0))))
                 .andDo(print());
@@ -250,7 +244,7 @@ public class TransactionControllerTest {
         String receiverEmail = "luluM@email.fr";
         String emitterEmail = "dada@email.fr";
 
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.addTransaction(isA(SendTransaction.class))).thenThrow(new BalanceInsufficientException("Insufficient account balance, your balance is: " + emitterEmail));
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
@@ -262,10 +256,9 @@ public class TransactionControllerTest {
                         .param("amount", "50"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.empty())))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "BalanceInsufficientException"))
@@ -276,7 +269,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
         //THEN
@@ -286,10 +279,9 @@ public class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.empty())))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "NotNull"))
                 .andDo(print());
     }
@@ -298,7 +290,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
         //THEN
@@ -307,10 +299,9 @@ public class TransactionControllerTest {
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.empty())))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "Max"))
                 .andDo(print());
     }
@@ -319,7 +310,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
         //THEN
@@ -327,10 +318,9 @@ public class TransactionControllerTest {
                         .param("amount", "0.5")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.empty())))
+                .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "Min"))
                 .andDo(print());
@@ -340,7 +330,7 @@ public class TransactionControllerTest {
     @Test
     public void addTransactionTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
-        when(userService.getFriendListByCurrentUserEmail(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
         //WHEN
         //THEN
@@ -348,10 +338,9 @@ public class TransactionControllerTest {
                         .param("amount", "2")
                         .param("receiverEmail", ""))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(Optional.empty())))
+                .andExpect(model().attribute("currentPage", 1))
                 .andExpect(model().errorCount(1))
                 .andExpect(model().attributeHasFieldErrors("sendTransaction", "receiverEmail"))
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "receiverEmail", "NotBlank"))

@@ -57,7 +57,7 @@ public class TransferIT {
         mockMvcTransfer.perform(get("/transfer"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transfer"))
-                .andExpect(model().size(5))
+                .andExpect(model().size(6))
                 .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes","totalPages", "currentPage"))
                 .andDo(print());
     }

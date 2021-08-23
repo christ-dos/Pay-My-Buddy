@@ -131,21 +131,21 @@
         </table>
         <!--**********Navigation pagination**********  -->
         <nav aria-label="Page navigation">
-            <ul th:if="${friendLists.getTotalPages() > 1}" class="pagination pagination-lg justify-content-center">
+            <ul th:if="${friendLists.getTotalPages() > 0}" class="pagination pagination-lg justify-content-center">
                 <li th:if="${friendLists.hasPrevious()}" class="page-item">
-                    <a th:href="@{/addfriend(page=${friendLists.number -1},size=${friendLists.size})}" class="page-link"
+                    <a th:href="@{/addfriend(page=${currentPage -1},size=${friendLists.size})}" class="page-link"
                        href="#" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                         <span class="sr-only"></span>
                     </a>
                 </li>
-                <li th:each="i : ${#numbers.sequence(0,friendLists.totalPages -1)}" class="page-item">
+                <li th:each="i : ${#numbers.sequence(1,totalPages)}" th:classappend="${currentPage}==${i}? 'active' : ''" class="page-item">
                     <a th:href="@{/addfriend(page=${i},size=${friendLists.size})}" th:text="${i}" class="page-link"
                        href="#"
-                       th:classappend="${currentPage}==${i}? 'active' : ''">1</a></li>
+                       >1</a></li>
 
                 <li th:if="${friendLists.hasNext()}" class="page-item">
-                    <a th:href="@{/addfriend(page=${friendLists.number +1},size=${friendLists.size})}" class="page-link"
+                    <a th:href="@{/addfriend(page=${currentPage +1},size=${friendLists.size})}" class="page-link"
                        href="#" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only"></span>

@@ -143,7 +143,7 @@
             <tr th:each="transfer: ${transfers}">
                 <td th:text="${transfer.description}">Description</td>
                 <td th:text="${transfer.amount}">Amount</td>
-                <td th:text="${transfer.postTradeBalance}">PostTradeBalance</td>
+                <td th:inline="text">[[${#numbers.formatDecimal(transfer.postTradeBalance, 0, 'COMMA', 2, 'POINT')}]] €</td>
             </tr>
             </tbody>
         </table>
@@ -172,23 +172,22 @@
         <!--**********Navigation pagination**********  -->
         <div class="row">
             <nav aria-label="Page navigation">
-                <ul th:if="${transfers.totalPages > 1}"
+                <ul th:if="${transfers.totalPages > 0}"
                     class="pagination pagination-lg justify-content-center">
                     <li th:if="${transfers.hasPrevious()}" class="page-item">
-                        <a th:href="@{/transfer(page=${transfers.number -1},size=${transfers.size})}" class="page-link"
+                        <a th:href="@{/transfer(page= ${currentPage -1}, size= ${transfers.size})}" class="page-link"
                            href="#" aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                             <span class="sr-only"></span>
                         </a>
                     </li>
-                    <li th:each="i : ${#numbers.sequence(0,transfers.totalPages -1)}" class="page-item">
-                        <a th:href="@{/transfer(page=${i},size=${transfers.size})}" th:text="${i}" class="page-link"
-                           href="#"
-                           th:classappend="${currentPage}==${i} ?'active':''">
+                    <li th:each="i : ${#numbers.sequence(1,transfers.totalPages)}" th:classappend="${currentPage}==${i} ?'active':''" class="page-item">
+                        <a th:href="@{/transfer(page= ${i}, size= ${transfers.size})}" th:text= "${i}" class="page-link"
+                           href="#">
                         </a>
                     </li>
                     <li th:if="${transfers.hasNext()}" class="page-item">
-                        <a th:href="@{/transfer(page=${transfers.number+1},size=${transfers.size})}" class="page-link"
+                        <a th:href="@{/transfer(page= ${currentPage +1}, size= ${transfers.size})}" class="page-link"
                            href="#" aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                             <span class="sr-only"></span>

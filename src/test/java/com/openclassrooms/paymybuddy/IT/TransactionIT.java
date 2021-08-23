@@ -58,9 +58,9 @@ public class TransactionIT {
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().size(8))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().size(6))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists",
+                        "friendListPage", "totalPagesTransaction", "currentPage"))
                 .andDo(print());
     }
 
@@ -86,8 +86,7 @@ public class TransactionIT {
                         .param("receiverEmail", "dada@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "displayingTransaction",
-                        "friendListPage", "totalPagesTransaction", "totalPagesFriendLists", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "friendListPage", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("books")))))

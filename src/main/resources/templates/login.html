@@ -1,5 +1,5 @@
 <!doctype>
-<html xmlns:th="http://www.thymeleaf.org"  lang="fr">
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -22,41 +22,49 @@
         <div class="col-sm-9 col-md-8 col-lg-5 mx-auto">
             <div class="card my-5 ">
                 <div class="card-body mx-3">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col d-flex justify-content-center py-2">
-                                <!--********Titre Pay My Buddy*******-->
-                                <h5 class="card-title btn-success bg-gradient text-light text-center p-2 rounded">Pay My Buddy
-                                </h5>
+                    <div class="container my-2">
+                        <div class="row justify-content-center">
+                            <!--********Titre Pay My Buddy*******-->
+                            <h5 class="card-title btn  btn-success bg-gradient text-light text-center p-2 rounded">Pay My
+                                Buddy
+                            </h5>
+                        </div>
+                        <form th:action="@{/login}" th:object="${userDetails}" method="post" class="form-payMyBuddy"
+                              action="#">
+                            <!--*********Input Email*****************-->
+                            <div class="form-label-group py-4">
+                                <input th:field="*{username}" type="email" id="inputEmail"
+                                       class="form-control input-lg inputIcon"
+                                       placeholder="&#xf0e0  Email" required autofocus>
+                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                   th:errors="*{username}"
+                                   th:errorclass="error"></p>
                             </div>
-                        </div>
+                            <!--*********Input Password*****************-->
+                            <div class="form-label-group py-3">
+                                <input th:field="*{password}" type="password" id="inputPassword"
+                                       class="form-control input-lg inputIcon"
+                                       placeholder="   Password" required>
+                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                   th:errors="*{password}"
+                                   th:errorclass="error"></p>
+                            </div>
+                            <!--*********Remember me*****************-->
+                            <div class=" col-8 col-md-6 col-lg-6 mx-auto my-4 custom-control custom-checkbox">
+                                <input type="checkbox"
+                                       class="custom-control-input" id="customCheck1">
+                                <label class="custom-control-label mb-4"
+                                       for="customCheck1">Remember me</label>
+                            </div>
+                            <!--**********button Login************-->
+                            <button class="col-6 col-md-6 col-lg-8 mx-auto mt-5 btn btn-block btn-primary bg-gradient text-center"
+                                    type="submit">Login
+                            </button>
+                            <!--**********link Sign up here ************-->
+                            <p class="text-center my-4">Don't have account?
+                                <a href="#"> Sign up here</a></p>
+                        </form>
                     </div>
-                    <form th:action="@{/login}" th:object="${userDetails}"  method="post" class="form-payMyBuddy" action="#" >
-                        <!--*********Input Email*****************-->
-                        <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}" th:errors="*{username}"
-                           th:errorclass="error"></p>
-                        <div class="form-label-group py-4">
-                            <input th:field="*{username}" type="email" id="inputEmail" class="form-control input-lg inputIcon"
-                                   placeholder="&#xf0e0  Email" required autofocus>
-                        </div>
-                        <!--*********Input Password*****************-->
-                        <div class="form-label-group py-3">
-                            <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}" th:errors="*{password}"
-                               th:errorclass="error"></p>
-                            <input  th:field="*{password}" type="password" id="inputPassword" class="form-control input-lg inputIcon"
-                                   placeholder="   Password" required>
-                        </div>
-                        <!--*********Remember me*****************-->
-                        <div class=" col-10 col-md-8 col-lg-8 pr-3 m-5 custom-control custom-checkbox">
-                            <input type="checkbox"
-                                   class="custom-control-input" id="customCheck1">
-                            <label class="custom-control-label"
-                                   for="customCheck1">Remember me</label>
-                        </div>
-                        <!--**********button Login************-->
-                        <button class="btn col-8 col-md-5 col-lg-8 m-5 btn-primary bg-gradient btn-block text-center" type="submit">Login
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
