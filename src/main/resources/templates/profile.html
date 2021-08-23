@@ -76,7 +76,7 @@
         <!-- form user info -->
         <div class="card card-outline-secondary">
             <div class="card-header bg-success bg-gradient text-light">
-                <h3 class="mb-0">User Information</h3>
+                <h3 class="mb-0 text-center">User Information</h3>
             </div>
             <div class="card-body">
                 <form class="form p-2" th:action="@{/profile}" th:object="${updateProfile}" action="#" role="form" autocomplete="off"
@@ -134,6 +134,9 @@
                             <input type="reset" class="btn btn-secondary bg-gradient" value="Cancel">
                             <input type="submit" class="btn btn-success bg-gradient" value="Save Changes">
                         </div>
+                        <p th:text="${message}" class="text-success bold my-2 fs-6">
+                            message updated
+                        </p>
                     </div>
                 </form>
             </div>

@@ -33,16 +33,23 @@ public class UpdateProfile {
     private String password;
 
     /**
-     * A String containing the userName
-     */
-    private String email;
-
-    /**
-     * A String containing the password
+     * A String containing the confirm password
      */
     @NotBlank(message = "Confirm password cannot be blank")
     @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
     private String confirmPassword;
+
+    /**
+     * A String containing the email
+     */
+    private String email;
+
+    /**
+     * A String containing the confirm email
+     */
+    private String confirmEmail;
+
+
 
     @Override
     public String toString() {

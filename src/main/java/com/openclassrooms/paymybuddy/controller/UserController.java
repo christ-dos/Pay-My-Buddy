@@ -62,6 +62,13 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @GetMapping("/signup")
+    public String getSignUpView(@ModelAttribute("user") User user, Model model) {
+        log.info("Controller: The View Sign Up displaying");
+
+        return "signup";
+    }
+
     /**
      * Method GET to displaying the view for log in mapped in "/login"
      *
@@ -179,6 +186,7 @@ public class UserController {
             result.rejectValue("confirmPassword", "ConfirmPasswordNotMatch", ex.getMessage());
         }
         model.addAttribute("updateProfile", updateProfile);
+        model.addAttribute("message", "Profil has been updated");
         model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
         log.debug("Controller: profile updated:" + SecurityUtilities.userEmail);
 
