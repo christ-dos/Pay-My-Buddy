@@ -6,6 +6,7 @@ import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
@@ -700,7 +701,6 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "ConfirmPasswordNotMatch"))
                 .andDo(print());
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                      Tests View signup
   ------------------------------------------------------------------------------------------------------*/
@@ -725,7 +725,7 @@ public class UserControllerTest {
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().size(2))
                 .andExpect(model().attributeExists("addUser", "message"))
-                .andExpect(model().attribute("message", is("User has been registered")))
+                .andExpect(model().attribute("message", is("Account registered with success!")))
                 .andExpect(model().attribute("addUser", hasProperty("firstName", is("Ines"))))
                 .andExpect(model().attribute("addUser", hasProperty("lastName", is("Martin"))))
                 .andExpect(model().attribute("addUser", hasProperty("email", is("inim@email.fr"))))
@@ -735,7 +735,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    //******************************Tests Errors in fields*************************************
+         //******************************Tests Errors in fields*************************************
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButFieldFirstNameIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
         //GIVEN
@@ -763,7 +763,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldLastNameIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldLastNameIsBlank_thenReturnErrorInFieldsLastName() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
@@ -789,7 +789,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldEmailIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldEmailIsBlank_thenReturnErrorInFieldsEmail() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "passpass", "passpass", "", "inim@email.fr",
@@ -815,7 +815,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldConfirmEmailIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldConfirmEmailIsBlank_thenReturnErrorInFieldsConfirmEmail() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "",
@@ -841,7 +841,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsBlank_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "        ", "passpass", "inim@email.fr",
@@ -867,7 +867,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsLess8_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsLess8_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "pass", "passpass", "inim@email.fr", "inim@email.fr",
@@ -893,7 +893,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan30_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan30_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "passpasspasspasspasspasspasspass", "passpass", "inim@email.fr",
@@ -918,9 +918,8 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsBlank_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "passpass", "        ", "inim@email.fr", "inim@email.fr",
@@ -946,7 +945,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsLess8_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsLess8_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "passpass", "pass", "inim@email.fr", "inim@email.fr",
@@ -972,7 +971,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan30_thenReturnErrorInFieldsFirstName() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan30_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Ines", "Martin", "passpass", "passpasspasspasspasspasspasspass", "inim@email.fr",
@@ -997,10 +996,34 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-//***********************************Test Exceptions*************************************
-
     @Test
-    public void signUpUserViewSignUp_whenUserareadyExistInDB_thenThrowsUserAlreadyExistException() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButAccountBankIsNull_thenReturnErrorInFieldsAccountBank() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
+                null);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "accountBank", "NotNull"))
+                .andDo(print());
+    }
+//************************************************Test Exceptions view signup**********************************************
+    @Test
+    public void signUpUserViewSignUp_whenUserAlreadyExistInDB_thenThrowsUserAlreadyExistException() throws Exception {
         //GIVEN
         User userAlreadyExist = User.builder()
                 .email("dada@email.fr")
@@ -1033,7 +1056,61 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButEmailAndConfirmEmailNotMatch_thenThrowsUserEmailNotMatcherException() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Albert", "Masarin", "passpass", "passpass", "albert@email.fr", "emailNotMatche@email.fr",
+                0123654);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
+        when(userServiceMock.addUser(isA(AddUser.class))).thenThrow(new EmailNotMatcherException("Field confirm email not match with email"));
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmEmail())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmEmail", "ConfirmEmailNotMatcher"))
+                .andDo(print());
+    }
 
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordAndConfirmPasswordNotMatch_thenThrowsUserPasswordNotMatcherException() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Albert", "Masarin", "passpass", "notmatch", "albert@email.fr", "albert@email.fr",
+                0123654);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
+        when(userServiceMock.addUser(isA(AddUser.class))).thenThrow(new PasswordNotMatcherException("Field confirm password not match with password"));
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmEmail())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
+                .andDo(print());
+    }
 }
 
 

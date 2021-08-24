@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -29,7 +30,7 @@ public class AddUser {
     /**
      * A String containing the password
      */
-    @NotBlank(message = "password cannot be blank")
+    @NotBlank(message = "Password cannot be blank")
     @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
     private String password;
 
@@ -57,8 +58,6 @@ public class AddUser {
      */
     @NotNull(message = "Account Bank cannot be null")
     private Integer accountBank;
-
-
 
     @Override
     public String toString() {

@@ -2,6 +2,9 @@ package com.openclassrooms.paymybuddy.IT;
 
 import com.openclassrooms.paymybuddy.DTO.AddUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
+import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
+import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.model.User;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -21,6 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -45,7 +50,408 @@ public class UserIT {
                 .apply(springSecurity())
                 .build();
     }
-/*------------------------------------------------------------------------------------------------------------
+    /*------------------------------------------------------------------------------------------------------------
+                                    Integration tests view sign Up
+    --------------------------------------------------------------------------------------------------------------*/
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBAndEmailMatchConfirmEmailAndPasswordMatchConfirmPassword_thenReturnUserAddedAndMessageSuccess() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().attribute("message", is("Account registered with success!")))
+                .andExpect(model().attribute("addUser", hasProperty("firstName", is("Ines"))))
+                .andExpect(model().attribute("addUser", hasProperty("lastName", is("Martin"))))
+                .andExpect(model().attribute("addUser", hasProperty("email", is("inim@email.fr"))))
+                .andExpect(model().attribute("addUser", hasProperty("confirmEmail", is("inim@email.fr"))))
+                .andExpect(model().attribute("addUser", hasProperty("password", is("passpass"))))
+                .andExpect(model().attribute("addUser", hasProperty("confirmPassword", is("passpass"))))
+                .andDo(print());
+    }
+
+    //******************************Tests Errors in fields*************************************
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldFirstNameIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "", "Martin", "passpass", "passpass", "inim@email.fr", "inim@email.fr"
+                , 123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "firstName", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldLastNameIsBlank_thenReturnErrorInFieldsLastName() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "lastName", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldEmailIsBlank_thenReturnErrorInFieldsEmail() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "email", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldConfirmEmailIsBlank_thenReturnErrorInFieldsConfirmEmail() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmEmail", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsBlank_thenReturnErrorInFieldsPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "        ", "passpass", "inim@email.fr",
+                "inim@email.fr", 123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "password", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsLess8_thenReturnErrorInFieldsPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "pass", "passpass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "password", "Size"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan30_thenReturnErrorInFieldsPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpasspasspasspasspasspasspass", "passpass", "inim@email.fr",
+                "inim@email.fr", 123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "password", "Size"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsBlank_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "        ", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "NotBlank"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsLess8_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "pass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "Size"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan30_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpasspasspasspasspasspasspass", "inim@email.fr",
+                "inim@email.fr", 123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "Size"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButAccountBankIsNull_thenReturnErrorInFieldsAccountBank() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
+                null);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "accountBank", "NotNull"))
+                .andDo(print());
+    }
+
+    //************************************************Test Exceptions view signup**********************************************
+    @Test
+    public void signUpUserViewSignUp_whenUserAlreadyExistInDB_thenThrowsUserAlreadyExistException() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Damien", "Sanchez", "passpass", "passpass", "dada@email.fr", "dada@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "email", "EmailAlreadyExist"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButEmailAndConfirmEmailNotMatch_thenThrowsUserEmailNotMatcherException() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Albert", "Masarin", "passpass", "passpass", "albert@email.fr", "emailNotMatche@email.fr",
+                0123654);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmEmail())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmEmail", "ConfirmEmailNotMatcher"))
+                .andDo(print());
+    }
+
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordAndConfirmPasswordNotMatch_thenThrowsUserPasswordNotMatcherException() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Albert", "Masarin", "passpass", "notmatch", "albert@email.fr", "albert@email.fr",
+                0123654);
+        //WHEN
+        //THEN
+        mockMvc.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmEmail())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
+                .andDo(print());
+    }
+
+
+    /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view home
     --------------------------------------------------------------------------------------------------------------*/
     @Test
@@ -70,35 +476,33 @@ public class UserIT {
                 .andDo(print());
     }
 
-    @Test
-    public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
-        //GIVEN
-        User currentUser = User.builder()
-                .email("emptylist@email.fr")
-                .firstName("Damien")
-                .lastName("Sanchez")
-                .password("passpass")
-                .balance(100.0)
-                .build();
-        //WHEN
-        //THEN
-        mockMvc.perform(get("/home")
-                        .param("email", String.valueOf(currentUser.getEmail())))
-                .andExpect(status().isOk())
-                .andExpect(view().name("home"))
-                .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("user"))
-                .andExpect(model().attribute("user",hasProperty("email", Matchers.is("dada@email.fr"))))
-                .andExpect(model().attribute("user",hasProperty("balance", Matchers.is(200.0))))
-                .andExpect(model().attribute("user",hasProperty("firstName", Matchers.is("Damien"))))
-                .andExpect(model().attribute("user",hasProperty("lastName", Matchers.is("Sanches"))))
-                .andExpect(model().attribute("lastBuddy",nullValue()))
-                .andExpect(model().attribute("lastTransaction",nullValue()))
-                .andDo(print());
-    }
-
-
-    /*------------------------------------------------------------------------------------------------------------
+//    @Test
+//    public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
+//        //GIVEN
+//        User currentUser = User.builder()
+//                .email("emptylist@email.fr")
+//                .firstName("Damien")
+//                .lastName("Sanchez")
+//                .password("passpass")
+//                .balance(100.0)
+//                .build();
+//        //WHEN
+//        //THEN
+//        mockMvc.perform(get("/home")
+//                        .param("email", String.valueOf(currentUser.getEmail())))
+//                .andExpect(status().isOk())
+//                .andExpect(view().name("home"))
+//                .andExpect(model().hasNoErrors())
+//                .andExpect(model().attributeExists("user"))
+//                .andExpect(model().attribute("user",hasProperty("email", Matchers.is("dada@email.fr"))))
+//                .andExpect(model().attribute("user",hasProperty("balance", Matchers.is(200.0))))
+//                .andExpect(model().attribute("user",hasProperty("firstName", Matchers.is("Damien"))))
+//                .andExpect(model().attribute("user",hasProperty("lastName", Matchers.is("Sanches"))))
+//                .andExpect(model().attribute("lastBuddy",nullValue()))
+//                .andExpect(model().attribute("lastTransaction",nullValue()))
+//                .andDo(print());
+//    }
+ /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view addfriend
     --------------------------------------------------------------------------------------------------------------*/
     @Test

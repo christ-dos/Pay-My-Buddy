@@ -76,11 +76,11 @@ public class UserService implements IUserService {
         }
         if (!addUser.getEmail().equals(addUser.getConfirmEmail())) {
             log.error("Service: confirmEmail not match email");
-            throw new EmailNotMatcherException("Confirm mail not mayh with email");
+            throw new EmailNotMatcherException("Field confirm email not match with email");
         }
         if (!addUser.getConfirmPassword().equals(addUser.getPassword())) {
             log.error("Service: confirmPassword not match password");
-            throw new PasswordNotMatcherException("Confirm not match with password");
+            throw new PasswordNotMatcherException("Field confirm  password not match with password");
         }
         User userToAdd = new User();
         userToAdd.setEmail(addUser.getConfirmEmail());

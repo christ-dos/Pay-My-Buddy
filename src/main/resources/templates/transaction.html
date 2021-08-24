@@ -77,7 +77,6 @@
         </div>
     </div>
 </nav>
-
 <!--************ link Transaction et Home /************-->
 <div class="container-fluid gray py-2">
     <ul class="nav">
@@ -123,7 +122,7 @@
                     </div>
                     <!--*************Input Number**************-->
                     <div class="col-12 col-md-2 col-lg-3 mb-3 d-flex flex-column">
-                        <input th:field="*{amount}" class="text-right form-control" type="number"
+                        <input th:field="*{amount}" class="text-right form-control-select" type="number"
                                id="howmuch" step="0.01"
                                placeholder="0€" min="0" max="10000">
                         <p th:if="${#fields.hasAnyErrors()}"

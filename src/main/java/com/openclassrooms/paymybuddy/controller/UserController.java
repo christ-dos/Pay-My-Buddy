@@ -86,14 +86,14 @@ public class UserController {
             result.rejectValue("email", "EmailAlreadyExist", ex.getMessage());
         } catch (EmailNotMatcherException ex1) {
             log.error("Controller: ConfirmEmail not match with email");
-            result.rejectValue("confirmEmail", "confirmEmailNotMatcher", ex1.getMessage());
+            result.rejectValue("confirmEmail", "ConfirmEmailNotMatcher", ex1.getMessage());
         } catch (PasswordNotMatcherException ex2) {
             log.error("Controller: ConfirmPassword not match with password");
-            result.rejectValue("confirmPassword", "confirmPasswordNotMatcher", ex2.getMessage());
+            result.rejectValue("confirmPassword", "ConfirmPasswordNotMatcher", ex2.getMessage());
         }
         model.addAttribute("addUser", addUser);
-        model.addAttribute("message", "User has been registered");
-        log.debug("Controller: User Added:" + addUser.getConfirmEmail());
+        model.addAttribute("message", "Account registered with success!");
+        log.debug("Controller: User Added with success: " + addUser.getConfirmEmail());
 
         return "signup";
     }

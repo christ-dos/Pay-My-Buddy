@@ -18,7 +18,7 @@
     <style>
         .error {
             color: red;
-            font-size: 0.7em;
+            font-size: 0.8em;
             font-weight: bold;
         }
     </style>
@@ -48,7 +48,7 @@
                                 <input th:field="*{firstName}" type="text" id="firstName"
                                        class="form-control input-lg inputIcon"
                                        placeholder="&#xf2bd First Name" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{firstName}"
                                    th:errorclass="error"></p>
                             </div>
@@ -57,7 +57,7 @@
                                 <input th:field="*{lastName}" type="text" id="lastName"
                                        class="form-control input-lg inputIcon"
                                        placeholder="&#xf2bd   Last name" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{lastName}"
                                    th:errorclass="error"></p>
                             </div>
@@ -66,7 +66,7 @@
                                 <input th:field="*{email}" type="email" id="inputEmail"
                                        class="form-control input-lg inputIcon"
                                        placeholder="&#xf0e0  Email" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{email}"
                                    th:errorclass="error"></p>
                             </div>
@@ -75,7 +75,7 @@
                                 <input th:field="*{confirmEmail}" type="email" id="inputconfirmEmail"
                                        class="form-control input-lg inputIcon"
                                        placeholder="&#xf0e0  Confirm email" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1" th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{confirmEmail}"
                                    th:errorclass="error"></p>
                             </div>
@@ -84,7 +84,7 @@
                                 <input th:field="*{password}" type="password" id="inputPassword"
                                        class="form-control input-lg inputIcon"
                                        placeholder="   Password" required>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{password}"
                                    th:errorclass="error"></p>
                             </div>
@@ -93,16 +93,16 @@
                                 <input th:field="*{confirmPassword}" type="password" id="confirmPassword"
                                        class="form-control input-lg inputIcon"
                                        placeholder="   Confirm Password" required>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{confirmPassword}"
                                    th:errorclass="error"></p>
                             </div>
                             <!--****************AccountBank****************************-->
                             <div class="form-label-group py-2">
-                                <input th:field="*{accountBank}" type="number" id="accountBank"
+                                <input th:field="*{accountBank}" type="number" min="0" id="accountBank"
                                        class="form-control input-lg inputIcon"
                                        placeholder="  Account Bank" required>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{accountBank}"
                                    th:errorclass="error"></p>
                             </div>
