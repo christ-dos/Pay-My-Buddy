@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -82,15 +83,21 @@ public class UserService implements IUserService {
             log.error("Service: confirmPassword not match password");
             throw new PasswordNotMatcherException("Field confirm  password not match with password");
         }
+
         User userToAdd = new User();
         userToAdd.setEmail(addUser.getConfirmEmail());
         userToAdd.setFirstName(addUser.getFirstName());
         userToAdd.setLastName(addUser.getLastName());
-        userToAdd.setPassword(addUser.getConfirmPassword());
+        userToAdd.setPassword(getEncodedPassword(addUser.getPassword()));
         userToAdd.setAccountBank(addUser.getAccountBank());
 
         log.debug("Service: User added : " + addUser.getConfirmEmail());
         return userRepository.save(userToAdd);
+    }
+
+    private String getEncodedPassword(String Password){
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        return passwordEncoder.encode(Password);
     }
 
     /**
@@ -108,7 +115,7 @@ public class UserService implements IUserService {
         userToUpdate.setEmail(SecurityUtilities.userEmail);
         userToUpdate.setFirstName(updateCurrentUser.getFirstName());
         userToUpdate.setLastName(updateCurrentUser.getLastName());
-        userToUpdate.setPassword(updateCurrentUser.getConfirmPassword());
+        userToUpdate.setPassword(getEncodedPassword(updateCurrentUser.getConfirmPassword()));
         log.info("Service:Current user updated");
         return userRepository.save(userToUpdate);
     }

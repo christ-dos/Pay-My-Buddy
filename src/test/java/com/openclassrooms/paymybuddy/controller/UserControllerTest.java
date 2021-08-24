@@ -94,21 +94,21 @@ public class UserControllerTest {
  ------------------------------------------------------------------------------------------------------*/
 
     @Test
-//    @WithMockUser
-    public void showLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    @WithMockUser(value = "spring")
+    public void getLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/customlogin"))
+        mockMvcUser.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
                 .andExpect(model().attributeExists("userDetails"))
                 .andDo(print());
     }
 
-    @WithMockUser(value = "@dada@email.fr")
+    @WithMockUser(value = "spring")
     @Test
-    public void showLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
+    public void getLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -117,15 +117,18 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void submitLoginViewTest_whenUserNameIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
+        String username = SecurityUtilities.userEmail;
 //        MyUserDetails myUserDetails = new MyUserDetails("", "pass");
 //        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/customlogin")
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/login")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("passpass"))
                         .accept(MediaType.ALL)).andExpect(status().isOk())
 //                .andExpect(redirectedUrl("/customlogin"))
 //                .andExpect(MockMvcResultMatchers.redirectedUrl("/customlogin"))
@@ -136,20 +139,20 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(username = "dada@email.fr", password = "pass")
+    @WithMockUser(value = "spring")
     @Test
     public void submitLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlIndex() throws Exception {
         //GIVEN
         String username = SecurityUtilities.userEmail;
-        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", "pass");
+        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", "passpass");
         when(userDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/authentication/login")
-                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("pass"))
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/login")
+                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("passpass"))
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("username", username)
-                        .param("password", "pass")
+                        .param("password", "passpass")
                         .accept(MediaType.ALL)).andExpect(status().isOk())
 //                .andExpect(redirectedUrl("/index"))
 //                .andExpect(MockMvcResultMatchers.redirectedUrl("/index"))
@@ -163,6 +166,7 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                      Tests View home
      ------------------------------------------------------------------------------------------------------*/
+    @WithMockUser(value = "spring")
     @Test
     public void getUserInformationHomeViewTest_whenCurrentUserIsDada_thenReturnFirstNameDamienAndLastNameSanchez() throws Exception {
         //GIVEN
@@ -193,6 +197,8 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", SecurityUtilities.userEmail)
                         .param("user", String.valueOf(currentUser)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
@@ -210,6 +216,7 @@ public class UserControllerTest {
 
     }
 
+    @WithMockUser(value = "spring")
     @Test
     public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
         //GIVEN
@@ -236,6 +243,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("user", String.valueOf(currentUser)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
@@ -253,7 +261,6 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                         Tests View addfriend
      ------------------------------------------------------------------------------------------------------*/
-
     @WithMockUser(value = "spring")
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnStatusOK() throws Exception {
@@ -701,6 +708,7 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "ConfirmPasswordNotMatch"))
                 .andDo(print());
     }
+
     /*-----------------------------------------------------------------------------------------------------
                                      Tests View signup
   ------------------------------------------------------------------------------------------------------*/
@@ -735,7 +743,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-         //******************************Tests Errors in fields*************************************
+    //******************************Tests Errors in fields*************************************
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButFieldFirstNameIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
         //GIVEN
@@ -1021,7 +1029,8 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "accountBank", "NotNull"))
                 .andDo(print());
     }
-//************************************************Test Exceptions view signup**********************************************
+
+    //************************************************Test Exceptions view signup**********************************************
     @Test
     public void signUpUserViewSignUp_whenUserAlreadyExistInDB_thenThrowsUserAlreadyExistException() throws Exception {
         //GIVEN

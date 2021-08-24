@@ -108,18 +108,19 @@ public class UserController {
     @GetMapping("/login")
     public String showLoginView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
         log.info("Controller: The View login displaying");
-
+        model.addAttribute("messageLogOff","You have been logged out.");
+//        model.addAttribute("userDetails", "Bad credentials");
         return "login";
     }
 
     //    @RolesAllowed({"USER", "ADMIN"})
     @PostMapping("/login")
-    public String submitLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
+    public String getLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
 
         if (result.hasErrors()) {
-//            model.addAttribute("userDetails", "Bad credentials");
+            model.addAttribute("userDetails", "Bad credentials");
             log.error("Controller: Error in fields");
-//            return "login";
+            return "login";
         }
         try {
 //            userDetailsService.loadUserByUsername(userDetails.getUsername());
@@ -129,7 +130,7 @@ public class UserController {
             return "login";
         }
 
-        return "transaction";
+        return "home";
 
     }
 
@@ -186,7 +187,9 @@ public class UserController {
     @GetMapping("/profile")
     public String getCurrentUserInformationInProfileView(@ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser, @ModelAttribute("currentUser") User currentUser,
                                                          Model model) {
-        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
+        User userByEmail = userService.getUserByEmail(SecurityUtilities.userEmail);
+        userByEmail.setPassword(userByEmail.getPassword());
+        model.addAttribute("currentUser", userByEmail);
         model.addAttribute("updateCurrentUser", updateCurrentUser);
         log.info("Controller: The View profile displaying");
 
@@ -216,7 +219,7 @@ public class UserController {
             result.rejectValue("confirmPassword", "ConfirmPasswordNotMatch", ex.getMessage());
         }
         model.addAttribute("updateCurrentUser", updateCurrentUser);
-        model.addAttribute("message", "Profil has been updated");
+        model.addAttribute("message", "Profile has been updated");
         model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
         log.debug("Controller: profile updated:" + SecurityUtilities.userEmail);
 

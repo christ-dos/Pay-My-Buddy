@@ -4,6 +4,7 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.configuration.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -56,6 +57,9 @@ public class TransactionControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    MyUserDetailsService myUserDetailsService;
 
     private Pageable pageable;
 

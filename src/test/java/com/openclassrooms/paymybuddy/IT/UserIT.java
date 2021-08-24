@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
@@ -449,8 +450,6 @@ public class UserIT {
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
                 .andDo(print());
     }
-
-
     /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view home
     --------------------------------------------------------------------------------------------------------------*/
@@ -460,7 +459,8 @@ public class UserIT {
         //WHEN
         //THEN
         mockMvc.perform(get("/home")
-                        .param("email", SecurityUtilities.userEmail))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user(SecurityUtilities.userEmail)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
@@ -565,7 +565,7 @@ public class UserIT {
         //THEN
         mockMvc.perform(MockMvcRequestBuilders.post("/addfriend")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("passpass"))
                         .param("email", friendEmailNotExist))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -658,7 +658,9 @@ public class UserIT {
           //WHEN
           //THEN
           mockMvc.perform(get("/profile")
-                          .param("email", SecurityUtilities.userEmail))
+                          .with(SecurityMockMvcRequestPostProcessors.csrf())
+                          .param("email", SecurityUtilities.userEmail)
+                          .param("password", "passpass"))
                   .andExpect(status().isOk())
                   .andExpect(view().name("profile"))
                   .andExpect(model().size(2))
@@ -667,7 +669,7 @@ public class UserIT {
                   .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
                   .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
                   .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanches"))))
-                  .andExpect(model().attribute("currentUser", hasProperty("password", is("passpasspass"))))
+                  .andExpect(model().attribute("currentUser", hasProperty("password", is(containsString("$2a$")))))
                   .andDo(print());
       }
 

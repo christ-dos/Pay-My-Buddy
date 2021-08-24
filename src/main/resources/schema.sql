@@ -7,7 +7,7 @@ USE paymybuddy;
 CREATE TABLE user
 (
     email        VARCHAR(100) NOT NULL,
-    password     VARCHAR(30)  NOT NULL,
+    password     VARCHAR(100)  NOT NULL,
     first_name   VARCHAR(100) NOT NULL,
     last_name    VARCHAR(100) NOT NULL,
     balance      DECIMAL(8, 2),
@@ -18,7 +18,7 @@ CREATE TABLE user
 
 INSERT INTO user(email, password, first_name, last_name, balance, account_bank)
 VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
-       ('dada@email.fr', 'pass', 'Damien', 'Sanchez', 200, 255896),
+       ('dada@email.fr', '$2a$10$2K11L/fq6fmlHt3K7Nq.LeBpsNYiaLsb0tCh3z3w/h4MIi2FtB66.', 'Damien', 'Sanchez', 200, 255896),
        ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 50, 359840),
        ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 20.0, 259873),
        ('lili@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 783600)

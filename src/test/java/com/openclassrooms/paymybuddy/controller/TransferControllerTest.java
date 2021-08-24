@@ -1,6 +1,7 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
+import com.openclassrooms.paymybuddy.configuration.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.repository.ITransferRepository;
@@ -46,10 +47,13 @@ public class TransferControllerTest {
     private TransferService transferServiceMock;
 
     @MockBean
-    private ITransferRepository transferRepositoryMock;
+    MyUserDetailsService myUserDetailsService;
 
-    @MockBean
-    private IUserRepository userRepositoryMock;
+//    @MockBean
+//    private ITransferRepository transferRepositoryMock;
+//
+//    @MockBean
+//    private IUserRepository userRepositoryMock;
 
     private Page<DisplayingTransfer> displayingTransferPage;
 
