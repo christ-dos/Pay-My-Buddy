@@ -1,8 +1,10 @@
 package com.openclassrooms.paymybuddy.service;
 
+import com.openclassrooms.paymybuddy.DTO.AddUser;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
+import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
+import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
@@ -61,22 +63,53 @@ public class UserService implements IUserService {
     }
 
     /**
-     * Method which add a User to the table User
+     * Method which add a user to the table User
      *
      * @return A {@link User} Object
      */
     @Override
-    public User addUser(UpdateProfile updateProfile) {
+    public User addUser(AddUser addUser) {
+        User userToAddExist = userRepository.findByEmail(addUser.getEmail());
+        if (userToAddExist != null) {
+            log.error("Service: User's email already exist in DB");
+            throw new UserAlreadyExistException("This email already exist");
+        }
+        if (!addUser.getEmail().equals(addUser.getConfirmEmail())) {
+            log.error("Service: confirmEmail not match email");
+            throw new EmailNotMatcherException("Confirm mail not mayh with email");
+        }
+        if (!addUser.getConfirmPassword().equals(addUser.getPassword())) {
+            log.error("Service: confirmPassword not match password");
+            throw new PasswordNotMatcherException("Confirm not match with password");
+        }
+        User userToAdd = new User();
+        userToAdd.setEmail(addUser.getConfirmEmail());
+        userToAdd.setFirstName(addUser.getFirstName());
+        userToAdd.setLastName(addUser.getLastName());
+        userToAdd.setPassword(addUser.getConfirmPassword());
+        userToAdd.setAccountBank(addUser.getAccountBank());
+
+        log.debug("Service: User added : " + addUser.getConfirmEmail());
+        return userRepository.save(userToAdd);
+    }
+
+    /**
+     * Method which update current user to the table User
+     *
+     * @return A {@link User} Object
+     */
+    @Override
+    public User updateProfile(UpdateCurrentUser updateCurrentUser) {
         User userToUpdate = userRepository.findByEmail(SecurityUtilities.userEmail);
-        if (!updateProfile.getConfirmPassword().equals(updateProfile.getPassword())) {
+        if (!updateCurrentUser.getConfirmPassword().equals(updateCurrentUser.getPassword())) {
             log.error("Service: confirmPassword not match password");
             throw new PasswordNotMatcherException("Confirm not match with password");
         }
         userToUpdate.setEmail(SecurityUtilities.userEmail);
-        userToUpdate.setFirstName(updateProfile.getFirstName());
-        userToUpdate.setLastName(updateProfile.getLastName());
-        userToUpdate.setPassword(updateProfile.getConfirmPassword());
-        log.debug("Service:Current user updated");
+        userToUpdate.setFirstName(updateCurrentUser.getFirstName());
+        userToUpdate.setLastName(updateCurrentUser.getLastName());
+        userToUpdate.setPassword(updateCurrentUser.getConfirmPassword());
+        log.info("Service:Current user updated");
         return userRepository.save(userToUpdate);
     }
 
@@ -135,7 +168,7 @@ public class UserService implements IUserService {
 
     @Override
     public List<FriendList> getFriendListByCurrentUserEmail() {
-        Page<Friend> friendListsByEmailPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail,null);
+        Page<Friend> friendListsByEmailPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.userEmail, null);
         List<Friend> friendListsByEmail = friendListsByEmailPaged.getContent();
         log.debug("UserService: friend list found for current user: " + SecurityUtilities.userEmail);
 

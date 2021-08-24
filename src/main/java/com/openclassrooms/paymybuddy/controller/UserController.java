@@ -1,10 +1,12 @@
 package com.openclassrooms.paymybuddy.controller;
 
+import com.openclassrooms.paymybuddy.DTO.AddUser;
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
+import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
@@ -63,8 +65,35 @@ public class UserController {
     }
 
     @GetMapping("/signup")
-    public String getSignUpView(@ModelAttribute("user") User user, Model model) {
+    public String getSignUpView(@ModelAttribute("addUser") AddUser addUser, Model model) {
         log.info("Controller: The View Sign Up displaying");
+
+        return "signup";
+    }
+
+    @PostMapping("/signup")
+    public String signUpUserViewSignUp(@Valid @ModelAttribute("addUser") AddUser addUser
+            , BindingResult result, Model model) {
+        if (result.hasFieldErrors()) {
+            model.addAttribute("addUser", addUser);
+            log.error("Controller: Error in fields");
+            return "signup";
+        }
+        try {
+            userService.addUser(addUser);
+        } catch (UserAlreadyExistException ex) {
+            log.error("Controller: user already exist in database");
+            result.rejectValue("email", "EmailAlreadyExist", ex.getMessage());
+        } catch (EmailNotMatcherException ex1) {
+            log.error("Controller: ConfirmEmail not match with email");
+            result.rejectValue("confirmEmail", "confirmEmailNotMatcher", ex1.getMessage());
+        } catch (PasswordNotMatcherException ex2) {
+            log.error("Controller: ConfirmPassword not match with password");
+            result.rejectValue("confirmPassword", "confirmPasswordNotMatcher", ex2.getMessage());
+        }
+        model.addAttribute("addUser", addUser);
+        model.addAttribute("message", "User has been registered");
+        log.debug("Controller: User Added:" + addUser.getConfirmEmail());
 
         return "signup";
     }
@@ -155,10 +184,10 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/profile")
-    public String getCurrentUserInformationInProfileView(@ModelAttribute("updateProfile") UpdateProfile updateProfile, @ModelAttribute("currentUser") User currentUser,
+    public String getCurrentUserInformationInProfileView(@ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser, @ModelAttribute("currentUser") User currentUser,
                                                          Model model) {
         model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
-        model.addAttribute("updateProfile", updateProfile);
+        model.addAttribute("updateCurrentUser", updateCurrentUser);
         log.info("Controller: The View profile displaying");
 
         return "profile";
@@ -172,20 +201,21 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @PostMapping("/profile")
-    public String updateCurrentUserInformation(@Valid @ModelAttribute("updateProfile") UpdateProfile updateProfile, BindingResult result, Model model) {
+    public String updateCurrentUserInformation(@Valid @ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser
+            , BindingResult result, Model model) {
         if (result.hasFieldErrors()) {
-            model.addAttribute("updateProfile", updateProfile);
+            model.addAttribute("updateCurrentUser", updateCurrentUser);
             model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
             log.error("Controller: Error in fields");
             return "profile";
         }
         try {
-            userService.addUser(updateProfile);
+            userService.updateProfile(updateCurrentUser);
         } catch (PasswordNotMatcherException ex) {
             log.error("Controller: Confirm not match with password");
             result.rejectValue("confirmPassword", "ConfirmPasswordNotMatch", ex.getMessage());
         }
-        model.addAttribute("updateProfile", updateProfile);
+        model.addAttribute("updateCurrentUser", updateCurrentUser);
         model.addAttribute("message", "Profil has been updated");
         model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
         log.debug("Controller: profile updated:" + SecurityUtilities.userEmail);

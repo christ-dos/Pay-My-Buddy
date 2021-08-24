@@ -1,11 +1,7 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
-import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
+import com.openclassrooms.paymybuddy.DTO.AddUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
-import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -23,13 +19,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -268,7 +259,7 @@ public class UserIT {
                   .andExpect(view().name("profile"))
                   .andExpect(model().size(2))
                   .andExpect(model().hasNoErrors())
-                  .andExpect(model().attributeExists("currentUser", "updateProfile"))
+                  .andExpect(model().attributeExists("currentUser", "updateCurrentUser"))
                   .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
                   .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
                   .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanches"))))
@@ -290,7 +281,7 @@ public class UserIT {
     @Test
     public void updateCurrentUserInformationTest_whenCurrentUserIsDada_thenReturnUserDadaUpdated() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Damien");
         updateProfileCurrentUser.setLastName("Sanches");
         updateProfileCurrentUser.setPassword("passpasspass");
@@ -305,18 +296,18 @@ public class UserIT {
                         .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attribute("updateProfile", hasProperty("email", is("dada@email.fr"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("firstName", is("Damien"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("lastName", is("Sanches"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("password", is("passpasspass"))))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("lastName", is("Sanches"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("password", is("passpasspass"))))
                 .andDo(print());
     }
 
     @Test
     public void updateCurrentUserInformationTest_whenFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("");
         updateProfileCurrentUser.setLastName("Duhamel");
         updateProfileCurrentUser.setPassword("passpasspass");
@@ -333,15 +324,15 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "firstName", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "firstName", "NotBlank"))
                 .andDo(print());
     }
 
     @Test
     public void updateCurrentUserInformationTest_whenLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("");
         updateProfileCurrentUser.setPassword("passpasspass");
@@ -357,15 +348,15 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "lastName", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "lastName", "NotBlank"))
                 .andDo(print());
     }
 
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
         updateProfileCurrentUser.setPassword("pass");
@@ -382,16 +373,16 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(2))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "Size"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "Size"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "password", "Size"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "Size"))
                 .andDo(print());
     }
 
     @Test
     public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
         updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspass");
@@ -408,16 +399,16 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(2))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "Size"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "Size"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "password", "Size"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "Size"))
                 .andDo(print());
     }
 
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
         updateProfileCurrentUser.setPassword("        ");
@@ -432,8 +423,8 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(2))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "password", "NotBlank"))
                 .andDo(print());
 
     }
@@ -441,7 +432,7 @@ public class UserIT {
     @Test
     public void updateCurrentUserInformationTest_whenConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Damien");
         updateProfileCurrentUser.setLastName("Sanchez");
         updateProfileCurrentUser.setPassword("passpass");
@@ -457,15 +448,15 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "NotBlank"))
                 .andDo(print());
     }
 
     @Test
     public void updateCurrentUserInformationTest_whenConfirmPassWordNotMatchWithPassword_thenThrowsPasswordNotMatcherException() throws Exception {
         //GIVEN
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Damien");
         updateProfileCurrentUser.setLastName("Sanchez");
         updateProfileCurrentUser.setPassword("password");
@@ -481,8 +472,8 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "ConfirmPasswordNotMatch"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "ConfirmPasswordNotMatch"))
                 .andDo(print());
     }
 }
