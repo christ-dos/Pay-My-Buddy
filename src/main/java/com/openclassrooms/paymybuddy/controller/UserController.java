@@ -5,7 +5,7 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,11 +38,6 @@ import java.util.Optional;
 @Controller
 @Slf4j
 public class UserController {
-
-
-    //private final List<IFriendList> friendLists = new ArrayList<>();
-
-    //private final List<IDisplayingTransaction> transactionslist = new ArrayList<>();
     /**
      * Dependency  {@link IUserService } injected
      */
@@ -51,8 +47,8 @@ public class UserController {
     @Autowired
     private ITransactionService transactionService;
 
-//    @Autowired
-//    private UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     /**
      * Method that get all users
@@ -106,16 +102,24 @@ public class UserController {
      */
 //    @RolesAllowed({"USER"})
     @GetMapping("/login")
-    public String showLoginView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
+    public String getLoginView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
         log.info("Controller: The View login displaying");
-        model.addAttribute("messageLogOff","You have been logged out.");
+
 //        model.addAttribute("userDetails", "Bad credentials");
         return "login";
     }
 
+    @GetMapping("/logoff")
+    public String logOffViewLogin(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
+        model.addAttribute("messageLogOff","You have been logged out.");
+        return "login";
+    }
+
+
+
     //    @RolesAllowed({"USER", "ADMIN"})
     @PostMapping("/login")
-    public String getLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
+    public String authenticationLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
 
         if (result.hasErrors()) {
             model.addAttribute("userDetails", "Bad credentials");
@@ -123,7 +127,7 @@ public class UserController {
             return "login";
         }
         try {
-//            userDetailsService.loadUserByUsername(userDetails.getUsername());
+            userDetailsService.loadUserByUsername(userDetails.getUsername());
         } catch (UsernameNotFoundException ex) {
             result.rejectValue("username", "UserNameNotFound", ex.getMessage());
             log.error("Controller: Username Not found");
@@ -156,7 +160,7 @@ public class UserController {
             log.error("Controller: Empty list");
         }
         log.info("Controller: The View home displaying");
-        model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.userEmail));
+        model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.currentUser));
         model.addAttribute("lastBuddy", lastFriendAdded);
         model.addAttribute("lastTransaction", lastTransaction);
 
@@ -187,7 +191,7 @@ public class UserController {
     @GetMapping("/profile")
     public String getCurrentUserInformationInProfileView(@ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser, @ModelAttribute("currentUser") User currentUser,
                                                          Model model) {
-        User userByEmail = userService.getUserByEmail(SecurityUtilities.userEmail);
+        User userByEmail = userService.getUserByEmail(SecurityUtilities.currentUser);
         userByEmail.setPassword(userByEmail.getPassword());
         model.addAttribute("currentUser", userByEmail);
         model.addAttribute("updateCurrentUser", updateCurrentUser);
@@ -208,7 +212,7 @@ public class UserController {
             , BindingResult result, Model model) {
         if (result.hasFieldErrors()) {
             model.addAttribute("updateCurrentUser", updateCurrentUser);
-            model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
+            model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.currentUser));
             log.error("Controller: Error in fields");
             return "profile";
         }
@@ -220,8 +224,8 @@ public class UserController {
         }
         model.addAttribute("updateCurrentUser", updateCurrentUser);
         model.addAttribute("message", "Profile has been updated");
-        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.userEmail));
-        log.debug("Controller: profile updated:" + SecurityUtilities.userEmail);
+        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.currentUser));
+        log.debug("Controller: profile updated:" + SecurityUtilities.currentUser);
 
         return "profile";
     }
@@ -260,10 +264,10 @@ public class UserController {
             log.error("Controller: Error in fields");
             return "addfriend";
         }
-        if (result.getRawFieldValue("email").equals(SecurityUtilities.userEmail)) {
+        if (result.getRawFieldValue("email").equals(SecurityUtilities.currentUser)) {
             result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
             getModelsAddFriends(model, page, size);
-            log.error("Controller: Invalid addition with email: " + SecurityUtilities.userEmail);
+            log.error("Controller: Invalid addition with email: " + SecurityUtilities.currentUser);
             return "addfriend";
         }
         try {

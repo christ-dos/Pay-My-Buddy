@@ -21,7 +21,7 @@ VALUES ('tela@email.fr', 'monsuperpassword', 'Stella', 'Durant', 20.50, 251250),
        ('dada@email.fr', '$2a$10$2K11L/fq6fmlHt3K7Nq.LeBpsNYiaLsb0tCh3z3w/h4MIi2FtB66.', 'Damien', 'Sanchez', 200, 255896),
        ('ggpassain@email.fr', 'corsica', 'Geraldine', 'Passain', 50, 359840),
        ('luluM@email.fr', 'portugalia', 'Lubin', 'Mendes', 20.0, 259873),
-       ('lili@email.fr', 'ronaldo', 'Elisabeth', 'Dupond', 189.00, 783600)
+       ('lili@email.fr', '$2y$10$wN5A7Byk5jyX0d0fb4NYOu988pzJRdBtPaY9PxA2.Ck1IN.EZusIq', 'Elisabeth', 'Dupond', 189.00, 783600)
 ;
 
 CREATE TABLE transaction

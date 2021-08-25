@@ -130,7 +130,7 @@ public class TransactionIT {
     public void addTransactionTest_whenBalanceIsInsufficient_thenReturnFieldErrorBalanceInsufficientException() throws Exception {
         //GIVEN
         Transaction transaction = new Transaction();
-        transaction.setUserEmitter(User.builder().email(SecurityUtilities.userEmail).build());
+        transaction.setUserEmitter(User.builder().email(SecurityUtilities.currentUser).build());
         transaction.setUserReceiver(User.builder().email("luluM@email.fr").build());
         transaction.setDescription("Movies tickets");
         transaction.setAmount(200.0);

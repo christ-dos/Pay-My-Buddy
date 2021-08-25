@@ -67,13 +67,13 @@ public class TransactionService implements ITransactionService {
     @Override
     public Page<DisplayingTransaction> getCurrentUserTransactionsByEmail(Pageable pageable) {
         Page<Transaction> transactions = transactionRepository.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(
-                SecurityUtilities.userEmail, SecurityUtilities.userEmail, pageable);
+                SecurityUtilities.currentUser, SecurityUtilities.currentUser, pageable);
         int totalElements = (int) transactions.getTotalElements();
-        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
+        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.currentUser);
 
         return new PageImpl<DisplayingTransaction>(transactions.stream()
                 .map(transaction -> {
-                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.userEmail)) {
+                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.currentUser)) {
                         User userReceiver = userRepository.findByEmail(transaction.getUserReceiver().getEmail());
                         return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
                     } else {
@@ -92,7 +92,7 @@ public class TransactionService implements ITransactionService {
     @Transactional
     @Override
     public Transaction addTransaction(SendTransaction sendTransaction) {
-        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.userEmail);
+        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.currentUser);
         if ((sendTransaction.getAmount() + calculateFees(sendTransaction.getAmount())) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());

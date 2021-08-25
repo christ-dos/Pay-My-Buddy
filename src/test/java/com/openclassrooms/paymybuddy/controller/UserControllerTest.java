@@ -5,13 +5,14 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.security.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.hamcrest.Matchers;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
@@ -58,7 +60,7 @@ public class UserControllerTest {
     private UserService userServiceMock;
 
     @MockBean
-    private UserDetailsService userDetailsServiceMock;
+    private MyUserDetailsService myUserDetailsServiceMock;
 
     @MockBean
     private ITransactionService transactionServiceMock;
@@ -121,7 +123,7 @@ public class UserControllerTest {
     @Test
     public void submitLoginViewTest_whenUserNameIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
-        String username = SecurityUtilities.userEmail;
+        String username = SecurityUtilities.currentUser;
 //        MyUserDetails myUserDetails = new MyUserDetails("", "pass");
 //        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
         //WHEN
@@ -143,14 +145,14 @@ public class UserControllerTest {
     @Test
     public void submitLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlIndex() throws Exception {
         //GIVEN
-        String username = SecurityUtilities.userEmail;
-        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", "passpass");
-        when(userDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
+        BCryptPasswordEncoder bCryptPasswordEncoder= new BCryptPasswordEncoder();
+        String username = SecurityUtilities.currentUser;
+        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", bCryptPasswordEncoder.encode("passpass"));
+        when(myUserDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/login")
-                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("passpass"))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/login").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user(username).password(bCryptPasswordEncoder.encode("passpass")).roles("USER"))
                         .param("username", username)
                         .param("password", "passpass")
                         .accept(MediaType.ALL)).andExpect(status().isOk())
@@ -198,7 +200,7 @@ public class UserControllerTest {
         //THEN
         mockMvcUser.perform(get("/home")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.userEmail)
+                        .param("email", SecurityUtilities.currentUser)
                         .param("user", String.valueOf(currentUser)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
@@ -333,7 +335,7 @@ public class UserControllerTest {
                         .param("email", "françois@email.fr")
                         .param("firstName", "François")
                         .param("lastName", "Dujardin")
-                        .param("userEmail", SecurityUtilities.userEmail))
+                        .param("userEmail", SecurityUtilities.currentUser))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -359,7 +361,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("userEmail", SecurityUtilities.userEmail)
+                        .param("userEmail", SecurityUtilities.currentUser)
                         .param("email", friendEmailNotExist)//.sessionAttr(springToken, csrfToken))
                 ).andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -391,7 +393,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.userEmail))
+                        .param("email", SecurityUtilities.currentUser))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
@@ -415,7 +417,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/profile")
-                        .param("email", SecurityUtilities.userEmail))
+                        .param("email", SecurityUtilities.currentUser))
                 .andExpect(status().isOk())
                 .andExpect(view().name("profile"))
                 .andExpect(model().size(2))
@@ -459,7 +461,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.userEmail)
+                        .param("email", SecurityUtilities.currentUser)
                         .param("firstName", updateProfileCurrentUser.getFirstName())
                         .param("lastName", updateProfileCurrentUser.getLastName())
                         .param("password", updateProfileCurrentUser.getPassword())

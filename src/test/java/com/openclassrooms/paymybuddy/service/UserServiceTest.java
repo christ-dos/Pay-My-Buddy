@@ -129,7 +129,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
         String friendEmail = "françois@email.fr";
 
         User user = User.builder()
@@ -163,7 +163,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsPresentInListFriend_thenThrowsUserAlreadyExistException() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
         String friendEmail = "françois@email.fr";
 
         User user = User.builder()
@@ -192,7 +192,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedNotExistInDB_thenThrowsUserNotFoundException() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
         String friendEmail = "wiwi@email.fr";
 
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(null);
@@ -207,7 +207,7 @@ public class UserServiceTest {
     @Test
     public void getFriendListByCurrentUserEmailPagedTest_whenUserEmailIsCurrentUser_thenReturnListFriend() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
 
         User user1 = User.builder()
                 .email("françois@email.fr")
@@ -254,7 +254,7 @@ public class UserServiceTest {
     @Test
     public void getFriendListByCurrentUserEmailTest_whenUserEmailIsCurrentUser_thenReturnListFriend() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
 
         User user1 = User.builder()
                 .email("françois@email.fr")
@@ -307,14 +307,14 @@ public class UserServiceTest {
     public void updateProfileTest_whenUserExistInDB_thenReturnUserUpdated() {
         //GIVEN
         UpdateCurrentUser updateCurrentUser = new UpdateCurrentUser();
-        updateCurrentUser.setEmail(SecurityUtilities.userEmail);
+        updateCurrentUser.setEmail(SecurityUtilities.currentUser);
         updateCurrentUser.setFirstName("Damien");
         updateCurrentUser.setLastName("Sanches");
         updateCurrentUser.setPassword("passpass");
         updateCurrentUser.setConfirmPassword("passpass");
 
         User userToUpdate = User.builder()
-                .email(SecurityUtilities.userEmail)
+                .email(SecurityUtilities.currentUser)
                 .password("pass")
                 .firstName("Damien")
                 .lastName("Sanchez")
@@ -322,7 +322,7 @@ public class UserServiceTest {
                 .accountBank(170974).build();
 
         User userUpdated = User.builder()
-                .email(SecurityUtilities.userEmail)
+                .email(SecurityUtilities.currentUser)
                 .firstName("Damien")
                 .lastName("Sanches")
                 .password("passpass")
@@ -335,7 +335,7 @@ public class UserServiceTest {
         //WHEN
         User userSavedResult = userServiceTest.updateProfile(updateCurrentUser);
         //THEN
-        assertEquals(SecurityUtilities.userEmail, userSavedResult.getEmail());
+        assertEquals(SecurityUtilities.currentUser, userSavedResult.getEmail());
         assertEquals("Damien", userSavedResult.getFirstName());
         assertEquals("Sanches", userSavedResult.getLastName());
         assertEquals("passpass", userSavedResult.getPassword());
@@ -347,7 +347,7 @@ public class UserServiceTest {
     public void updateProfileTest_whenPasswordNotMatchWithConfirmPassword_thenThrowsPasswordNotMatcherException() {
         //GIVEN
         User currentUser = User.builder()
-                .email(SecurityUtilities.userEmail)
+                .email(SecurityUtilities.currentUser)
                 .firstName("Damien")
                 .lastName("Sanchez")
                 .password("passpass")

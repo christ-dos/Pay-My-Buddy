@@ -2,9 +2,6 @@ package com.openclassrooms.paymybuddy.IT;
 
 import com.openclassrooms.paymybuddy.DTO.AddUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
-import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
-import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.model.User;
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -15,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,8 +21,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -460,7 +454,7 @@ public class UserIT {
         //THEN
         mockMvc.perform(get("/home")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user(SecurityUtilities.userEmail)))
+                        .with(SecurityMockMvcRequestPostProcessors.user(SecurityUtilities.currentUser)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
@@ -636,7 +630,7 @@ public class UserIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/addfriend")
                 .with(SecurityMockMvcRequestPostProcessors.csrf())
                 .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("email", SecurityUtilities.userEmail))
+                        .param("email", SecurityUtilities.currentUser))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("friendLists", "friendList","totalPages","currentPage"))
@@ -659,7 +653,7 @@ public class UserIT {
           //THEN
           mockMvc.perform(get("/profile")
                           .with(SecurityMockMvcRequestPostProcessors.csrf())
-                          .param("email", SecurityUtilities.userEmail)
+                          .param("email", SecurityUtilities.currentUser)
                           .param("password", "passpass"))
                   .andExpect(status().isOk())
                   .andExpect(view().name("profile"))

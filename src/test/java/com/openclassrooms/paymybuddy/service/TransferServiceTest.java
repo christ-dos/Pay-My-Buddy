@@ -46,7 +46,7 @@ public class TransferServiceTest {
     @Test
     public void addTransferTest_whenUserEmailIsDadaAndTransferTypeIsCredit_thenVerifyBalanceIs120AndUserEmailIsDada() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
         User user = User.builder()
                 .email(userEmail).firstName("Damien").lastName("Sanchez").balance(20.0).accountBank(589632)
                 .build();
@@ -76,7 +76,7 @@ public class TransferServiceTest {
     @Test
     public void addTransferTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenTransferIsSavedAndBalanceUpdatedTo50() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
         User user = User.builder()
                 .email(userEmail).firstName("Damien").lastName("Sanchez").balance(100.0).accountBank(589632)
                 .build();
@@ -106,7 +106,7 @@ public class TransferServiceTest {
     @Test
     public void addTransferTest_whenTransferTypeIsDebitAndBalanceInsufficient_thenTrowBalanceInsufficientException() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
         User user = User.builder()
                 .email(userEmail).firstName("Damien").lastName("Sanchez").balance(49.0).accountBank(589632)
                 .build();
@@ -127,7 +127,7 @@ public class TransferServiceTest {
     @Test
     public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnPageOfDisplayingTransferForDadaWithSignNegativeIfTypeIsDebit() {
         //GIVEN
-        String userEmail = SecurityUtilities.userEmail;
+        String userEmail = SecurityUtilities.currentUser;
         User userTransfer1 = User.builder()
                 .email(userEmail)
                 .firstName("Damien")

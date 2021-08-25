@@ -1,9 +1,8 @@
-package com.openclassrooms.paymybuddy.configuration;
+package com.openclassrooms.paymybuddy.security;
 
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,10 +19,10 @@ public class MyUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-      User user = userRepository.findByEmail(email);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+      User user = userRepository.findByEmail(username);
       if(user == null){
-          throw  new UsernameNotFoundException("User not found:" + email);
+          throw  new UsernameNotFoundException("User not found:" + username);
       }
         return new MyUserDetails(user.getEmail(),user.getPassword());
     }

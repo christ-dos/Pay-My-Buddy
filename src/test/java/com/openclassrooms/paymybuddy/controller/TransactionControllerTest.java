@@ -4,7 +4,7 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.SendTransaction;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.configuration.MyUserDetailsService;
+import com.openclassrooms.paymybuddy.security.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -30,7 +30,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
@@ -190,10 +189,10 @@ public class TransactionControllerTest {
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         String receiverEmail = "fifi@email.com";
-        String emitterEmail = SecurityUtilities.userEmail;
+        String emitterEmail = SecurityUtilities.currentUser;
 
         User userEmitter = User.builder()
-                .email(SecurityUtilities.userEmail)
+                .email(SecurityUtilities.currentUser)
                 .password("monTropToppassword")
                 .firstName("Christine")
                 .lastName("Deldalle")

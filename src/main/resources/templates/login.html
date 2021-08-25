@@ -28,15 +28,15 @@
                                 Buddy
                             </h5>
                         </div>
-                        <p  class="text-success bold mt-2 fs-6">
+                        <p th:text="${messageLogOff}" class="text-success bold mt-2 fs-6">
                             message logoff
-<!--                            th:text="${messageLogOff}"-->
+
                         </p>
                         <form th:action="@{/login}" th:object="${userDetails}" method="post" class="form-payMyBuddy"
                               action="#">
                             <!--*********Input Email*****************-->
                             <div class="form-label-group py-4">
-                                <input th:field="*{username}" type="email" id="inputEmail"
+                                <input th:field="*{username}" type="email" id="username" name="username"
                                        class="form-control input-lg inputIcon"
                                        placeholder="&#xf0e0  Email" required autofocus>
                                 <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
@@ -45,7 +45,7 @@
                             </div>
                             <!--*********Input Password*****************-->
                             <div class="form-label-group py-3">
-                                <input th:field="*{password}" type="password" id="inputPassword"
+                                <input th:field="*{password}" type="password" id="password" name="password"
                                        class="form-control input-lg inputIcon"
                                        placeholder="   Password" required>
                                 <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"

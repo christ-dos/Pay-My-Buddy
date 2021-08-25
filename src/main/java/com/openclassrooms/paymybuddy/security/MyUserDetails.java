@@ -1,4 +1,4 @@
-package com.openclassrooms.paymybuddy.configuration;
+package com.openclassrooms.paymybuddy.security;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Arrays;
@@ -14,6 +13,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MyUserDetails implements UserDetails {
+
     @NotBlank
     private String username;
 

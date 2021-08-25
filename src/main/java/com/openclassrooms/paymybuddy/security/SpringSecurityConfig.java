@@ -1,4 +1,4 @@
-package com.openclassrooms.paymybuddy.configuration;
+package com.openclassrooms.paymybuddy.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -8,10 +8,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import javax.sql.DataSource;
 
 /**
  * Class of configuration SpringSecurity
@@ -21,9 +20,14 @@ import javax.sql.DataSource;
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
-
     @Autowired
-    private UserDetailsService userDetailsService;
+//    private UserDetailsService userDetailsService;
+
+    private MyUserDetailsService myUserDetailsService;
+//
+//    public SpringSecurityConfig(MyUserDetailsService myUserDetailsService) {
+//        this.myUserDetailsService = myUserDetailsService;
+//    }
 
 //    @Autowired
 //    private DataSource dataSource;
@@ -33,18 +37,21 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(){
+    public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setUserDetailsService(myUserDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
 
         return authProvider;
     }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
-//        auth.userDetailsService(userDetailsService);
+//        auth.userDetailsService(myUserDetailsService);
+
 
 //        auth.inMemoryAuthentication()
 //                .withUser("spring@email.fr")
@@ -62,14 +69,24 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/user").hasRole("USER")
                 .authenticated()
                 .anyRequest().permitAll()
-              .and()
+                .and()
                 .formLogin()
-                .usernameParameter("email")
+                .loginPage("/login")
+//                .usernameParameter("email")
                 .defaultSuccessUrl("/home")
+                .failureUrl("/login?error")
                 .permitAll()
                 .and()
                 .logout().
-                logoutSuccessUrl("/login").permitAll();
+                logoutSuccessUrl("/logoff").permitAll();
+    }
+
+    public static  String getCurrentUser() {
+        SecurityContext auth = SecurityContextHolder.getContext();
+//        auth.getAuthentication().getAuthorities();
+        MyUserDetails userAuthenticated = (MyUserDetails) auth.getAuthentication().getDetails();
+
+        return userAuthenticated.getUsername();
     }
 
 }

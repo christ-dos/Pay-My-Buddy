@@ -18,10 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Controller
 @Slf4j
@@ -53,7 +50,7 @@ public class TransferController {
         }
         try {
             transferService.addTransfer(displayingTransfer);
-            log.debug("Controller: Transfer added for userEmail: " + SecurityUtilities.userEmail);
+            log.debug("Controller: Transfer added for userEmail: " + SecurityUtilities.currentUser);
         } catch (BalanceInsufficientException ex) {
             result.rejectValue("amount", "BalanceInsufficient", ex.getMessage());
             log.error("Controller: Balance is insufficient to proceed a transfer");

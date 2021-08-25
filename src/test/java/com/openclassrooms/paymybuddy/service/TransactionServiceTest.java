@@ -49,7 +49,7 @@ class TransactionServiceTest {
         pageable = PageRequest.of(0, 5);
         transactionServiceTest = new TransactionService(transactionRepositoryMock, userRepositoryMock);
 
-        String emitterEmail = SecurityUtilities.userEmail;
+        String emitterEmail = SecurityUtilities.currentUser;
 
         transactions = new ArrayList<>();
         Transaction transaction1 = Transaction.builder()

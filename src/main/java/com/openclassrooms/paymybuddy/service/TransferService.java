@@ -36,7 +36,7 @@ public class TransferService implements ITransferService {
     @Transactional
     @Override
     public Transfer addTransfer(DisplayingTransfer displayingTransfer) {
-        User currentUser = userRepository.findByEmail(SecurityUtilities.userEmail);
+        User currentUser = userRepository.findByEmail(SecurityUtilities.currentUser);
 
         //update of balance when transfer type is debit
         if (displayingTransfer.getTransferType() == TransferTypeEnum.DEBIT) {
@@ -62,9 +62,9 @@ public class TransferService implements ITransferService {
     }
 
     public Page<DisplayingTransfer> getCurrentUserTransfers(Pageable pageable) {
-        Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.userEmail, pageable);
+        Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.currentUser, pageable);
         int totalElements = (int) transfers.getTotalElements();
-        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.userEmail);
+        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.currentUser);
 
         return new PageImpl<DisplayingTransfer>(transfers.stream()
                 .map(transfer -> {
