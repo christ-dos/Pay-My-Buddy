@@ -37,6 +37,7 @@
                         </p>
                         <form th:action="@{/login}" method="post" class="form-payMyBuddy"
                               action="#">
+                            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                             <!--*********Input Email*****************-->
                             <div class="form-label-group pb-4 pt-2">
                                 <input type="email" id="username" name="username"

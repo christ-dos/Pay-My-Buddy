@@ -77,7 +77,7 @@ public class UserController {
         try {
             userService.addUser(addUser);
         } catch (UserAlreadyExistException ex) {
-            log.error("Controller: user already exist in database");
+            log.error("Controller: There is already a user registered with the email provided");
             result.rejectValue("email", "EmailAlreadyExist", ex.getMessage());
             return "signup";
         } catch (EmailNotMatcherException ex1) {
@@ -109,57 +109,20 @@ public class UserController {
         return "login";
     }
 
-    @GetMapping("/logoff")
-    public String logOffMessageViewLogin(Model model) {
-        model.addAttribute("messageLogOff", "You have been logged out.");
-        return "login";
-    }
-
-    @PostMapping("/logout")
-    public String logOutViewLogin(Model model) {
-        model.addAttribute("messageLogOff", "You have been logged out.");
-        log.info("Controller: The View logoff displaying");
-
-        return "login";
-    }
-
-
-//    @GetMapping("/login?error")
-//    public String getLoginErrorView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
-//
-//        return"login";
+//    @GetMapping("/logoff")
+//    public String logOffMessageViewLogin(Model model) {
+//        model.addAttribute("messageLogOff", "You have been logged out.");
+//        return "login";
 //    }
-//    @RequestMapping(value = "/login", method = RequestMethod.GET)
-//    @ResponseBody
-//    public String currentUserName(Authentication authentication) {
-//        log.info("contoller: authntication:" + authentication.getName());
-//        return authentication.getName();
+//
+//    @PostMapping("/logout")
+//    public String logOutViewLogin(Model model) {
+//        model.addAttribute("messageLogOff", "You have been logged out.");
+//        log.info("Controller: The View logoff displaying");
+//
+//        return "login";
 //    }
 
-
-    //    @RolesAllowed({"USER", "ADMIN"})
-//    @PostMapping("/login")
-//    public String authenticationLoginView(@Valid @ModelAttribute("userDetails")  MyUserDetails userDetails, BindingResult result, Model model) {
-//
-//        if (result.hasErrors()) {
-//            model.addAttribute("userDetails", "Bad credentials");
-//            log.error("Controller: Error in fields");
-//            return "login";
-//        }
-//        try {
-//            UserDetails userDetails1 = userDetailsService.loadUserByUsername(userDetails.getUsername());
-//            log.info(" Controlerdansle try : currentUser :" + userDetailsService.loadUserByUsername(userDetails.getUsername()));
-//        } catch (Exception ex) {
-//            result.rejectValue("username", "UserNameNotFound", ex.getMessage());
-//            log.error("Controller: Username Not found");
-//            return "login";
-//        }
-//        String currentUser = userDetails.getUsername();
-//
-//
-//        return "home";
-//
-//    }
 
     /**
      * Method GET to displaying the view for home in endpoint in "/home"

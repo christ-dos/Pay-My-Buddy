@@ -32,6 +32,7 @@ public class TransactionService implements ITransactionService {
      */
     private final ITransactionRepository transactionRepository;
 
+
     /**
      * Instance of {@link IUserRepository}
      */
@@ -92,13 +93,14 @@ public class TransactionService implements ITransactionService {
     @Transactional
     @Override
     public Transaction addTransaction(SendTransaction sendTransaction) {
+        Double fees = calculateFees(sendTransaction.getAmount());
         User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.currentUser);
-        if ((sendTransaction.getAmount() + calculateFees(sendTransaction.getAmount())) > userEmitterTransaction.getBalance()) {
+        if ((sendTransaction.getAmount() + fees) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
         }
         Transaction transaction = new Transaction();
-        transaction.setFees(calculateFees(sendTransaction.getAmount()));
+        transaction.setFees(fees);
         transaction.setDate(LocalDateTime.now());
         transaction.setAmount(sendTransaction.getAmount());
         transaction.setDescription(sendTransaction.getDescription());

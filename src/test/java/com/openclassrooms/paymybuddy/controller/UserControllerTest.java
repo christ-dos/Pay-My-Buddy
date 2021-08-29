@@ -70,6 +70,9 @@ public class UserControllerTest {
     @MockBean
     private IUserRepository userRepositoryMock;
 
+    @MockBean
+    private SecurityUtilities securityUtilities;
+
     private Pageable pageable;
 
     private Page<FriendList> displayingFriendsPage;
@@ -81,8 +84,8 @@ public class UserControllerTest {
 //                .webAppContextSetup(context)
 //                .apply(springSecurity())
 //                .build();
+        securityUtilities = new SecurityUtilities();
         pageable = PageRequest.of(0, 5);
-
         List<FriendList> friendListPageTest = new ArrayList<>();
         friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
         friendListPageTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
@@ -276,7 +279,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr" , password = "passpass")
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -304,6 +307,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
+//                        .with(SecurityMockMvcRequestPostProcessors.)
                         .param("email", userToAdd.getEmail())
                         .param("firstName", userToAdd.getFirstName()))
                 .andExpect(status().isOk())
@@ -342,18 +346,14 @@ public class UserControllerTest {
     @Test
     public void addFriendToListConnectionTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
         //GIVEN
-//        String springToken = "org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository.CSRF_TOKEN";
-//        HttpSessionCsrfTokenRepository httpSessionCsrfTokenRepository = new HttpSessionCsrfTokenRepository();
-//        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
-
         String friendEmailNotExist = "wiwi@email.fr";
         when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
         when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("userEmail", SecurityUtilities.currentUser)
-                        .param("email", friendEmailNotExist)//.sessionAttr(springToken, csrfToken))
+                        .param("userEmail","dada@email.fr")
+                        .param("email", friendEmailNotExist)
                 ).andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())

@@ -55,7 +55,7 @@ public class TransactionController {
     public String getTransactionsViewTransaction(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model, @RequestParam("page") Optional<Integer> page,
                                                  @RequestParam("size") Optional<Integer> size) {
         getModelsTransaction(model, page, size);
-        log.info("Controller: The View index displaying");
+        log.info("Controller: The View transaction displaying");
 
         return "transaction";
     }
@@ -86,7 +86,7 @@ public class TransactionController {
             log.error("Controller: Insufficient account balance");
         }
         getModelsTransaction(model, page, size);
-        log.info("Controller: form index submitted");
+        log.info("Controller: form transaction submitted");
 
         return "transaction";
     }

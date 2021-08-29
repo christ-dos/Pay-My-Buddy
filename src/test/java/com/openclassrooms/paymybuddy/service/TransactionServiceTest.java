@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,12 +45,13 @@ class TransactionServiceTest {
 
     private Page<Transaction> transactionsPage;
 
+
     @BeforeEach
     void setUp() {
         pageable = PageRequest.of(0, 5);
         transactionServiceTest = new TransactionService(transactionRepositoryMock, userRepositoryMock);
 
-        String emitterEmail = SecurityUtilities.currentUser;
+        String emitterEmail = "dada@email.fr";
 
         transactions = new ArrayList<>();
         Transaction transaction1 = Transaction.builder()
@@ -179,7 +181,7 @@ class TransactionServiceTest {
         assertEquals(0.5, transactionResult.getFees());
         verify(transactionRepositoryMock, times(1)).save(isA(Transaction.class));
     }
-
+    @WithMockUser(value = "kikine@email.fr")
     @Test
     public void addTransaction_whenUserBalanceNotEnough_thenThrowBalanceInsufficientException() {
         //GIVEN

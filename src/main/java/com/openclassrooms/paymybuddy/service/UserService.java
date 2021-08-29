@@ -88,6 +88,7 @@ public class UserService implements IUserService {
         userToAdd.setEmail(addUser.getConfirmEmail());
         userToAdd.setFirstName(addUser.getFirstName());
         userToAdd.setLastName(addUser.getLastName());
+        userToAdd.setBalance(0.0);
         userToAdd.setPassword(getEncodedPassword(addUser.getPassword()));
         userToAdd.setAccountBank(addUser.getAccountBank());
 

@@ -28,9 +28,10 @@ public class MyUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
       User user = userRepository.findByEmail(username);
       if(user == null){
+          log.error("MyUserDetailsService: UserNotFound ");
           throw  new UsernameNotFoundException("User not found:" + username);
       }
-        log.info("myServiceDetailscontextauthentication:" + SecurityContextHolder.getContext().getAuthentication());
+        log.debug("MyUserDetailsService: User found with email:" + username );
         return new MyUserDetails(user.getEmail(),user.getPassword());
     }
 
