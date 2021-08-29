@@ -65,7 +65,7 @@ public class UserIT {
                         .param("confirmPassword", addUser.getConfirmPassword())
                         .param("accountBank", String.valueOf(addUser.getAccountBank())))
                 .andExpect(status().isOk())
-                .andExpect(view().name("signup"))
+                .andExpect(view().name("login"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().size(2))
                 .andExpect(model().attributeExists("addUser", "message"))
@@ -387,8 +387,8 @@ public class UserIT {
                 .andExpect(view().name("signup"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().size(2))
-                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "email", "EmailAlreadyExist"))
                 .andDo(print());
     }
@@ -413,8 +413,8 @@ public class UserIT {
                 .andExpect(view().name("signup"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().size(2))
-                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmEmail", "ConfirmEmailNotMatcher"))
                 .andDo(print());
     }
@@ -439,8 +439,8 @@ public class UserIT {
                 .andExpect(view().name("signup"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().size(2))
-                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
                 .andDo(print());
     }

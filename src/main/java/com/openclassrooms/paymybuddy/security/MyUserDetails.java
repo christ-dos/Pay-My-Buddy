@@ -5,19 +5,21 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Arrays;
 import java.util.Collection;
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class MyUserDetails implements UserDetails {
 
-    @NotBlank
+//    @NotBlank
     private String username;
 
-    @Size(min= 8, max = 255 , message = "password must be between 8 and 255 character")
+//    @Size(min= 8, max = 255 , message = "password must be between 8 and 255 character")
     private String password;
 
     @Override
@@ -53,5 +55,13 @@ public class MyUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "MyUserDetails{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
     }
 }

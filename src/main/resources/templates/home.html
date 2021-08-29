@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
 <head>
     <meta charset="UTF-8">
     <!-- ************Bootstrap CSS ******************-->
@@ -63,8 +63,13 @@
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" href="/logoff"><span class="navbar-brand mb-0 h1">Log off</span>
-                            </a>
+                            <div sec:authorize="isAuthenticated()">
+                                <a class="nav-link" href="http://localhost:9090/logoff"><span class="navbar-brand mb-0 h1">Log off</span>
+                                </a>
+                                <form name="logoutForm" th:action="@{/logout}" method="post" th:hidden="true">
+                                    <input hidden type="submit" value="Sign Out"/>
+                                </form>
+                            </div>
                         </li>
                     </ul>
                 </div>

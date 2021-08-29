@@ -5,12 +5,12 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -80,18 +79,21 @@ public class UserController {
         } catch (UserAlreadyExistException ex) {
             log.error("Controller: user already exist in database");
             result.rejectValue("email", "EmailAlreadyExist", ex.getMessage());
+            return "signup";
         } catch (EmailNotMatcherException ex1) {
             log.error("Controller: ConfirmEmail not match with email");
             result.rejectValue("confirmEmail", "ConfirmEmailNotMatcher", ex1.getMessage());
+            return "signup";
         } catch (PasswordNotMatcherException ex2) {
             log.error("Controller: ConfirmPassword not match with password");
             result.rejectValue("confirmPassword", "ConfirmPasswordNotMatcher", ex2.getMessage());
+            return "signup";
         }
         model.addAttribute("addUser", addUser);
         model.addAttribute("message", "Account registered with success!");
         log.debug("Controller: User Added with success: " + addUser.getConfirmEmail());
 
-        return "signup";
+        return "login";
     }
 
     /**
@@ -100,43 +102,64 @@ public class UserController {
      * @param model Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
-//    @RolesAllowed({"USER"})
     @GetMapping("/login")
-    public String getLoginView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
+    public String getLoginView(MyUserDetails myUserDetails, Model model) {
         log.info("Controller: The View login displaying");
 
-//        model.addAttribute("userDetails", "Bad credentials");
         return "login";
     }
 
     @GetMapping("/logoff")
-    public String logOffViewLogin(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
-        model.addAttribute("messageLogOff","You have been logged out.");
+    public String logOffMessageViewLogin(Model model) {
+        model.addAttribute("messageLogOff", "You have been logged out.");
+        return "login";
+    }
+
+    @PostMapping("/logout")
+    public String logOutViewLogin(Model model) {
+        model.addAttribute("messageLogOff", "You have been logged out.");
+        log.info("Controller: The View logoff displaying");
+
         return "login";
     }
 
 
+//    @GetMapping("/login?error")
+//    public String getLoginErrorView(@ModelAttribute("userDetails") MyUserDetails userDetails, Model model) {
+//
+//        return"login";
+//    }
+//    @RequestMapping(value = "/login", method = RequestMethod.GET)
+//    @ResponseBody
+//    public String currentUserName(Authentication authentication) {
+//        log.info("contoller: authntication:" + authentication.getName());
+//        return authentication.getName();
+//    }
+
 
     //    @RolesAllowed({"USER", "ADMIN"})
-    @PostMapping("/login")
-    public String authenticationLoginView(@Valid MyUserDetails userDetails, BindingResult result, Model model) {
-
-        if (result.hasErrors()) {
-            model.addAttribute("userDetails", "Bad credentials");
-            log.error("Controller: Error in fields");
-            return "login";
-        }
-        try {
-            userDetailsService.loadUserByUsername(userDetails.getUsername());
-        } catch (UsernameNotFoundException ex) {
-            result.rejectValue("username", "UserNameNotFound", ex.getMessage());
-            log.error("Controller: Username Not found");
-            return "login";
-        }
-
-        return "home";
-
-    }
+//    @PostMapping("/login")
+//    public String authenticationLoginView(@Valid @ModelAttribute("userDetails")  MyUserDetails userDetails, BindingResult result, Model model) {
+//
+//        if (result.hasErrors()) {
+//            model.addAttribute("userDetails", "Bad credentials");
+//            log.error("Controller: Error in fields");
+//            return "login";
+//        }
+//        try {
+//            UserDetails userDetails1 = userDetailsService.loadUserByUsername(userDetails.getUsername());
+//            log.info(" Controlerdansle try : currentUser :" + userDetailsService.loadUserByUsername(userDetails.getUsername()));
+//        } catch (Exception ex) {
+//            result.rejectValue("username", "UserNameNotFound", ex.getMessage());
+//            log.error("Controller: Username Not found");
+//            return "login";
+//        }
+//        String currentUser = userDetails.getUsername();
+//
+//
+//        return "home";
+//
+//    }
 
     /**
      * Method GET to displaying the view for home in endpoint in "/home"

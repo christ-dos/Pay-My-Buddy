@@ -1,15 +1,17 @@
 package com.openclassrooms.paymybuddy.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
@@ -19,18 +21,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  */
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
-//    private UserDetailsService userDetailsService;
-
-    private MyUserDetailsService myUserDetailsService;
-//
-//    public SpringSecurityConfig(MyUserDetailsService myUserDetailsService) {
-//        this.myUserDetailsService = myUserDetailsService;
-//    }
-
-//    @Autowired
-//    private DataSource dataSource;
+    private UserDetailsService userDetailsService;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -41,15 +35,17 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(myUserDetailsService);
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
 
+        log.info("DaocontextHolder:" + SecurityContextHolder.getContext().getAuthentication());
         return authProvider;
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
+        log.info("my contextauthentication:" + SecurityContextHolder.getContext().getAuthentication());
 //        auth.userDetailsService(myUserDetailsService);
 
 
@@ -60,34 +56,90 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    public void configure(WebSecurity web) {
+        web.ignoring()
+                .antMatchers("resources/**", "/error");
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
 //
         http
                 .authorizeRequests()
-                .antMatchers("/home")
+                .antMatchers("/css/**").permitAll()
+                .antMatchers("/home").authenticated()
+                .antMatchers("/addfriend").authenticated()
+                .antMatchers("/transaction").authenticated()
+                .antMatchers("/transfer").authenticated()
+                .antMatchers("/profie").authenticated()
+                .antMatchers("/contact").authenticated()
+                .antMatchers("/logoff").authenticated()
+                .and()
+                .authorizeRequests().anyRequest().authenticated()
+                .and()
+                .rememberMe().userDetailsService(this.userDetailsService)
 //                .antMatchers("/admin").hasRole("ADMIN")
 //                .antMatchers("/user").hasRole("USER")
-                .authenticated()
-                .anyRequest().permitAll()
                 .and()
-                .formLogin()
-                .loginPage("/login")
-//                .usernameParameter("email")
-                .defaultSuccessUrl("/home")
-                .failureUrl("/login?error")
-                .permitAll()
-                .and()
-                .logout().
-                logoutSuccessUrl("/logoff").permitAll();
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/home")
+                        .loginProcessingUrl("/login")
+                        .failureUrl("/login?error=true")
+                        .permitAll())
+//                .and()
+//                .httpBasic()
+//                .and()
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID", "remember-me"))
+
+//
+//                .permitAll()
+        ;
     }
 
-    public static  String getCurrentUser() {
-        SecurityContext auth = SecurityContextHolder.getContext();
-//        auth.getAuthentication().getAuthorities();
-        MyUserDetails userAuthenticated = (MyUserDetails) auth.getAuthentication().getDetails();
 
-        return userAuthenticated.getUsername();
-    }
+//    @Component
+//    public class CustomAuthenticationProvider
+//            implements AuthenticationProvider {
+//
+//        @Autowired
+//        private UserDetailsService userDetailsService;
+//
+//        @Autowired
+//        private PasswordEncoder passwordEncoder;
+//
+//        @Override
+//        public Authentication authenticate(Authentication authentication) {
+//            String username = authentication.getName();
+//            String password = authentication.getCredentials().toString();
+//
+//            UserDetails u = userDetailsService.loadUserByUsername(username);
+//
+//            if (passwordEncoder.matches(password, u.getPassword())) {
+//                return new UsernamePasswordAuthenticationToken(
+//                        username,
+//                        password,
+//                        u.getAuthorities());
+//            } else {
+//                throw new BadCredentialsException
+//                        ("Something went wrong!");
+//            }
+//        }
+//
+//        // Omitted code
+//    }
+
+//    public static  String getCurrentUser() {
+//        SecurityContext auth = SecurityContextHolder.getContext();
+////        auth.getAuthentication().getAuthorities();
+//        MyUserDetails userAuthenticated = (MyUserDetails) auth.getAuthentication().getDetails();
+//
+//        return userAuthenticated.getUsername();
+//    }
 
 }
 

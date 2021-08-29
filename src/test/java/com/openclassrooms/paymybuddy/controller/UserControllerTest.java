@@ -30,6 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -41,6 +42,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -96,19 +98,18 @@ public class UserControllerTest {
  ------------------------------------------------------------------------------------------------------*/
 
     @Test
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "lili@email.fr",password = "passpass")
     public void getLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/login"))
-                .andExpect(status().isOk())
+        mockMvcUser.perform(get("/login")
+                ).andExpect(status().isOk())
                 .andExpect(view().name("login"))
-                .andExpect(model().attributeExists("userDetails"))
+                .andExpect(model().attributeDoesNotExist())
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
     @Test
     public void getLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
@@ -118,35 +119,30 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
-
-    @WithMockUser(value = "spring")
+//    @WithMockUser(username = "wiwi@email.fr", password = "passpass")
     @Test
-    public void submitLoginViewTest_whenUserNameIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
+    public void authenticationLoginView_whenUserNameIsNull_thenThrowsUserNameNotFoundException() throws Exception {
         //GIVEN
-        String username = SecurityUtilities.currentUser;
-//        MyUserDetails myUserDetails = new MyUserDetails("", "pass");
-//        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
+        BCryptPasswordEncoder bCryptPasswordEncoder= new BCryptPasswordEncoder();
+        String username = "wiwi@email.fr";
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
+        when(myUserDetailsServiceMock.loadUserByUsername(isA(String.class))).thenThrow(new UsernameNotFoundException("User not found"));
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/login")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("passpass"))
-                        .accept(MediaType.ALL)).andExpect(status().isOk())
-//                .andExpect(redirectedUrl("/customlogin"))
-//                .andExpect(MockMvcResultMatchers.redirectedUrl("/customlogin"))
-//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/customlogin")))
-                .andExpect(model().attributeExists("userDetails"))
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("userDetails", "username", "NotBlank"))
+                        .accept(MediaType.ALL))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error=true"))
+                .andExpect(cookie().exists("remember-me"))
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
     @Test
-    public void submitLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlIndex() throws Exception {
+    public void authenticationLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlHome() throws Exception {
         //GIVEN
         BCryptPasswordEncoder bCryptPasswordEncoder= new BCryptPasswordEncoder();
-        String username = SecurityUtilities.currentUser;
+        String username = "dada@email.fr";
         MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", bCryptPasswordEncoder.encode("passpass"));
         when(myUserDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
         //WHEN
@@ -155,13 +151,8 @@ public class UserControllerTest {
                         .with(SecurityMockMvcRequestPostProcessors.user(username).password(bCryptPasswordEncoder.encode("passpass")).roles("USER"))
                         .param("username", username)
                         .param("password", "passpass")
-                        .accept(MediaType.ALL)).andExpect(status().isOk())
-//                .andExpect(redirectedUrl("/index"))
-//                .andExpect(MockMvcResultMatchers.redirectedUrl("/index"))
-//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/index")))
-                .andExpect(view().name("login"))
-                .andExpect(model().attributeExists("userDetails"))
-                .andExpect(model().hasNoErrors())
+                        .accept(MediaType.ALL)).andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/home"))
                 .andDo(print());
     }
 
@@ -731,7 +722,7 @@ public class UserControllerTest {
                         .param("confirmPassword", addUser.getConfirmPassword())
                         .param("accountBank", String.valueOf(addUser.getAccountBank())))
                 .andExpect(status().isOk())
-                .andExpect(view().name("signup"))
+                .andExpect(view().name("login"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().size(2))
                 .andExpect(model().attributeExists("addUser", "message"))
@@ -1061,8 +1052,8 @@ public class UserControllerTest {
                 .andExpect(view().name("signup"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().size(2))
-                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "email", "EmailAlreadyExist"))
                 .andDo(print());
     }
@@ -1089,8 +1080,8 @@ public class UserControllerTest {
                 .andExpect(view().name("signup"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().size(2))
-                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmEmail", "ConfirmEmailNotMatcher"))
                 .andDo(print());
     }
@@ -1117,8 +1108,8 @@ public class UserControllerTest {
                 .andExpect(view().name("signup"))
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().size(2))
-                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
                 .andDo(print());
     }
