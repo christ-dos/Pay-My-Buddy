@@ -1,30 +1,34 @@
 package com.openclassrooms.paymybuddy;
 
-import com.openclassrooms.paymybuddy.security.MyUserDetails;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 
 @Getter
 @Setter
 public class SecurityUtilities {
-
-    public final static String getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        MyUserDetails userAuthenticated = (MyUserDetails) auth.getPrincipal();
-
-        return userAuthenticated.getUsername();
-    }
-
     /**
      * The Current User Connected
      */
     public final static String currentUser = getCurrentUser();
 
-    public SecurityUtilities() {
+    /**
+     * Method that get the current user in the SecurityContextHolder
+     *
+     * @return A String containing user's current user
+     */
+    @PreAuthorize("isAuthenticated()")
+    public final static String getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userAuthenticated = (UserDetails) auth.getPrincipal();
+
+        return userAuthenticated.getUsername();
     }
+
+
+
 }

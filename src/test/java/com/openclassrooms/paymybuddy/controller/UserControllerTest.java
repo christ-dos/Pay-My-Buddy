@@ -5,13 +5,13 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.security.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
@@ -23,28 +23,36 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -52,7 +60,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-//@SpringBootTest
 public class UserControllerTest {
 
     @Autowired
@@ -71,20 +78,25 @@ public class UserControllerTest {
     private IUserRepository userRepositoryMock;
 
     @MockBean
-    private SecurityUtilities securityUtilities;
+    private Authentication authentication;
 
     private Pageable pageable;
 
     private Page<FriendList> displayingFriendsPage;
 
+    @Autowired
+    private WebApplicationContext context;
 
     @BeforeEach
     public void setupPerTest() {
-//        mockMvcUser = MockMvcBuilders
-//                .webAppContextSetup(context)
-//                .apply(springSecurity())
-//                .build();
-        securityUtilities = new SecurityUtilities();
+        mockMvcUser = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+
+        SecurityContext securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(authentication);
+
         pageable = PageRequest.of(0, 5);
         List<FriendList> friendListPageTest = new ArrayList<>();
         friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
@@ -96,12 +108,12 @@ public class UserControllerTest {
         displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
     }
- /*-----------------------------------------------------------------------------------------------------
-                                     Tests View Login
- ------------------------------------------------------------------------------------------------------*/
 
+    /*-----------------------------------------------------------------------------------------------------
+                                        Tests View Login
+    ------------------------------------------------------------------------------------------------------*/
     @Test
-    @WithMockUser(username = "lili@email.fr",password = "passpass")
+    @WithMockUser(username = "lili@email.fr", password = "passpass")
     public void getLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
@@ -113,6 +125,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
@@ -122,11 +135,12 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
-//    @WithMockUser(username = "wiwi@email.fr", password = "passpass")
+
+    //    @WithMockUser(username = "wiwi@email.fr", password = "passpass")
     @Test
     public void authenticationLoginView_whenUserNameIsNull_thenThrowsUserNameNotFoundException() throws Exception {
         //GIVEN
-        BCryptPasswordEncoder bCryptPasswordEncoder= new BCryptPasswordEncoder();
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         String username = "wiwi@email.fr";
         when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
         when(myUserDetailsServiceMock.loadUserByUsername(isA(String.class))).thenThrow(new UsernameNotFoundException("User not found"));
@@ -134,7 +148,10 @@ public class UserControllerTest {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/login")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .accept(MediaType.ALL))
+                        .accept(MediaType.ALL)
+                        .param("username", "dada@email.fr")
+                        .param("password", "passpass"))
+
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error=true"))
                 .andExpect(cookie().exists("remember-me"))
@@ -144,7 +161,7 @@ public class UserControllerTest {
     @Test
     public void authenticationLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlHome() throws Exception {
         //GIVEN
-        BCryptPasswordEncoder bCryptPasswordEncoder= new BCryptPasswordEncoder();
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         String username = "dada@email.fr";
         MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", bCryptPasswordEncoder.encode("passpass"));
         when(myUserDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
@@ -162,7 +179,7 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                      Tests View home
      ------------------------------------------------------------------------------------------------------*/
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getUserInformationHomeViewTest_whenCurrentUserIsDada_thenReturnFirstNameDamienAndLastNameSanchez() throws Exception {
         //GIVEN
@@ -193,10 +210,10 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.currentUser)
-                        .param("user", String.valueOf(currentUser)))
-                .andExpect(status().isOk())
+                                .with(SecurityMockMvcRequestPostProcessors.csrf())
+//                        .param("email", SecurityUtilities.currentUser)
+//                        .param("user", String.valueOf(currentUser)))
+                ).andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("user", "lastBuddy", "lastTransaction"))
@@ -212,7 +229,7 @@ public class UserControllerTest {
 
     }
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
         //GIVEN
@@ -257,7 +274,7 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                         Tests View addfriend
      ------------------------------------------------------------------------------------------------------*/
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
@@ -279,7 +296,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(username = "dada@email.fr" , password = "passpass")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -294,7 +311,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanAddToFriendInList() throws Exception {
         //GIVEN
@@ -307,8 +324,10 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-//                        .with(SecurityMockMvcRequestPostProcessors.)
+
+//                        .param("username", userToAdd.getEmail())
                         .param("email", userToAdd.getEmail())
+//                        .param("password", "passpass")
                         .param("firstName", userToAdd.getFirstName()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
@@ -317,7 +336,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
@@ -342,17 +361,18 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
         //GIVEN
         String friendEmailNotExist = "wiwi@email.fr";
         when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
         when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
+//        PowerMockito.when(SecurityUtilities.getCurrentUser()).thenReturn("dada@email.fr");
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("userEmail","dada@email.fr")
+                        .param("userEmail", "dada@email.fr")
                         .param("email", friendEmailNotExist)
                 ).andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -361,6 +381,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
@@ -377,6 +398,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenEmailToAddAndEmailCurrentUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
@@ -395,6 +417,7 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                       Tests View profile
    ------------------------------------------------------------------------------------------------------*/
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
@@ -433,6 +456,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     public void updateCurrentUserInformationTest_whenCurrentUserIsDada_thenReturnUserDadaUpdated() throws Exception {
         //GIVEN
         User currentUser = User.builder()
@@ -468,6 +492,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
         //GIVEN
@@ -501,6 +526,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
         //GIVEN
@@ -534,6 +560,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
@@ -568,6 +595,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
@@ -602,6 +630,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
@@ -634,6 +663,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
@@ -667,6 +697,7 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_ConfirmPassWordNotMatchWithPassword_thenThrowsPasswordNotMatcherException() throws Exception {
         //GIVEN

@@ -7,6 +7,7 @@ import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -40,11 +41,13 @@ public class UserIT {
 
     @Before
     public void setup() {
+        MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
     }
+
     /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view sign Up
     --------------------------------------------------------------------------------------------------------------*/
@@ -444,6 +447,7 @@ public class UserIT {
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
                 .andDo(print());
     }
+
     /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view home
     --------------------------------------------------------------------------------------------------------------*/
@@ -454,23 +458,23 @@ public class UserIT {
         //THEN
         mockMvc.perform(get("/home")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user(SecurityUtilities.currentUser)))
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("user","lastBuddy","lastTransaction"))
-                .andExpect(model().attribute("user",hasProperty("email", Matchers.is("dada@email.fr"))))
-                .andExpect(model().attribute("user",hasProperty("balance", Matchers.is(200.0))))
-                .andExpect(model().attribute("user",hasProperty("firstName", Matchers.is("Damien"))))
-                .andExpect(model().attribute("user",hasProperty("lastName", Matchers.is("Sanches"))))
-                .andExpect(model().attribute("lastBuddy",hasProperty("firstName", Matchers.is("Elisabeth"))))
-                .andExpect(model().attribute("lastBuddy",hasProperty("lastName", Matchers.is("Dupond"))))
-                .andExpect(model().attribute("lastTransaction",hasProperty("firstName", Matchers.is("Lubin"))))
-                .andExpect(model().attribute("lastTransaction",hasProperty("amount", Matchers.is(-15.0))))
+                .andExpect(model().attributeExists("user", "lastBuddy", "lastTransaction"))
+                .andExpect(model().attribute("user", hasProperty("email", Matchers.is("dada@email.fr"))))
+                .andExpect(model().attribute("user", hasProperty("balance", Matchers.is(200.0))))
+                .andExpect(model().attribute("user", hasProperty("firstName", Matchers.is("Damien"))))
+                .andExpect(model().attribute("user", hasProperty("lastName", Matchers.is("Sanches"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("firstName", Matchers.is("Elisabeth"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("lastName", Matchers.is("Dupond"))))
+                .andExpect(model().attribute("lastTransaction", hasProperty("firstName", Matchers.is("Lubin"))))
+                .andExpect(model().attribute("lastTransaction", hasProperty("amount", Matchers.is(-15.0))))
                 .andDo(print());
     }
 
-//    @Test
+    //    @Test
 //    public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
 //        //GIVEN
 //        User currentUser = User.builder()
@@ -500,7 +504,7 @@ public class UserIT {
                                     Integration tests view addfriend
     --------------------------------------------------------------------------------------------------------------*/
     @Test
-    public void showAddFriendViewTest_thenStatusOk() throws Exception {
+    public void getListConnectionsViewAddfriendTest_thenStatusOk() throws Exception {
         //GIVEN
         User user = User.builder()
                 .email("fifi@email.fr")
@@ -520,13 +524,13 @@ public class UserIT {
     }
 
     @Test
-    public void showAddFriendViewTest_whenUrlTemplateIsWrong_thenStatusNotFound() throws Exception {
+    public void getListConnectionsViewAddfriendTest_whenUrlTemplateIsWrong_thenStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
         mockMvc.perform(get("/friend")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
@@ -628,12 +632,12 @@ public class UserIT {
         //WHEN
         //THEN
         mockMvc.perform(MockMvcRequestBuilders.get("/addfriend")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())
-                .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
                         .param("email", SecurityUtilities.currentUser))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("friendLists", "friendList","totalPages","currentPage"))
+                .andExpect(model().attributeExists("friendLists", "friendList", "totalPages", "currentPage"))
                 .andExpect(model().attribute("totalPages", is(2)))
                 .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(3L))))
@@ -643,31 +647,33 @@ public class UserIT {
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("lili@email.fr")))))
                 .andDo(print());
     }
-      /*------------------------------------------------------------------------------------------------------------
-                                    Integration tests  view profile
-    --------------------------------------------------------------------------------------------------------------*/
-      @Test
-      public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
-          //GIVEN
-          //WHEN
-          //THEN
-          mockMvc.perform(get("/profile")
-                          .with(SecurityMockMvcRequestPostProcessors.csrf())
-                          .param("email", SecurityUtilities.currentUser)
-                          .param("password", "passpass"))
-                  .andExpect(status().isOk())
-                  .andExpect(view().name("profile"))
-                  .andExpect(model().size(2))
-                  .andExpect(model().hasNoErrors())
-                  .andExpect(model().attributeExists("currentUser", "updateCurrentUser"))
-                  .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
-                  .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
-                  .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanches"))))
-                  .andExpect(model().attribute("currentUser", hasProperty("password", is(containsString("$2a$")))))
-                  .andDo(print());
-      }
 
-    @WithMockUser(value = "spring")
+    /*------------------------------------------------------------------------------------------------------------
+                                  Integration tests  view profile
+  --------------------------------------------------------------------------------------------------------------*/
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
+    @Test
+    public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvc.perform(get("/profile")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", SecurityUtilities.currentUser)
+                        .param("password", "passpass"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("profile"))
+                .andExpect(model().size(2))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().attributeExists("currentUser", "updateCurrentUser"))
+                .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanches"))))
+                .andExpect(model().attribute("currentUser", hasProperty("password", is(containsString("$2a$")))))
+                .andDo(print());
+    }
+
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
@@ -678,6 +684,7 @@ public class UserIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenCurrentUserIsDada_thenReturnUserDadaUpdated() throws Exception {
         //GIVEN
@@ -704,6 +711,7 @@ public class UserIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
         //GIVEN
@@ -729,6 +737,7 @@ public class UserIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
         //GIVEN
@@ -753,6 +762,7 @@ public class UserIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
@@ -779,6 +789,7 @@ public class UserIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
@@ -805,6 +816,7 @@ public class UserIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
@@ -829,6 +841,7 @@ public class UserIT {
 
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
@@ -853,6 +866,7 @@ public class UserIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenConfirmPassWordNotMatchWithPassword_thenThrowsPasswordNotMatcherException() throws Exception {
         //GIVEN

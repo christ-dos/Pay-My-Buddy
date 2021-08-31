@@ -10,9 +10,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * Class of configuration SpringSecurity
@@ -46,22 +46,23 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(authenticationProvider());
     }
 
-    @Override
-    public void configure(WebSecurity web) {
-        web.ignoring()
-                .antMatchers("resources/**","/static/**");
-    }
+//    @Override
+//    public void configure(WebSecurity web) {
+//        web.ignoring()
+//                .antMatchers("resources/**", "/static/**");
+//    }
 
     @Override
-    protected void configure( HttpSecurity http) throws Exception {
+    protected void configure(final HttpSecurity http) throws Exception {
 //
         http
+
                 .authorizeRequests()
-                .antMatchers("/css/**","/login/**","/signup").permitAll()
+                .antMatchers("/css/**", "/login/**", "/signup").permitAll()
 //                .antMatchers("/home").authenticated()
 //                .antMatchers("/addfriend").authenticated()
 //                .antMatchers("/transaction").authenticated()
-//                .antMatchers("/transfer").authenticated()
+                .antMatchers("/transfer").authenticated()
 //                .antMatchers("/profie").authenticated()
 //                .antMatchers("/contact").authenticated()
 //                .antMatchers("/logoff").authenticated()
@@ -71,15 +72,16 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .rememberMe().userDetailsService(this.userDetailsService)
                 .and()
                 .formLogin()
-                        .loginPage("/login").permitAll()
-                        .defaultSuccessUrl("/home",true)
-                        .failureUrl("/login?error=true")
+                .loginPage("/login").permitAll()
+                .defaultSuccessUrl("/home", true)
+                .failureUrl("/login?error=true")
                 .and()
                 .logout()
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID", "remember-me");
+                .clearAuthentication(true)
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login")
+                .deleteCookies("JSESSIONID")
+                .invalidateHttpSession(true);
 
     }
 

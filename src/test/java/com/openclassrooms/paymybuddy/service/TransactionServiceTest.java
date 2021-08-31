@@ -8,15 +8,27 @@ import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDateTime;
@@ -24,20 +36,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
+@WithMockUser(username = "dada@email.fr", password = "passpass")
 @ExtendWith(MockitoExtension.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SecurityUtilities.class)
 class TransactionServiceTest {
 
-    ITransactionService transactionServiceTest;
+    private ITransactionService transactionServiceTest;
 
     @Mock
-    ITransactionRepository transactionRepositoryMock;
+    private ITransactionRepository transactionRepositoryMock;
 
     @Mock
-    IUserRepository userRepositoryMock;
+    private IUserRepository userRepositoryMock;
+
+//    private SecurityUtilities securityUtilities =  new SecurityUtilities();
 
     private Pageable pageable;
 
@@ -45,14 +63,22 @@ class TransactionServiceTest {
 
     private Page<Transaction> transactionsPage;
 
+    @Mock
+    private Authentication authentication;
+//    @Mock
+    private SecurityContext securityContextMock;
+
 
     @BeforeEach
-    void setUp() {
+    void setUpPerTest() {
+
+        SecurityContext securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        PowerMockito.mockStatic(SecurityUtilities.class);
         pageable = PageRequest.of(0, 5);
         transactionServiceTest = new TransactionService(transactionRepositoryMock, userRepositoryMock);
-
         String emitterEmail = "dada@email.fr";
-
         transactions = new ArrayList<>();
         Transaction transaction1 = Transaction.builder()
                 .transactionId(1).amount(25.0).description("diner paula")
@@ -76,6 +102,19 @@ class TransactionServiceTest {
         transactions.add(transaction3);
 
         transactionsPage = new PageImpl<>(transactions);
+    }
+
+    @Test
+    void givenStaticMethodWithNoArgs_whenMocked_thenReturnsMockSuccessfully() {
+//        securityUtilities = new SecurityUtilities();
+//     assertThat(SecurityUtilities.getCurrentUser()).isEqualTo("dada@email.fr");
+//
+//        try (MockedStatic<SecurityUtilities> utilities = Mockito.mockStatic(SecurityUtilities.class)) {
+//            utilities.when(MockedStatic::).thenReturn("Eugen");
+//            assertThat(SecurityUtilities.name()).isEqualTo("Eugen");
+//        }
+//
+//        assertThat(SecurityUtilities.name()).isEqualTo("Baeldung");
     }
 
     @Test
@@ -108,7 +147,8 @@ class TransactionServiceTest {
                 .lastName("Dumarche")
                 .balance(30.50)
                 .accountBank(170974).build();
-
+//        PowerMockito.mockStatic(SecurityUtilities.class);
+//        when(securityContextMock.getAuthentication().getDetails()).thenReturn("dada@email.fr","passpass",null);
         when(transactionRepositoryMock.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(isA(String.class), isA(String.class), isA(Pageable.class))).thenReturn(transactionsPage);
         when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userLise);
         //WHEN
@@ -181,12 +221,16 @@ class TransactionServiceTest {
         assertEquals(0.5, transactionResult.getFees());
         verify(transactionRepositoryMock, times(1)).save(isA(Transaction.class));
     }
-    @WithMockUser(value = "kikine@email.fr")
+
+    @WithMockUser(username = "dada@email.fr", password = "$2a$10$2K11L/fq6fmlHt3K7Nq.LeBpsNYiaLsb0tCh3z3w/h4MIi2FtB66.")
     @Test
     public void addTransaction_whenUserBalanceNotEnough_thenThrowBalanceInsufficientException() {
         //GIVEN
+
+
+
         User emitter = User.builder()
-                .email("kikine@email.fr")
+                .email("dada@email.fr")
                 .password("monTropToppassword")
                 .firstName("Christine")
                 .lastName("Deldalle")
@@ -194,8 +238,7 @@ class TransactionServiceTest {
                 .accountBank(170974).build();
 
         SendTransaction sendTransaction = new SendTransaction("lisa@email.fr", 250.0, "books");
-
-        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(emitter);
+        when(userRepositoryMock.findByEmail("dada@email.fr")).thenReturn(emitter);
         //WHEN
         //THEN
         assertThrows(BalanceInsufficientException.class, () -> transactionServiceTest.addTransaction(sendTransaction));

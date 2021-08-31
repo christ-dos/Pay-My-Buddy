@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -47,7 +48,7 @@ public class TransactionIT {
     /*--------------------------------------------------------------------------------------------------
                                    Integration tests View transaction
    ----------------------------------------------------------------------------------------------------*/
-
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getTransactionsViewTransactionTest_whenUrlIsSlashtransferAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -55,7 +56,7 @@ public class TransactionIT {
         //THEN
         mockMvc.perform(get("/transaction")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("passpass")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
                 .andExpect(model().size(6))
@@ -64,6 +65,7 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getTransactionsViewTransactionTest_whenIsAWrongUrlSlashIndex_thenReturnStatusNotFound() throws Exception {
         //GIVEN
@@ -76,7 +78,7 @@ public class TransactionIT {
                 .andDo(print());
     }
 
-
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getTransactionsViewTransactionTest_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN

@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -45,6 +46,7 @@ public class TransferIT {
     /*-----------------------------------------------------------------------------------------------------
                                        Integration tests View transfer
     ---------------------------------------------------------------------------------------------------------*/
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsSlashTransfer_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -54,10 +56,11 @@ public class TransferIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("transfer"))
                 .andExpect(model().size(6))
-                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes","totalPages", "currentPage"))
+                .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes", "totalPages", "currentPage"))
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsWrong_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -68,6 +71,7 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnListTransferOfDada() throws Exception {
         //GIVEN
@@ -88,12 +92,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsCredit_thenReturnBalanceCreditedWithAmount() throws Exception {
         //WHEN
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("userEmail", SecurityUtilities.currentUser)
+                        .param("userEmail", "dada@email.fr")
                         .param("amount", String.valueOf(20.0))
                         .param("description", "transfer appli")
                         .param("transferType", TransferTypeEnum.CREDIT.name())
@@ -109,6 +114,7 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenReturnTransferAddedWithUserWithNewBalanceDebitedfromAmount() throws Exception {
         //GIVEN
@@ -132,6 +138,7 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsInsufficient_thenThrowBalanceInsufficientException() throws Exception {
         //GIVEN
@@ -153,6 +160,7 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
@@ -169,6 +177,7 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
@@ -184,7 +193,7 @@ public class TransferIT {
                 .andDo(print());
     }
 
-
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlank_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
@@ -201,6 +210,7 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlankAndAmountIsNull_thenReturnFieldsErrorsNotBlankAndNotNull() throws Exception {
         //GIVEN

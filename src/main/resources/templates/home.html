@@ -48,25 +48,25 @@
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " aria-current="page" href="http://localhost:9090/transaction"><span
+                            <a class="nav-link " aria-current="page" href="/transaction"><span
                                     class="navbar-brand mb-0 h1">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/profile"><span
+                            <a class="nav-link " href="/profile"><span
                                     class="navbar-brand mb-0 h1">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/contact"><span
+                            <a class="nav-link " href="/contact"><span
                                     class="navbar-brand mb-0 h1">Contact</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <div sec:authorize="isAuthenticated()">
-                                <a class="nav-link" href="javascript: document.logoutForm.submit()"><span class="navbar-brand mb-0 h1">Log off</span>
+                            <div>
+                                <a class="nav-link" href="javascript: document.logout.submit()"><span class="navbar-brand mb-0 h1">Log off</span>
                                 </a>
-                                <form name="logoutForm" th:action="@{/logout}" method="post" th:hidden="true">
+                                <form name="logout" th:action="@{/logout}" method="post" th:hidden="true">
                                     <input hidden type="submit" value="Sign Out"/>
                                 </form>
                             </div>
@@ -99,7 +99,7 @@
                         <p class="card-text text-muted text-truncate">Transfer money to and from your bank</p>
                     </div>
                     <div class="card-footer py-3 ">
-                        <a href="http://localhost:9090/transfer"
+                        <a href="/transfer"
                            class="btn text-light lightGreen400 bg-gradient btn-block">Go
                             To Transfer</a>
                     </div>
@@ -116,7 +116,7 @@
                         <p class="card-text text-muted text-truncate">And update your personal data</p>
                     </div>
                     <div class="card-footer py-3">
-                        <a href="http://localhost:9090/profile" class="btn text-light lightGreen600 bg-gradient">Go to
+                        <a href="/profile" class="btn text-light lightGreen600 bg-gradient">Go to
                             Profile</a>
                     </div>
                 </div>
@@ -136,7 +136,7 @@
                         <p class="card-text text-muted text-truncate">Easy! PayMyBuddy is the solution</p>
                     </div>
                     <div class="card-footer py-3 ">
-                        <a href="http://localhost:9090/transaction"
+                        <a href="/transaction"
                            class="btn text-light lightGreen800 bg-gradient  btn-block">Go
                             To Transaction</a>
                     </div>
@@ -153,7 +153,7 @@
                         <p class="card-text text-muted text-truncate">And begins to pay him back</p>
                     </div>
                     <div class="card-footer py-3">
-                        <a href="http://localhost:9090/addfriend" class="btn text-light lightGreen900 bg-gradient">Go to
+                        <a href="/addfriend" class="btn text-light lightGreen900 bg-gradient">Go to
                             Add A Buddy</a>.
                     </div>
                 </div>

@@ -78,7 +78,6 @@ public class TransactionControllerTest {
         friendListTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
         friendListTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
 
-//        displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
         List<DisplayingTransaction> displayingTransactionsList = new ArrayList<>();
         displayingTransactionsList.add(new DisplayingTransaction("Lisette", "books", 15.0));
@@ -189,10 +188,9 @@ public class TransactionControllerTest {
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         String receiverEmail = "fifi@email.com";
-        String emitterEmail = SecurityUtilities.currentUser;
-
+        String emitterEmail = "dada@email.fr";
         User userEmitter = User.builder()
-                .email(SecurityUtilities.currentUser)
+                .email(emitterEmail)
                 .password("monTropToppassword")
                 .firstName("Christine")
                 .lastName("Deldalle")

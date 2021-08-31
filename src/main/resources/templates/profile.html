@@ -33,27 +33,32 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav p-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="http://localhost:9090/home"><span class="navbar-brand mb-0 h1 ">Home</span>
+                            <a class="nav-link" href="/home"><span class="navbar-brand mb-0 h1 ">Home</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" aria-current="page" href="http://localhost:9090/transaction"><span
+                            <a class="nav-link" aria-current="page" href="/transaction"><span
                                     class="navbar-brand mb-0 h1 ">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/profile"><span
+                            <a class="nav-link " href="/profile"><span
                                     class="navbar-brand mb-0 h1 current active">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/contact"><span
+                            <a class="nav-link " href="/contact"><span
                                     class="navbar-brand mb-0 h1">Contact</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" href="http://localhost:9090/login"><span class="navbar-brand mb-0 h1">Log off</span>
-                            </a>
+                            <div>
+                                <a class="nav-link" href="javascript: document.logoutForm.submit()"><span class="navbar-brand mb-0 h1">Log off</span>
+                                </a>
+                                <form name="logoutForm" th:action="@{/logout}" method="post" th:hidden="true">
+                                    <input hidden type="submit" value="Sign Out"/>
+                                </form>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -65,7 +70,7 @@
 <div class="container-fluid gray py-2">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" href="http://localhost:9090/home">Home /</a>
+            <a class="nav-link" href="/home">Home /</a>
         </li>
         <li class="nav-item ">
             <a class="nav-link disabled" href="#">Profile</a>
