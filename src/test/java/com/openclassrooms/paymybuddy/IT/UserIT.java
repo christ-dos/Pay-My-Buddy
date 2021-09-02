@@ -634,7 +634,7 @@ public class UserIT {
         mockMvc.perform(MockMvcRequestBuilders.get("/addfriend")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
-                        .param("email", SecurityUtilities.currentUser))
+                        .param("email", SecurityUtilities.getCurrentUser()))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("friendLists", "friendList", "totalPages", "currentPage"))
@@ -659,7 +659,7 @@ public class UserIT {
         //THEN
         mockMvc.perform(get("/profile")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.currentUser)
+                        .param("email", SecurityUtilities.getCurrentUser())
                         .param("password", "passpass"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("profile"))

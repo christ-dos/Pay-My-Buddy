@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,12 +30,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -50,8 +46,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
-import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -94,10 +88,9 @@ public class UserControllerTest {
                 .apply(springSecurity())
                 .build();
 
-        SecurityContext securityContext = new SecurityContextImpl();
-        securityContext.setAuthentication(authentication);
+//        SecurityContext securityContext = new SecurityContextImpl();
+//        securityContext.setAuthentication(authentication);
 
-        pageable = PageRequest.of(0, 5);
         List<FriendList> friendListPageTest = new ArrayList<>();
         friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
         friendListPageTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
@@ -105,6 +98,8 @@ public class UserControllerTest {
         friendListPageTest.add(new FriendList("barnabé@email.fr", "Barnabé", "Vincent"));
         friendListPageTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
         friendListPageTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
+
+        pageable = PageRequest.of(0, 5);
         displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
     }
@@ -136,12 +131,10 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    //    @WithMockUser(username = "wiwi@email.fr", password = "passpass")
+    @WithMockUser(username = "wiwi@email.fr", password = "passpass")
     @Test
     public void authenticationLoginView_whenUserNameIsNull_thenThrowsUserNameNotFoundException() throws Exception {
         //GIVEN
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-        String username = "wiwi@email.fr";
         when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
         when(myUserDetailsServiceMock.loadUserByUsername(isA(String.class))).thenThrow(new UsernameNotFoundException("User not found"));
         //WHEN
@@ -151,13 +144,13 @@ public class UserControllerTest {
                         .accept(MediaType.ALL)
                         .param("username", "dada@email.fr")
                         .param("password", "passpass"))
-
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error=true"))
                 .andExpect(cookie().exists("remember-me"))
                 .andDo(print());
     }
 
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void authenticationLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlHome() throws Exception {
         //GIVEN
@@ -174,6 +167,20 @@ public class UserControllerTest {
                         .accept(MediaType.ALL)).andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/home"))
                 .andDo(print());
+    }
+
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
+    @Test
+    public void logOutTest() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/logout").with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?logout"))
+                .andDo(print());
+
+
     }
 
     /*-----------------------------------------------------------------------------------------------------
@@ -201,7 +208,7 @@ public class UserControllerTest {
                 "Elisabeth", "books", 5.0);
         displayingTransactions.add(displayingTransaction);
 
-        Page<FriendList> friendListPage = new PageImpl<>(friendLists);
+//        Page<FriendList> friendListPage = new PageImpl<>(friendLists);
         Page<DisplayingTransaction> displayingTransactionsPage = new PageImpl<>(displayingTransactions);
 
         when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
@@ -349,7 +356,7 @@ public class UserControllerTest {
                         .param("email", "françois@email.fr")
                         .param("firstName", "François")
                         .param("lastName", "Dujardin")
-                        .param("userEmail", SecurityUtilities.currentUser))
+                        .param("userEmail", SecurityUtilities.getCurrentUser()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -406,7 +413,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.currentUser))
+                        .param("email", SecurityUtilities.getCurrentUser()))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
@@ -431,7 +438,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/profile")
-                        .param("email", SecurityUtilities.currentUser))
+                        .param("email", SecurityUtilities.getCurrentUser()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("profile"))
                 .andExpect(model().size(2))
@@ -476,7 +483,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.currentUser)
+                        .param("email", SecurityUtilities.getCurrentUser())
                         .param("firstName", updateProfileCurrentUser.getFirstName())
                         .param("lastName", updateProfileCurrentUser.getLastName())
                         .param("password", updateProfileCurrentUser.getPassword())

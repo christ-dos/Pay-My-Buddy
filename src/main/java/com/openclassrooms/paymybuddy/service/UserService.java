@@ -108,12 +108,12 @@ public class UserService implements IUserService {
      */
     @Override
     public User updateProfile(UpdateCurrentUser updateCurrentUser) {
-        User userToUpdate = userRepository.findByEmail(SecurityUtilities.currentUser);
+        User userToUpdate = userRepository.findByEmail(SecurityUtilities.getCurrentUser());
         if (!updateCurrentUser.getConfirmPassword().equals(updateCurrentUser.getPassword())) {
             log.error("Service: confirmPassword not match password");
             throw new PasswordNotMatcherException("Confirm not match with password");
         }
-        userToUpdate.setEmail(SecurityUtilities.currentUser);
+        userToUpdate.setEmail(SecurityUtilities.getCurrentUser());
         userToUpdate.setFirstName(updateCurrentUser.getFirstName());
         userToUpdate.setLastName(updateCurrentUser.getLastName());
         userToUpdate.setPassword(getEncodedPassword(updateCurrentUser.getConfirmPassword()));
@@ -141,7 +141,7 @@ public class UserService implements IUserService {
      */
     @Override
     public Friend addFriendCurrentUserList(String friendEmail) {
-        Friend friendToAdd = new Friend(SecurityUtilities.currentUser, friendEmail, LocalDateTime.now());
+        Friend friendToAdd = new Friend(SecurityUtilities.getCurrentUser(), friendEmail, LocalDateTime.now());
         if (!userEmailIsPresentDataBase(friendEmail)) {
             log.error("Service: User's email not Exist in data base");
             throw new UserNotFoundException("User's email not exist");
@@ -163,11 +163,11 @@ public class UserService implements IUserService {
      */
     @Override
     public Page<FriendList> getFriendListByCurrentUserEmailPaged(Pageable pageable) {
-        Page<Friend> friendListsByEmail = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.currentUser, pageable);
+        Page<Friend> friendListsByEmail = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.getCurrentUser(), pageable);
         int totalElements = (int) friendListsByEmail.getTotalElements();
-        log.debug("UserService: friend list  paged found for current user: " + SecurityUtilities.currentUser);
+        log.debug("UserService: friend list  paged found for current user: " + SecurityUtilities.getCurrentUser());
 
-        return new PageImpl<FriendList>(friendListsByEmail.stream()
+        return new PageImpl<>(friendListsByEmail.stream()
                 .map(friend -> {
                     User user = userRepository.findByEmail(friend.getFriendEmail());
                     return new FriendList(user.getEmail(), user.getFirstName(), user.getLastName());
@@ -176,9 +176,9 @@ public class UserService implements IUserService {
 
     @Override
     public List<FriendList> getFriendListByCurrentUserEmail() {
-        Page<Friend> friendListsByEmailPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.currentUser, null);
+        Page<Friend> friendListsByEmailPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.getCurrentUser(), null);
         List<Friend> friendListsByEmail = friendListsByEmailPaged.getContent();
-        log.debug("UserService: friend list found for current user: " + SecurityUtilities.currentUser);
+        log.debug("UserService: friend list found for current user: " + SecurityUtilities.getCurrentUser());
 
         return friendListsByEmail.stream()
                 .map(friend -> {
@@ -194,7 +194,7 @@ public class UserService implements IUserService {
      * @return true if the friend already exist in list else return false
      */
     private Boolean friendAlreadyExistsInList(String friendEmail) {
-        Page<Friend> listFriendPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.currentUser, null);
+        Page<Friend> listFriendPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.getCurrentUser(), null);
         List<Friend> listFriends = listFriendPaged.getContent();
         for (Friend friend : listFriends) {
             if (friend.getFriendEmail().equals(friendEmail)) {

@@ -6,13 +6,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
+import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 
 /**
  * Class of configuration SpringSecurity
@@ -21,6 +22,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
  */
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @Slf4j
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
@@ -42,27 +44,20 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authenticationProvider());
     }
 
-//    @Override
-//    public void configure(WebSecurity web) {
-//        web.ignoring()
-//                .antMatchers("resources/**", "/static/**");
-//    }
-
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-//
-        http
+        http.csrf().disable()
 
                 .authorizeRequests()
                 .antMatchers("/css/**", "/login/**", "/signup").permitAll()
 //                .antMatchers("/home").authenticated()
 //                .antMatchers("/addfriend").authenticated()
 //                .antMatchers("/transaction").authenticated()
-                .antMatchers("/transfer").authenticated()
+//                .antMatchers("/transfer").authenticated()
 //                .antMatchers("/profie").authenticated()
 //                .antMatchers("/contact").authenticated()
 //                .antMatchers("/logoff").authenticated()
@@ -79,8 +74,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                 .clearAuthentication(true)
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login")
-                .deleteCookies("JSESSIONID")
+//                .logoutSuccessUrl("/login")
+
+                .deleteCookies("dummyCookie")
                 .invalidateHttpSession(true);
 
     }

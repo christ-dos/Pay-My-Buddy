@@ -8,15 +8,21 @@ import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.ITransferRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,6 +33,8 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SecurityUtilities.class)
 public class TransferServiceTest {
 
     @Mock
@@ -37,6 +45,9 @@ public class TransferServiceTest {
 
     private TransferService transferServiceTest;
 
+    String username;
+
+
     @BeforeEach
     public void setPerTest() {
 
@@ -46,7 +57,7 @@ public class TransferServiceTest {
     @Test
     public void addTransferTest_whenUserEmailIsDadaAndTransferTypeIsCredit_thenVerifyBalanceIs120AndUserEmailIsDada() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        String userEmail = username;
         User user = User.builder()
                 .email(userEmail).firstName("Damien").lastName("Sanchez").balance(20.0).accountBank(589632)
                 .build();
@@ -76,7 +87,9 @@ public class TransferServiceTest {
     @Test
     public void addTransferTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenTransferIsSavedAndBalanceUpdatedTo50() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        PowerMockito.mockStatic(SecurityUtilities.class);
+        when(SecurityUtilities.getCurrentUser()).thenReturn("dada@email.fr");
+        String userEmail = SecurityUtilities.getCurrentUser();
         User user = User.builder()
                 .email(userEmail).firstName("Damien").lastName("Sanchez").balance(100.0).accountBank(589632)
                 .build();
@@ -106,7 +119,7 @@ public class TransferServiceTest {
     @Test
     public void addTransferTest_whenTransferTypeIsDebitAndBalanceInsufficient_thenTrowBalanceInsufficientException() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        String userEmail = SecurityUtilities.getCurrentUser();
         User user = User.builder()
                 .email(userEmail).firstName("Damien").lastName("Sanchez").balance(49.0).accountBank(589632)
                 .build();
@@ -127,7 +140,7 @@ public class TransferServiceTest {
     @Test
     public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnPageOfDisplayingTransferForDadaWithSignNegativeIfTypeIsDebit() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        String userEmail = "dada@email.fr";
         User userTransfer1 = User.builder()
                 .email(userEmail)
                 .firstName("Damien")

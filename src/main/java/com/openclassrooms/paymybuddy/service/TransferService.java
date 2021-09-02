@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TransferService implements ITransferService {
 
-    private ITransferRepository transferRepository;
+    private final ITransferRepository transferRepository;
 
-    private IUserRepository userRepository;
+    private final IUserRepository userRepository;
 
     @Autowired
     public TransferService(ITransferRepository transferRepository, IUserRepository userRepository) {
@@ -36,7 +36,7 @@ public class TransferService implements ITransferService {
     @Transactional
     @Override
     public Transfer addTransfer(DisplayingTransfer displayingTransfer) {
-        User currentUser = userRepository.findByEmail(SecurityUtilities.currentUser);
+        User currentUser = userRepository.findByEmail(SecurityUtilities.getCurrentUser());
 
         //update of balance when transfer type is debit
         if (displayingTransfer.getTransferType() == TransferTypeEnum.DEBIT) {
@@ -62,11 +62,11 @@ public class TransferService implements ITransferService {
     }
 
     public Page<DisplayingTransfer> getCurrentUserTransfers(Pageable pageable) {
-        Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.currentUser, pageable);
+        Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.getCurrentUser(), pageable);
         int totalElements = (int) transfers.getTotalElements();
-        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.currentUser);
+        log.debug("Service: displaying list of transfer for userEmail: " + SecurityUtilities.getCurrentUser());
 
-        return new PageImpl<DisplayingTransfer>(transfers.stream()
+        return new PageImpl<>(transfers.stream()
                 .map(transfer -> {
                     if (transfer.getTransferType() == TransferTypeEnum.DEBIT) {
                         return new DisplayingTransfer(transfer.getDescription(), transfer.getTransferType(), -transfer.getAmount(), transfer.getPostTradeBalance());

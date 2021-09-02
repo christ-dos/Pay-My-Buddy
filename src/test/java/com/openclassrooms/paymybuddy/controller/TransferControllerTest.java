@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,20 +57,24 @@ public class TransferControllerTest {
     private TransferService transferServiceMock;
 
     @MockBean
-    private MyUserDetailsService myUserDetailsService;
-
-    @Autowired
-    private WebApplicationContext context;
-
-    @MockBean
-    private DefaultOidcUser principal;
-
-    @MockBean
-    private  Authentication authentication;
-
-    private SecurityUtilities securityUtilities;
+    private MyUserDetailsService myUserDetailsServiceMock;
 
     private Page<DisplayingTransfer> displayingTransferPage;
+//
+//    @Autowired
+//    private WebApplicationContext context;
+
+//    @MockBean
+//    private DefaultOidcUser principal;
+
+//    @MockBean
+//    private  Authentication authentication;
+
+//    private SecurityUtilities securityUtilities;
+
+    private SecurityUtilities spySecurityUtilities;
+
+
 
     @BeforeEach
     public void setPertest() {

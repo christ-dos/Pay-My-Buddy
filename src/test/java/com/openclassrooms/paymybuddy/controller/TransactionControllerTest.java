@@ -15,6 +15,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -34,11 +35,14 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(TransactionController.class)
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +62,7 @@ public class TransactionControllerTest {
     private UserService userService;
 
     @MockBean
-    MyUserDetailsService myUserDetailsService;
+    MyUserDetailsService myUserDetailsServiceMock;
 
     private Pageable pageable;
 
@@ -90,7 +94,7 @@ public class TransactionControllerTest {
     /*-------------------------------------------------------------------------------------------------------
                                          Tests View transaction
     ---------------------------------------------------------------------------------------------------------*/
-    @WithMockUser(value = "spring")
+  @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getTransactionsTransactionView_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -183,7 +187,7 @@ public class TransactionControllerTest {
 
     }
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
@@ -238,7 +242,7 @@ public class TransactionControllerTest {
     }
 
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenBalanceIsInsufficient_thenReturnBalanceInsufficientException() throws Exception {
         //GIVEN
@@ -287,7 +291,7 @@ public class TransactionControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN

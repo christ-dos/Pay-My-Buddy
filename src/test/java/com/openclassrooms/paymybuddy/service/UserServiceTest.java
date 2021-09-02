@@ -15,12 +15,16 @@ import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +39,8 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(SecurityUtilities.class)
 public class UserServiceTest {
     @Mock
     private IUserRepository userRepositoryMock;
@@ -129,7 +135,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        String userEmail = SecurityUtilities.getCurrentUser();
         String friendEmail = "françois@email.fr";
 
         User user = User.builder()
@@ -163,7 +169,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsPresentInListFriend_thenThrowsUserAlreadyExistException() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        String userEmail = SecurityUtilities.getCurrentUser();
         String friendEmail = "françois@email.fr";
 
         User user = User.builder()
@@ -192,7 +198,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedNotExistInDB_thenThrowsUserNotFoundException() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        String userEmail = SecurityUtilities.getCurrentUser();
         String friendEmail = "wiwi@email.fr";
 
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(null);
@@ -207,7 +213,7 @@ public class UserServiceTest {
     @Test
     public void getFriendListByCurrentUserEmailPagedTest_whenUserEmailIsCurrentUser_thenReturnListFriend() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+//        String userEmail = "dada@email.fr";
 
         User user1 = User.builder()
                 .email("françois@email.fr")
@@ -254,7 +260,7 @@ public class UserServiceTest {
     @Test
     public void getFriendListByCurrentUserEmailTest_whenUserEmailIsCurrentUser_thenReturnListFriend() {
         //GIVEN
-        String userEmail = SecurityUtilities.currentUser;
+        String userEmail = SecurityUtilities.getCurrentUser();
 
         User user1 = User.builder()
                 .email("françois@email.fr")
@@ -307,14 +313,14 @@ public class UserServiceTest {
     public void updateProfileTest_whenUserExistInDB_thenReturnUserUpdated() {
         //GIVEN
         UpdateCurrentUser updateCurrentUser = new UpdateCurrentUser();
-        updateCurrentUser.setEmail(SecurityUtilities.currentUser);
+        updateCurrentUser.setEmail(SecurityUtilities.getCurrentUser());
         updateCurrentUser.setFirstName("Damien");
         updateCurrentUser.setLastName("Sanches");
         updateCurrentUser.setPassword("passpass");
         updateCurrentUser.setConfirmPassword("passpass");
 
         User userToUpdate = User.builder()
-                .email(SecurityUtilities.currentUser)
+                .email(SecurityUtilities.getCurrentUser())
                 .password("pass")
                 .firstName("Damien")
                 .lastName("Sanchez")
@@ -322,7 +328,7 @@ public class UserServiceTest {
                 .accountBank(170974).build();
 
         User userUpdated = User.builder()
-                .email(SecurityUtilities.currentUser)
+                .email(SecurityUtilities.getCurrentUser())
                 .firstName("Damien")
                 .lastName("Sanches")
                 .password("passpass")
@@ -335,7 +341,7 @@ public class UserServiceTest {
         //WHEN
         User userSavedResult = userServiceTest.updateProfile(updateCurrentUser);
         //THEN
-        assertEquals(SecurityUtilities.currentUser, userSavedResult.getEmail());
+        assertEquals(SecurityUtilities.getCurrentUser(), userSavedResult.getEmail());
         assertEquals("Damien", userSavedResult.getFirstName());
         assertEquals("Sanches", userSavedResult.getLastName());
         assertEquals("passpass", userSavedResult.getPassword());
@@ -347,7 +353,7 @@ public class UserServiceTest {
     public void updateProfileTest_whenPasswordNotMatchWithConfirmPassword_thenThrowsPasswordNotMatcherException() {
         //GIVEN
         User currentUser = User.builder()
-                .email(SecurityUtilities.currentUser)
+                .email(SecurityUtilities.getCurrentUser())
                 .firstName("Damien")
                 .lastName("Sanchez")
                 .password("passpass")

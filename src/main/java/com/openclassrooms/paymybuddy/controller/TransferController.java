@@ -20,13 +20,64 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.validation.Valid;
 import java.util.Optional;
 
+/**
+ * Class Controller that manage transfer requests
+ *
+ * @author Christine Duarte
+ */
 @Controller
 @Slf4j
 public class TransferController {
 
+    /**
+     * Dependency {@link ITransferService } injected
+     */
     @Autowired
     private ITransferService transferService;
 
+    /**
+     * Method POST that process data receiving by the view transfer in endpoint "/transfer"
+     * for adding transfer in table transfer in database
+     *
+     * @param displayingTransfer A model DTO {@link DisplayingTransfer} that displaying transfer
+     *                           information in view : reason of transaction,  and the post trade balance after the operation
+     * @param result             An Interface that permit check validity of entries on fields with annotation @Valid
+     * @param model              Interface that defines a support for model attributes
+     * @param page               An Optional with the page
+     * @param size               An optional with the number of items in page
+     * @return A String containing the name of view
+     */
+    @PostMapping(value = "/transfer")
+    public String addTransferCurrentUser(@Valid DisplayingTransfer displayingTransfer, BindingResult result, Model model, @RequestParam("page") Optional<Integer> page,
+                                         @RequestParam("size") Optional<Integer> size) {
+        if (result.hasErrors()) {
+            transferModelsPageable(model, page, size);
+            log.error("Controller: Error in fields");
+
+            return "transfer";
+        }
+        try {
+            transferService.addTransfer(displayingTransfer);
+            log.debug("Controller: Transfer added for userEmail: " + SecurityUtilities.getCurrentUser());
+        } catch (BalanceInsufficientException ex) {
+            result.rejectValue("amount", "BalanceInsufficient", ex.getMessage());
+            log.error("Controller: Balance is insufficient to proceed a transfer");
+        }
+        transferModelsPageable(model, page, size);
+
+        return "transfer";
+    }
+
+    /**
+     * Method GET to displaying the view transfer mapped in "/transfer"
+     *
+     * @param displayingTransfer A model DTO {@link DisplayingTransfer} that displaying transfer
+     *                           information in view : reason of transaction,  and the post trade balance after the operation
+     * @param model              Interface that defines a support for model attributes
+     * @param page               An Optional with the page
+     * @param size               An optional with the number of items in page
+     * @return A String containing the name of view
+     */
     @GetMapping(value = "/transfer")
     public String getTransfersViewTransfer(@ModelAttribute("displayingTransfer") DisplayingTransfer displayingTransfer, Model model,
                                            @RequestParam("page") Optional<Integer> page,
@@ -39,39 +90,24 @@ public class TransferController {
         return "transfer";
     }
 
-    @PostMapping(value = "/transfer")
-    public String addTransferCurrentUser(@Valid DisplayingTransfer displayingTransfer, BindingResult result, Model model, @RequestParam("page") Optional<Integer> page,
-                                         @RequestParam("size") Optional<Integer> size) {
-        if (result.hasErrors()) {
-            transferModelsPageable(model, page, size);
-            log.error("Controller: Error in fields");
-
-            return "transfer";
-        }
-        try {
-            transferService.addTransfer(displayingTransfer);
-            log.debug("Controller: Transfer added for userEmail: " + SecurityUtilities.currentUser);
-        } catch (BalanceInsufficientException ex) {
-            result.rejectValue("amount", "BalanceInsufficient", ex.getMessage());
-            log.error("Controller: Balance is insufficient to proceed a transfer");
-        }
-        transferModelsPageable(model, page, size);
-
-        return "transfer";
-    }
-
+    /**
+     * Method private that get models for pagination of transfer
+     *
+     * @param model Interface that defines a support for model attributes.
+     * @param page  An Optional with the page
+     * @param size  An optional with the nomber of items in page
+     */
     private void transferModelsPageable(Model model, Optional<Integer> page, Optional<Integer> size) {
         int currentPage = page.orElse(1);
         int pageSize = size.orElse(2);
 
-        Page<DisplayingTransfer> transfers = transferService.getCurrentUserTransfers(PageRequest.of(currentPage -1, pageSize));
+        Page<DisplayingTransfer> transfers = transferService.getCurrentUserTransfers(PageRequest.of(currentPage - 1, pageSize));
 
         model.addAttribute("transfers", transfers);
         model.addAttribute("totalPages", transfers.getTotalPages());
-        model.addAttribute("currentPage",currentPage);
+        model.addAttribute("currentPage", currentPage);
         model.addAttribute("transferTypes", TransferTypeEnum.values());
-        model.addAttribute("totalElements",transfers.getTotalElements());
+        model.addAttribute("totalElements", transfers.getTotalElements());
 
     }
-
 }

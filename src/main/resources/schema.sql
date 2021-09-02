@@ -65,7 +65,7 @@ CREATE TABLE friend
 (
     user_email   VARCHAR(100) NOT NULL,
     friend_email VARCHAR(100) NOT NULL,
-    date_added   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_added   TIMESTAMP    NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_email, friend_email)
 
 )

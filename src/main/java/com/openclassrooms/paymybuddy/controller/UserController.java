@@ -10,14 +10,12 @@ import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,7 +28,7 @@ import javax.validation.Valid;
 import java.util.Optional;
 
 /**
- * Class Controller that manage users'requests
+ * Class Controller that manage user's requests
  *
  * @author Christine Duarte
  */
@@ -38,16 +36,16 @@ import java.util.Optional;
 @Slf4j
 public class UserController {
     /**
-     * Dependency  {@link IUserService } injected
+     * Dependency  {@link IUserService} injected
      */
     @Autowired
     private IUserService userService;
 
+    /**
+     * Dependency  {@link ITransactionService} injected
+     */
     @Autowired
     private ITransactionService transactionService;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     /**
      * Method that get all users
@@ -59,13 +57,19 @@ public class UserController {
         return userService.getUsers();
     }
 
-    @GetMapping("/signup")
-    public String getSignUpView(@ModelAttribute("addUser") AddUser addUser, Model model) {
-        log.info("Controller: The View Sign Up displaying");
-
-        return "signup";
-    }
-
+/**
+ * ------------------------------------------------------------------------------------------------------
+ *                                         View signup
+ * ------------------------------------------------------------------------------------------------------
+ */
+    /**
+     * Method POST which create a new User in table User
+     *
+     * @param addUser A model DTO {@link AddUser} that permit get information to create a new User
+     * @param result  An Interface that permit check validity of entries on fields with annotation @Valid
+     * @param model   Interface that defines a support for model attributes
+     * @return A String containing the name of view
+     */
     @PostMapping("/signup")
     public String signUpUserViewSignUp(@Valid @ModelAttribute("addUser") AddUser addUser
             , BindingResult result, Model model) {
@@ -97,42 +101,50 @@ public class UserController {
     }
 
     /**
-     * Method GET to displaying the view for log in mapped in "/login"
+     * Method GET to displaying the view signup to create a new User mapped in "/signup"
      *
-     * @param model Interface that defines a support for model attributes
+     * @param addUser A model DTO {@link AddUser} that permit get information to create a new User
+     * @return A String containing the name of view
+     */
+    @GetMapping("/signup")
+    public String getSignUpView(@ModelAttribute("addUser") AddUser addUser) {
+        log.info("Controller: The View Sign Up displaying");
+
+        return "signup";
+    }
+
+/**
+ * ------------------------------------------------------------------------------------------------------
+ *                                         View login
+ * ------------------------------------------------------------------------------------------------------
+ */
+    /**
+     * Method GET to displaying the view login for log  mapped in "/login"
+     *
      * @return A String containing the name of view
      */
     @GetMapping("/login")
-    public String getLoginView(MyUserDetails myUserDetails, Model model) {
+    public String getLoginView() {
         log.info("Controller: The View login displaying");
 
         return "login";
     }
 
-//    @GetMapping("/logoff")
-//    public String logOffMessageViewLogin(Model model) {
-//        model.addAttribute("messageLogOff", "You have been logged out.");
-//        return "login";
-//    }
-//
-//    @PostMapping("/logout")
-//    public String logOutViewLogin(Model model) {
-//        model.addAttribute("messageLogOff", "You have been logged out.");
-//        log.info("Controller: The View logoff displaying");
-//
-//        return "login";
-//    }
-
-
+/**
+ * ------------------------------------------------------------------------------------------------------
+ *                                         View home
+ * ------------------------------------------------------------------------------------------------------
+ */
     /**
      * Method GET to displaying the view for home in endpoint in "/home"
      *
      * @param model Interface that defines a support for model attributes
+     * @param page  An Optional with the page
+     * @param size  An optional with the number of items in page
      * @return A String containing the name of view
      */
-//    @RolesAllowed({"USER"})
     @GetMapping("/home")
-    public String getUserInformationHomeView(@ModelAttribute("user") User user, Model model, @RequestParam("page") Optional<Integer> page,
+    public String getUserInformationHomeView(Model model, @RequestParam("page") Optional<Integer> page,
                                              @RequestParam("size") Optional<Integer> size) {
         int currentPage = page.orElse(1);
         int pageSize = size.orElse(2);
@@ -146,59 +158,45 @@ public class UserController {
             log.error("Controller: Empty list");
         }
         log.info("Controller: The View home displaying");
-        model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.currentUser));
+        model.addAttribute("user", userService.getUserByEmail(SecurityUtilities.getCurrentUser()));
         model.addAttribute("lastBuddy", lastFriendAdded);
         model.addAttribute("lastTransaction", lastTransaction);
 
         return "home";
     }
-
+/**
+ * ------------------------------------------------------------------------------------------------------
+ *                                         View contact
+ * ------------------------------------------------------------------------------------------------------
+ */
     /**
      * Method GET to displaying the view for contact  in endpoint in "/contact"
      *
-     * @param model Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
-//    @RolesAllowed({"USER"})
     @GetMapping("/contact")
-    public String getContactView(Model model) {
+    public String getContactView() {
         log.info("Controller: The View contact displaying");
 
         return "contact";
     }
-
-    /**
-     * Method GET to displaying the view for profile  in endpoint in "/profile"
-     *
-     * @param model Interface that defines a support for model attributes
-     * @return A String containing the name of view
-     */
-//    @RolesAllowed({"USER"})
-    @GetMapping("/profile")
-    public String getCurrentUserInformationInProfileView(@ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser, @ModelAttribute("currentUser") User currentUser,
-                                                         Model model) {
-        User userByEmail = userService.getUserByEmail(SecurityUtilities.currentUser);
-        userByEmail.setPassword(userByEmail.getPassword());
-        model.addAttribute("currentUser", userByEmail);
-        model.addAttribute("updateCurrentUser", updateCurrentUser);
-        log.info("Controller: The View profile displaying");
-
-        return "profile";
-    }
-
+/**
+ * ------------------------------------------------------------------------------------------------------
+ *                                         View profile
+ * ------------------------------------------------------------------------------------------------------
+ */
     /**
      * Method POST to collect information in the view profile to update currentUser profile in endpoint in "/profile"
      *
      * @param model Interface that defines a support for model attributes
      * @return A String containing the name of view
      */
-//    @RolesAllowed({"USER"})
     @PostMapping("/profile")
-    public String updateCurrentUserInformation(@Valid @ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser
-            , BindingResult result, Model model) {
+    public String updateCurrentUserInformation(@Valid @ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser,
+                                               BindingResult result, Model model) {
         if (result.hasFieldErrors()) {
             model.addAttribute("updateCurrentUser", updateCurrentUser);
-            model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.currentUser));
+            model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.getCurrentUser()));
             log.error("Controller: Error in fields");
             return "profile";
         }
@@ -210,10 +208,74 @@ public class UserController {
         }
         model.addAttribute("updateCurrentUser", updateCurrentUser);
         model.addAttribute("message", "Profile has been updated");
-        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.currentUser));
-        log.debug("Controller: profile updated:" + SecurityUtilities.currentUser);
+        model.addAttribute("currentUser", userService.getUserByEmail(SecurityUtilities.getCurrentUser()));
+        log.debug("Controller: profile updated:" + SecurityUtilities.getCurrentUser());
 
         return "profile";
+    }
+
+    /**
+     * Method GET to displaying the view for profile  in endpoint in "/profile"
+     *
+     * @param model Interface that defines a support for model attributes
+     * @return A String containing the name of view
+     */
+    @GetMapping("/profile")
+    public String getCurrentUserInformationInProfileView(@ModelAttribute("updateCurrentUser") UpdateCurrentUser updateCurrentUser,
+                                                         @ModelAttribute("currentUser") User currentUser,
+                                                         Model model) {
+        User userByEmail = userService.getUserByEmail(SecurityUtilities.getCurrentUser());
+        userByEmail.setPassword(userByEmail.getPassword());
+        model.addAttribute("currentUser", userByEmail);
+        model.addAttribute("updateCurrentUser", updateCurrentUser);
+        log.info("Controller: The View profile displaying");
+
+        return "profile";
+    }
+/**
+ * ------------------------------------------------------------------------------------------------------
+ *                                         View addfriend
+ * ------------------------------------------------------------------------------------------------------
+ */
+    /**
+     * Method POST that process data receiving by the view addfriend in endpoint "/addfriend"
+     * for adding a friend in table friend in database
+     *
+     * @param friendList DTO model {@link FriendList }that permit displaying the list od friends
+     * @param result     An Interface that permit check validity of entries on fields with annotation @Valid
+     * @param model      Interface that defines a support for model attributes
+     * @param page       An Optional with the page
+     * @param size       An optional with the number of items in page
+     * @return A String containing the name of view
+     */
+    @PostMapping(value = "/addfriend")
+    public String addFriendToListConnection(@Valid FriendList friendList, BindingResult result, Model model,
+                                            @RequestParam("page") Optional<Integer> page,
+                                            @RequestParam("size") Optional<Integer> size) {
+        if (result.hasErrors()) {
+            getModelsAddFriends(model, page, size);
+            log.error("Controller: Error in fields");
+            return "addfriend";
+        }
+        if (result.getRawFieldValue("email").equals(SecurityUtilities.getCurrentUser())) {
+            result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
+            getModelsAddFriends(model, page, size);
+            log.error("Controller: Invalid addition with email: " + SecurityUtilities.getCurrentUser());
+            return "addfriend";
+        }
+        try {
+            userService.addFriendCurrentUserList(friendList.getEmail());
+        } catch (UserAlreadyExistException e1) {
+            result.rejectValue("email", "UserAlreadyExist", e1.getMessage());
+            log.error("Controller: User already exist in your list");
+        } catch (UserNotFoundException e2) {
+            result.rejectValue("email", "UserNotExistDB", e2.getMessage());
+            log.error("Controller: User Email not exist in data base");
+        }
+        getModelsAddFriends(model, page, size);
+        log.info("Controller: form addFriend submitted");
+
+        return "addfriend";
     }
 
     /**
@@ -234,43 +296,12 @@ public class UserController {
     }
 
     /**
-     * Method POST that process data receiving by the view addfriend in endpoint "/addfriend"
-     * for adding a friend in table friend in database
+     * Method private that get models for pagination of friendList
      *
-     * @param friendList DTO model {@link FriendList }that permit displaying the list od friends
-     * @param result     An Interface that permit check validity of entries on fields with annotation @Valid
-     * @param model      Interface that defines a support for model attributes
-     * @return A String containing the name of view
+     * @param model Interface that defines a support for model attributes.
+     * @param page  An Optional with the page
+     * @param size  An optional with the nomber of items in page
      */
-    @PostMapping(value = "/addfriend")
-    public String addFriendToListConnection(@Valid FriendList friendList, BindingResult result, Model model, @RequestParam("page") Optional<Integer> page,
-                                            @RequestParam("size") Optional<Integer> size) {
-        if (result.hasErrors()) {
-            getModelsAddFriends(model, page, size);
-            log.error("Controller: Error in fields");
-            return "addfriend";
-        }
-        if (result.getRawFieldValue("email").equals(SecurityUtilities.currentUser)) {
-            result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
-            getModelsAddFriends(model, page, size);
-            log.error("Controller: Invalid addition with email: " + SecurityUtilities.currentUser);
-            return "addfriend";
-        }
-        try {
-            userService.addFriendCurrentUserList(friendList.getEmail());
-        } catch (UserAlreadyExistException e1) {
-            result.rejectValue("email", "UserAlreadyExist", e1.getMessage());
-            log.error("Controller: User already exist in your list");
-        } catch (UserNotFoundException e2) {
-            result.rejectValue("email", "UserNotExistDB", e2.getMessage());
-            log.error("Controller: User Email not exist in data base");
-        }
-        getModelsAddFriends(model, page, size);
-        log.info("Controller: form addFriend submitted");
-
-        return "addfriend";
-    }
-
     private void getModelsAddFriends(Model model, Optional<Integer> page, Optional<Integer> size) {
 
         int currentPage = page.orElse(1);

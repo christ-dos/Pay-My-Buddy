@@ -44,31 +44,15 @@ public class TransactionController {
     private IUserService userService;
 
     /**
-     * Method GET to displaying the view index mapped in "/transaction"
-     *
-     * @param sendTransaction A model DTO {@link SendTransaction} that displaying transactions
-     *                        information in view : receiver's name, reason of transaction and amount
-     * @param model           Interface that defines a support for model attributes.
-     * @return A String containing the name of view
-     */
-    @GetMapping(value = "/transaction")
-    public String getTransactionsViewTransaction(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model, @RequestParam("page") Optional<Integer> page,
-                                                 @RequestParam("size") Optional<Integer> size) {
-        getModelsTransaction(model, page, size);
-        log.info("Controller: The View transaction displaying");
-
-        return "transaction";
-    }
-
-    /**
-     * Method POST that process data receiving by the view index in endpoint "/transaction"
+     * Method POST that process data receiving by the view transaction in endpoint "/transaction"
      * for adding transactions in table transaction in database
      *
      * @param sendTransaction A model DTO {@link SendTransaction} that displaying transactions
      *                        information in view : receiver's name, reason of transaction and amount
      * @param result          An Interface that permit check validity of entries on fields with annotation @Valid
      * @param model           Interface that defines a support for model attributes
-     * @return A String containing the name of view
+     * @param page            An Optional with the page number
+     * @param size            An optional with the number of items in page
      */
     @PostMapping(value = "/transaction")
     public String addTransaction(@Valid @ModelAttribute("sendTransaction") SendTransaction sendTransaction, BindingResult result, Model model, @RequestParam("page") Optional<Integer> page,
@@ -91,17 +75,41 @@ public class TransactionController {
         return "transaction";
     }
 
+    /**
+     * Method GET to displaying the view transaction mapped in "/transaction"
+     *
+     * @param sendTransaction A model DTO {@link SendTransaction} that displaying transactions
+     *                        information in view : receiver's name, reason of transaction and amount
+     * @param model           Interface that defines a support for model attributes.
+     * @return A String containing the name of view
+     */
+    @GetMapping(value = "/transaction")
+    public String getTransactionsViewTransaction(@ModelAttribute("sendTransaction") SendTransaction sendTransaction, Model model, @RequestParam("page") Optional<Integer> page,
+                                                 @RequestParam("size") Optional<Integer> size) {
+        getModelsTransaction(model, page, size);
+        log.info("Controller: The View transaction displaying");
+
+        return "transaction";
+    }
+
+    /**
+     * Method private that get models for pagination of transactions
+     *
+     * @param model Interface that defines a support for model attributes.
+     * @param page  An Optional with the page number
+     * @param size  An optional with the number of items in page
+     */
     private void getModelsTransaction(Model model, Optional<Integer> page, Optional<Integer> size) {
 
         int currentPage = page.orElse(1);
         int pageSize = size.orElse(2);
 
-        Page<DisplayingTransaction> displayingTransactionPage = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage -1, pageSize));
+        Page<DisplayingTransaction> displayingTransactionPage = transactionService.getCurrentUserTransactionsByEmail(PageRequest.of(currentPage - 1, pageSize));
         Page<FriendList> friendListsPage = userService.getFriendListByCurrentUserEmailPaged(PageRequest.of(currentPage - 1, pageSize));
         List<FriendList> friendLists = userService.getFriendListByCurrentUserEmail();
 
         model.addAttribute("transactions", displayingTransactionPage);
-        model.addAttribute("friendLists",friendLists);
+        model.addAttribute("friendLists", friendLists);
         model.addAttribute("friendListPage", friendListsPage);
         model.addAttribute("totalPagesTransaction", displayingTransactionPage.getTotalPages());
         model.addAttribute("currentPage", currentPage);

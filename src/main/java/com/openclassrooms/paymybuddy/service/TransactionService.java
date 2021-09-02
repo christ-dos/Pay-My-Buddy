@@ -68,13 +68,13 @@ public class TransactionService implements ITransactionService {
     @Override
     public Page<DisplayingTransaction> getCurrentUserTransactionsByEmail(Pageable pageable) {
         Page<Transaction> transactions = transactionRepository.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(
-                SecurityUtilities.currentUser, SecurityUtilities.currentUser, pageable);
+                SecurityUtilities.getCurrentUser(), SecurityUtilities.getCurrentUser(), pageable);
         int totalElements = (int) transactions.getTotalElements();
-        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.currentUser);
+        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.getCurrentUser());
 
-        return new PageImpl<DisplayingTransaction>(transactions.stream()
+        return new PageImpl<>(transactions.stream()
                 .map(transaction -> {
-                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.currentUser)) {
+                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.getCurrentUser())) {
                         User userReceiver = userRepository.findByEmail(transaction.getUserReceiver().getEmail());
                         return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
                     } else {
@@ -94,7 +94,7 @@ public class TransactionService implements ITransactionService {
     @Override
     public Transaction addTransaction(SendTransaction sendTransaction) {
         Double fees = calculateFees(sendTransaction.getAmount());
-        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.currentUser);
+        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.getCurrentUser());
         if ((sendTransaction.getAmount() + fees) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
