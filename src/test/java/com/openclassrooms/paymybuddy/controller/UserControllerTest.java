@@ -177,7 +177,7 @@ public class UserControllerTest {
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/logout").with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?logout"))
+                .andExpect(redirectedUrl("/login"))
                 .andDo(print());
 
 
@@ -604,7 +604,7 @@ public class UserControllerTest {
 
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
+    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan100_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -616,8 +616,8 @@ public class UserControllerTest {
         AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
-        updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspass");
-        updateProfileCurrentUser.setConfirmPassword("passpasspasspasspasspasspasspass");
+        updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass");
+        updateProfileCurrentUser.setConfirmPassword("passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass");
 
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
         //WHEN
@@ -932,10 +932,11 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan30_thenReturnErrorInFieldsPassword() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan100_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
-                "Ines", "Martin", "passpasspasspasspasspasspasspass", "passpass", "inim@email.fr",
+                "Ines", "Martin",
+                "passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass", "passpass", "inim@email.fr",
                 "inim@email.fr", 123456);
         //WHEN
         //THEN
@@ -982,7 +983,7 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "NotBlank"))
                 .andDo(print());
     }
-
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsLess8_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
@@ -1010,10 +1011,12 @@ public class UserControllerTest {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan30_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan100_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
-                "Ines", "Martin", "passpass", "passpasspasspasspasspasspasspass", "inim@email.fr",
+                "Ines", "Martin", "passpass",
+                "passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass",
+                "inim@email.fr",
                 "inim@email.fr", 123456);
         //WHEN
         //THEN

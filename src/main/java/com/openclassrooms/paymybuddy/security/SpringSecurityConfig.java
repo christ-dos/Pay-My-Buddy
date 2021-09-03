@@ -12,8 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
-import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 
 /**
  * Class of configuration SpringSecurity
@@ -25,15 +23,30 @@ import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Slf4j
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+    /**
+     * Core interface which loads user-specific data
+     * {@link UserDetailsService}
+     */
     @Autowired
     private UserDetailsService userDetailsService;
 
+    /**
+     * A bean that permit crypt the password before recording in the database
+     *
+     * @return A String containing the password encoded
+     */
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
+    /**
+     * Implementation that retrieves user details from a
+     * {@link UserDetailsService}.
+     * to authenticate the User
+     *
+     * @return authentication set with the user find in database
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -43,25 +56,28 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         return authProvider;
     }
 
+    /**
+     * Method configure to determine the authentication provider
+     * here provide from the database
+     *
+     * @param auth An {@link AuthenticationManagerBuilder} that create the authentication
+     */
     @Override
     protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authenticationProvider());
     }
 
+    /**
+     * Method that configure the security chain for requests HTTP
+     *
+     * @param http A incoming request
+     * @throws Exception
+     */
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http.csrf().disable()
-
                 .authorizeRequests()
                 .antMatchers("/css/**", "/login/**", "/signup").permitAll()
-//                .antMatchers("/home").authenticated()
-//                .antMatchers("/addfriend").authenticated()
-//                .antMatchers("/transaction").authenticated()
-//                .antMatchers("/transfer").authenticated()
-//                .antMatchers("/profie").authenticated()
-//                .antMatchers("/contact").authenticated()
-//                .antMatchers("/logoff").authenticated()
-//                .and()
                 .anyRequest().authenticated()
                 .and()
                 .rememberMe().userDetailsService(this.userDetailsService)
@@ -72,60 +88,13 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureUrl("/login?error=true")
                 .and()
                 .logout()
-                .clearAuthentication(true)
                 .logoutUrl("/logout")
-//                .logoutSuccessUrl("/login")
-
+                .logoutSuccessUrl("/login")
                 .deleteCookies("dummyCookie")
                 .invalidateHttpSession(true);
-
     }
-
-
-//    @Component
-//    public class CustomAuthenticationProvider
-//            implements AuthenticationProvider {
-//
-//        @Autowired
-//        private UserDetailsService userDetailsService;
-//
-//        @Autowired
-//        private PasswordEncoder passwordEncoder;
-//
-//        @Override
-//        public Authentication authenticate(Authentication authentication) {
-//            String username = authentication.getName();
-//            String password = authentication.getCredentials().toString();
-//
-//            UserDetails u = userDetailsService.loadUserByUsername(username);
-//
-//            if (passwordEncoder.matches(password, u.getPassword())) {
-//                return new UsernamePasswordAuthenticationToken(
-//                        username,
-//                        password,
-//                        u.getAuthorities());
-//            } else {
-//                throw new BadCredentialsException
-//                        ("Something went wrong!");
-//            }
-//        }
-//
-//        // Omitted code
-//    }
-
-//    public static  String getCurrentUser() {
-//        SecurityContext auth = SecurityContextHolder.getContext();
-////        auth.getAuthentication().getAuthorities();
-//        MyUserDetails userAuthenticated = (MyUserDetails) auth.getAuthentication().getDetails();
-//
-//        return userAuthenticated.getUsername();
-//    }
-
 }
 
-//
-
-//
 //    @Override
 //    protected void configure(HttpSecurity http) throws Exception {
 //        http

@@ -240,10 +240,10 @@ public class UserIT {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan30_thenReturnErrorInFieldsPassword() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan100_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
-                "Ines", "Martin", "passpasspasspasspasspasspasspass", "passpass", "inim@email.fr",
+                "Ines", "Martin", "passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass", "passpass", "inim@email.fr",
                 "inim@email.fr", 123456);
         //WHEN
         //THEN
@@ -318,10 +318,11 @@ public class UserIT {
     }
 
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan30_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan100_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
-                "Ines", "Martin", "passpass", "passpasspasspasspasspasspasspass", "inim@email.fr",
+                "Ines", "Martin", "passpass",
+                "passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass", "inim@email.fr",
                 "inim@email.fr", 123456);
         //WHEN
         //THEN
@@ -791,13 +792,13 @@ public class UserIT {
 
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
+    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan100_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
         AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
-        updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspass");
-        updateProfileCurrentUser.setConfirmPassword("passpasspasspasspasspasspasspass");
+        updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass");
+        updateProfileCurrentUser.setConfirmPassword("passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass");
 
         //WHEN
         //THEN

@@ -1,17 +1,8 @@
 package com.openclassrooms.paymybuddy.repository;
 
-import com.openclassrooms.paymybuddy.model.Friend;
 import com.openclassrooms.paymybuddy.model.User;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Interface that handles database queries for users
