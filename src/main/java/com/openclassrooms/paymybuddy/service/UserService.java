@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 /**
  * Class Service that manage User entity
+ * implements {@link IUserService}
  *
  * @author Christine Duarte
  */
@@ -38,6 +39,9 @@ public class UserService implements IUserService {
      */
     private final IUserRepository userRepository;
 
+    /**
+     * An instance of {@link IFriendRepository}
+     */
     private final IFriendRepository friendRepository;
 
     /**
@@ -66,7 +70,11 @@ public class UserService implements IUserService {
     /**
      * Method which add a user to the table User
      *
+     * @param addUser A model DTO with user information
      * @return A {@link User} Object
+     * @throws UserAlreadyExistException   when user email already exists in database
+     * @throws EmailNotMatcherException    when email not match with confirm email
+     * @throws PasswordNotMatcherException when password not match with confirm password
      */
     @Override
     public User addUser(AddUser addUser) {
@@ -96,15 +104,23 @@ public class UserService implements IUserService {
         return userRepository.save(userToAdd);
     }
 
-    private String getEncodedPassword(String Password){
+    /**
+     * Private method that get the password encoded
+     *
+     * @param password A String entry by the user(not encoded)
+     * @return A String encoded to save in database
+     */
+    private String getEncodedPassword(String password) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        return passwordEncoder.encode(Password);
+        return passwordEncoder.encode(password);
     }
 
     /**
      * Method which update current user to the table User
      *
-     * @return A {@link User} Object
+     * @param updateCurrentUser a model DTO to get the information from the view
+     * @return A {@link User} Object updated
+     * @throws PasswordNotMatcherException when password not match with confirm password
      */
     @Override
     public User updateProfile(UpdateCurrentUser updateCurrentUser) {
@@ -156,8 +172,9 @@ public class UserService implements IUserService {
     }
 
     /**
-     * Method which get list of friend recorded by a user
+     * Method which get list of friend recorded by a user with pagination
      *
+     * @param pageable Abstract interface for pagination information.
      * @return A list of {@link FriendList} a DTO model
      * to displaying the email, first name and last name of the friend added
      */
@@ -174,6 +191,12 @@ public class UserService implements IUserService {
                 }).collect(Collectors.toList()), pageable, totalElements);
     }
 
+    /**
+     * Method which get list of friend recorded by a user
+     *
+     * @return A list of {@link FriendList} a DTO model
+     * to displaying the email, first name and last name of the friend added
+     */
     @Override
     public List<FriendList> getFriendListByCurrentUserEmail() {
         Page<Friend> friendListsByEmailPaged = friendRepository.findByUserEmailOrderByDateAddedDesc(SecurityUtilities.getCurrentUser(), null);

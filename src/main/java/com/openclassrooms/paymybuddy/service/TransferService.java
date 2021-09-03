@@ -19,20 +19,44 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+/**
+ * Class of service that manage {@link Transfer} entity
+ * and implements ITransferService
+ *
+ * @author Christine Duarte
+ */
 @Service
 @Slf4j
 public class TransferService implements ITransferService {
-
+    /**
+     * An instance of {@link ITransferRepository}
+     */
     private final ITransferRepository transferRepository;
 
+    /**
+     * An instance of {@link IUserRepository}
+     */
     private final IUserRepository userRepository;
 
+    /**
+     * Constructor
+     *
+     * @param transferRepository {@link ITransferRepository}
+     * @param userRepository     {@link IUserRepository}
+     */
     @Autowired
     public TransferService(ITransferRepository transferRepository, IUserRepository userRepository) {
         this.transferRepository = transferRepository;
         this.userRepository = userRepository;
     }
 
+    /**
+     * Method to add a transfer in the database
+     *
+     * @param displayingTransfer a model DTO to display information in view
+     * @return The {@link Transfer} added
+     * @throws BalanceInsufficientException when the balance is insufficient
+     */
     @Transactional
     @Override
     public Transfer addTransfer(DisplayingTransfer displayingTransfer) {
@@ -50,6 +74,7 @@ public class TransferService implements ITransferService {
             //update of balance when transfer type is credit
             currentUser.setBalance(currentUser.getBalance() + displayingTransfer.getAmount());
         }
+
         Transfer transfer = new Transfer();
         transfer.setTransferType(displayingTransfer.getTransferType());
         transfer.setPostTradeBalance(currentUser.getBalance());
@@ -58,9 +83,16 @@ public class TransferService implements ITransferService {
         transfer.setAmount(displayingTransfer.getAmount());
         transfer.setUser(currentUser);
         log.info("Service: Transfer is saved with success for email: " + currentUser.getEmail());
+
         return transferRepository.save(transfer);
     }
 
+    /**
+     * Method that find transfers of the current user with pagination
+     *
+     * @param pageable Abstract interface for pagination information.
+     * @return A Page of {@link Transfer} for the current user
+     */
     public Page<DisplayingTransfer> getCurrentUserTransfers(Pageable pageable) {
         Page<Transfer> transfers = transferRepository.findTransfersByUserEmailOrderByDateDesc(SecurityUtilities.getCurrentUser(), pageable);
         int totalElements = (int) transfers.getTotalElements();

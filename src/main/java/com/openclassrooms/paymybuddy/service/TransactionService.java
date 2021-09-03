@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 /**
  * Class of service that manage Transaction entity
+ * implements {@link ITransactionService}
  *
  * @author Christine Duarte
  */
@@ -61,9 +62,10 @@ public class TransactionService implements ITransactionService {
     }
 
     /**
-     * Method which get all transactions for a user email
+     * Method which get all transactions for the current user with pagination
      *
-     * @return A list of {@link DisplayingTransaction}, a data transfer object
+     * @param pageable Abstract interface for pagination information.
+     * @return A list of {@link DisplayingTransaction}
      */
     @Override
     public Page<DisplayingTransaction> getCurrentUserTransactionsByEmail(Pageable pageable) {
@@ -89,6 +91,7 @@ public class TransactionService implements ITransactionService {
      *
      * @param sendTransaction An object {@link SendTransaction}
      * @return A {@link Transaction} object
+     * @throws BalanceInsufficientException when the balance is insufficient to realize the operation
      */
     @Transactional
     @Override
@@ -150,5 +153,4 @@ public class TransactionService implements ITransactionService {
 
         return userEmitterTransaction;
     }
-
 }

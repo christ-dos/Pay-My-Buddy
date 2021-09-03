@@ -8,7 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-
+/**
+ * Class utils that manage the User logged
+ */
 @Getter
 @Setter
 @Slf4j
@@ -24,7 +26,7 @@ public class SecurityUtilities {
     /**
      * Method that get the current user in the SecurityContextHolder
      *
-     * @return A String containing user's current user
+     * @return A String containing current user
      */
 //    @PreAuthorize("isAuthenticated()")
     public static String getCurrentUser() {
