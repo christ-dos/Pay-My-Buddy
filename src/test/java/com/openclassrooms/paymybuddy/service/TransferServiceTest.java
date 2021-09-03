@@ -45,7 +45,7 @@ public class TransferServiceTest {
 
     private TransferService transferServiceTest;
 
-    String username;
+    private String username;
 
 
     @BeforeEach
@@ -87,7 +87,7 @@ public class TransferServiceTest {
     @Test
     public void addTransferTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenTransferIsSavedAndBalanceUpdatedTo50() {
         //GIVEN
-        PowerMockito.mockStatic(SecurityUtilities.class);
+//        PowerMockito.mockStatic(SecurityUtilities.class);
         when(SecurityUtilities.getCurrentUser()).thenReturn("dada@email.fr");
         String userEmail = SecurityUtilities.getCurrentUser();
         User user = User.builder()

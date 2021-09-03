@@ -4,18 +4,13 @@ import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
-import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import com.openclassrooms.paymybuddy.security.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.service.TransferService;
 import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,17 +18,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.annotation.security.RolesAllowed;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,10 +64,16 @@ public class TransferControllerTest {
 
     private SecurityUtilities spySecurityUtilities;
 
+    @Autowired
+    private WebApplicationContext context;
 
 
     @BeforeEach
     public void setPertest() {
+//        mockMvcTransfer = MockMvcBuilders
+//                .webAppContextSetup(context)
+//                .apply(springSecurity())
+//                .build();
 //         securityUtilities = new SecurityUtilities();
         List<DisplayingTransfer> displayingTransferList = new ArrayList<>();
 
@@ -157,17 +153,15 @@ public class TransferControllerTest {
     }
 
     @WithMockUser(username = "dada@email.fr", password = "passpass")
-//    @RolesAllowed("USER")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsCredit_thenReturnBalanceCreditedWithAmount() throws Exception {
         //GIVEN
-        String username = "dada@email.fr";
         when(transferServiceMock.getCurrentUserTransfers(isA(Pageable.class))).thenReturn(displayingTransferPage);
         //WHEN
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
-//                .param("username", "dada@email.fr")
-//                        .param("password", "passpass")
+                        .param("username", "dada@email.fr")
+                        .param("password", "passpass")
                         .param("amount", String.valueOf(50.0))
                         .param("page", String.valueOf(1))
                         .param("size", String.valueOf(5))
@@ -200,7 +194,7 @@ public class TransferControllerTest {
                         .param("page", String.valueOf(1))
                         .param("size", String.valueOf(5))
                         .param("currentUser", "dada@email.fr"))
-                        .andExpect(status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
                 .andExpect(view().name("transfer"))
                 .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes"))
@@ -221,11 +215,11 @@ public class TransferControllerTest {
         // WHEN
         // THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
-                                .param("amount", String.valueOf(180.0))
-                                .param("transferType", TransferTypeEnum.DEBIT.name())
-                                .param("balance", String.valueOf(100.0))
-                                .param("size", String.valueOf(5))
-                                .param("page", String.valueOf(1))).andExpect(status().isOk())
+                        .param("amount", String.valueOf(180.0))
+                        .param("transferType", TransferTypeEnum.DEBIT.name())
+                        .param("balance", String.valueOf(100.0))
+                        .param("size", String.valueOf(5))
+                        .param("page", String.valueOf(1))).andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes"))
                 .andExpect(view().name("transfer"))

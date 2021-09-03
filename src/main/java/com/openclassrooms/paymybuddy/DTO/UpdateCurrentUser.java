@@ -8,6 +8,12 @@ import lombok.Setter;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+/**
+ * Class DTO {@link UpdateCurrentUser} that obtains input from the view profile to update information
+ * of the current user
+ *
+ * @author Christine Duarte
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -41,10 +47,15 @@ public class UpdateCurrentUser {
     private String confirmPassword;
 
     /**
-     * A String containing the email
+     * A String containing the email that we will update
      */
     private String email;
 
+    /**
+     * Method ToString
+     *
+     * @return A string of the object UpdateCurrentUser
+     */
     @Override
     public String toString() {
         return "UpdateCurrentUser{" +

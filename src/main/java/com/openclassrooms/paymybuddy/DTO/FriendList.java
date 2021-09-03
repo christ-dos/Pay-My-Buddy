@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /** Class DTO that permit displaying in view the email, firstName and Lastname
  * in list nof connections
@@ -36,6 +35,7 @@ public class FriendList {
 
     /**
      * Method ToString
+     *
      * @return A string of the object FriendList
      */
     @Override

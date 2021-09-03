@@ -6,10 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * Class DTO {@link AddUser} that obtains input to adding a User in table User
+ *
+ * @author Christine Duarte
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -59,14 +63,21 @@ public class AddUser {
     @NotNull(message = "Account Bank cannot be null")
     private Integer accountBank;
 
+    /**
+     * Method toString
+     *
+     * @return a String of the object AddUser
+     */
     @Override
     public String toString() {
-        return "UpdateProfile{" +
+        return "AddUser{" +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", password='" + password + '\'' +
-                ", userName='" + email + '\'' +
                 ", confirmPassword='" + confirmPassword + '\'' +
+                ", email='" + email + '\'' +
+                ", confirmEmail='" + confirmEmail + '\'' +
+                ", accountBank=" + accountBank +
                 '}';
     }
 }

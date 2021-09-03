@@ -30,7 +30,7 @@ public class SecurityUtilities {
     public static String getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 //        if (auth != null) {
-            UserDetails userAuthenticated = (UserDetails) auth.getPrincipal();
+            UserDetails userAuthenticated = (UserDetails)auth.getPrincipal();
             log.debug("SecurityUtilities: User authenticated: " + userAuthenticated.getUsername());
             return userAuthenticated.getUsername();
 //        }
