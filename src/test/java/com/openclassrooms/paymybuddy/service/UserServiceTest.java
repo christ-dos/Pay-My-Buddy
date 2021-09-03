@@ -135,7 +135,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
         //GIVEN
-        String userEmail = SecurityUtilities.getCurrentUser();
+        String userEmail = "dada@email.fr";
         String friendEmail = "françois@email.fr";
 
         User user = User.builder()
@@ -313,7 +313,7 @@ public class UserServiceTest {
     public void updateProfileTest_whenUserExistInDB_thenReturnUserUpdated() {
         //GIVEN
         UpdateCurrentUser updateCurrentUser = new UpdateCurrentUser();
-        updateCurrentUser.setEmail(SecurityUtilities.getCurrentUser());
+        updateCurrentUser.setEmail("dada@email.fr");
         updateCurrentUser.setFirstName("Damien");
         updateCurrentUser.setLastName("Sanches");
         updateCurrentUser.setPassword("passpass");
@@ -341,7 +341,7 @@ public class UserServiceTest {
         //WHEN
         User userSavedResult = userServiceTest.updateProfile(updateCurrentUser);
         //THEN
-        assertEquals(SecurityUtilities.getCurrentUser(), userSavedResult.getEmail());
+        assertEquals("dada@email.fr", userSavedResult.getEmail());
         assertEquals("Damien", userSavedResult.getFirstName());
         assertEquals("Sanches", userSavedResult.getLastName());
         assertEquals("passpass", userSavedResult.getPassword());

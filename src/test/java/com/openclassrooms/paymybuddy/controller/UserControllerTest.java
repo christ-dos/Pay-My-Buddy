@@ -36,7 +36,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
@@ -46,51 +45,70 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Class of test for {@link UserController}
+ *
+ * @author Christine Duarte
+ */
 @WebMvcTest(UserController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 public class UserControllerTest {
-
+    /**
+     * An instance of {@link MockMvc} that permit simulate a request HTTP
+     */
     @Autowired
     private MockMvc mockMvcUser;
 
+    /**
+     * A mock of {@link UserService}
+     */
     @MockBean
     private UserService userServiceMock;
 
+    /**
+     * A mock of {@link MyUserDetailsService}
+     */
     @MockBean
     private MyUserDetailsService myUserDetailsServiceMock;
 
+    /**
+     * A mock of {@link ITransactionService}
+     */
     @MockBean
     private ITransactionService transactionServiceMock;
 
+    /**
+     * A mock of {@link IUserRepository}
+     */
     @MockBean
     private IUserRepository userRepositoryMock;
 
+    /**
+     * A mock of {@link Authentication}
+     */
     @MockBean
     private Authentication authentication;
 
+    /**
+     * A instance of {@link Pageable}
+     */
     private Pageable pageable;
 
+    /**
+     * An instance of {@link PageImpl}
+     */
     private Page<FriendList> displayingFriendsPage;
 
-    @Autowired
-    private WebApplicationContext context;
-
+    /**
+     * Method that create mocks to perform each tests
+     */
     @BeforeEach
     public void setupPerTest() {
-//        mockMvcUser = MockMvcBuilders
-//                .webAppContextSetup(context)
-//                .apply(springSecurity())
-//                .build();
-
-//        SecurityContext securityContext = new SecurityContextImpl();
-//        securityContext.setAuthentication(authentication);
-
         List<FriendList> friendListPageTest = new ArrayList<>();
         friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
         friendListPageTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
@@ -103,23 +121,32 @@ public class UserControllerTest {
         displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                         Tests View Login
     ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test  get view login when the url is correct "/login"
+     *
+     * @throws Exception
+     */
     @Test
-    @WithMockUser(username = "lili@email.fr", password = "passpass")
     public void getLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/login")
-                ).andExpect(status().isOk())
+        mockMvcUser.perform(get("/login"))
+                .andExpect(status().isOk())
                 .andExpect(view().name("login"))
                 .andExpect(model().attributeDoesNotExist())
                 .andDo(print());
     }
 
+    /**
+     * Method that test get view login when the url is wrong "/log
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
@@ -131,6 +158,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test authentication in  view login when username is null
+     * then throw {@link UsernameNotFoundException}
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "wiwi@email.fr", password = "passpass")
     @Test
     public void authenticationLoginView_whenUserNameIsNull_thenThrowsUserNameNotFoundException() throws Exception {
@@ -150,6 +183,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test authentication in view login when username exist and password match
+     * then  redirect view home
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void authenticationLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlHome() throws Exception {
@@ -169,6 +208,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test log out
+     * then redirect  view login
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void logOutTest() throws Exception {
@@ -178,14 +223,21 @@ public class UserControllerTest {
         mockMvcUser.perform(MockMvcRequestBuilders.post("/logout").with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
+
                 .andDo(print());
 
 
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                      Tests View home
      ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get user information in view home when current user is "dada@email.fr
+     * then return current user information in view home
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getUserInformationHomeViewTest_whenCurrentUserIsDada_thenReturnFirstNameDamienAndLastNameSanchez() throws Exception {
@@ -208,7 +260,6 @@ public class UserControllerTest {
                 "Elisabeth", "books", 5.0);
         displayingTransactions.add(displayingTransaction);
 
-//        Page<FriendList> friendListPage = new PageImpl<>(friendLists);
         Page<DisplayingTransaction> displayingTransactionsPage = new PageImpl<>(displayingTransactions);
 
         when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
@@ -217,10 +268,8 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")
-                                .with(SecurityMockMvcRequestPostProcessors.csrf())
-//                        .param("email", SecurityUtilities.currentUser)
-//                        .param("user", String.valueOf(currentUser)))
-                ).andExpect(status().isOk())
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", "dada@email.fr")).andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("user", "lastBuddy", "lastTransaction"))
@@ -236,6 +285,12 @@ public class UserControllerTest {
 
     }
 
+    /**
+     * Method that test  get user information in view home when list of friends or list of transaction is empty
+     * then display in view none result found
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
@@ -277,10 +332,16 @@ public class UserControllerTest {
                 .andExpect(model().attribute("lastTransaction", nullValue()))
                 .andDo(print());
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                         Tests View addfriend
      ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get list connection when url is correct "/addfriend"
+     * then display view addfriend with pagination
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnStatusOK() throws Exception {
@@ -295,6 +356,9 @@ public class UserControllerTest {
                 .andExpect(model().attributeExists("friendLists", "totalPages", "currentPage"))
                 .andExpect(model().attribute("totalPages", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
+                .andExpect(view().name("addfriend"))
+                .andExpect(model().size(4))
+                .andExpect(model().attributeExists("friendLists", "friendList"))
                 .andExpect(model().attribute("friendLists", Matchers.isA(Page.class)))
                 .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(6L))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Christine")))))
@@ -303,21 +367,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(username = "dada@email.fr", password = "passpass")
-    @Test
-    public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
-        //GIVEN
-        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
-        //WHEN
-        //THEN
-        mockMvcUser.perform(get("/addfriend"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("addfriend"))
-                .andExpect(model().size(4))
-                .andExpect(model().attributeExists("friendLists", "friendList"))
-                .andDo(print());
-    }
-
+    /**
+     * Method that test add friend to list connection when user exist in DB
+     * and friend is not present in list of friends
+     * then the user can be added
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanAddToFriendInList() throws Exception {
@@ -331,10 +387,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-
-//                        .param("username", userToAdd.getEmail())
                         .param("email", userToAdd.getEmail())
-//                        .param("password", "passpass")
                         .param("firstName", userToAdd.getFirstName()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
@@ -343,6 +396,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test add friend to list connection when friend already exist in list of friends
+     * then throw friendEmailAlreadyExist
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
@@ -368,6 +427,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test add friend to list connection when friend to add not exist in DB
+     * then display message error in form "user not exist in DB"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
@@ -375,7 +440,6 @@ public class UserControllerTest {
         String friendEmailNotExist = "wiwi@email.fr";
         when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
         when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
-//        PowerMockito.when(SecurityUtilities.getCurrentUser()).thenReturn("dada@email.fr");
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -388,12 +452,17 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test add friend to list connection when field email is empty
+     * then return error in fields NotBlank
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
         when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
-
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -405,6 +474,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test add friend to list connection when friend email is equal to the current user
+     * then return error in field unableAddingOwnEmail
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenEmailToAddAndEmailCurrentUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
@@ -424,6 +499,13 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                       Tests View profile
    ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get current user information in view profile when url is correct "/profile"
+     * then display view profile
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
@@ -451,6 +533,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get current user information in view profile when url is wong "/prof"
+     * then return status not found
+     *
+     * @throws Exception
+     */
     @WithMockUser(value = "spring")
     @Test
     public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfAndWrong_thenReturnStatusNotFound() throws Exception {
@@ -462,6 +550,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when current user is "dada@email.fr
+     * then return user updated
+     *
+     * @throws Exception
+     */
     @Test
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     public void updateCurrentUserInformationTest_whenCurrentUserIsDada_thenReturnUserDadaUpdated() throws Exception {
@@ -499,6 +593,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when firstName is blank
+     * then return error NotBlank in field firstname
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
@@ -533,6 +633,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when lastName is blank
+     * then return error in fields NotBlank in field lastname
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
@@ -567,6 +673,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when password is less 8 characters
+     * then return error in fields size in field password
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
@@ -602,6 +714,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when password is greater than 100 characters
+     * then return error in fields Size in field password
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan100_thenReturnErrorSizeInFieldPassWord() throws Exception {
@@ -637,6 +755,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when password is blank
+     * then return error in fields NotBlank in field password
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
@@ -670,6 +794,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when confirmPassword is blank
+     * then return error in fields NotBlank in field confirmPassword
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
@@ -704,6 +834,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when confirmPassword not match with password
+     * then throw PasswordNotMatcherException
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_ConfirmPassWordNotMatchWithPassword_thenThrowsPasswordNotMatcherException() throws Exception {
@@ -743,6 +879,15 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                      Tests View signup
   ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test signUp in view signup when user email not exist in DB
+     * and field email match with  field confirmEmail
+     * and field password match with  field confirmPassword
+     * then return user added and view login
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBAndEmailMatchConfirmEmailAndPasswordMatchConfirmPassword_thenReturnUserAddedAndMessageSuccess() throws Exception {
         //GIVEN
@@ -775,6 +920,13 @@ public class UserControllerTest {
     }
 
     //******************************Tests Errors in fields*************************************
+
+    /**
+     * Method that test signUp  when user not exist in DB but field firstName is blank
+     * then return error in field firstName
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButFieldFirstNameIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
         //GIVEN
@@ -801,6 +953,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp  when user not exist in DB but field lastName is blank
+     * then return error in field lastName
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButFieldLastNameIsBlank_thenReturnErrorInFieldsLastName() throws Exception {
         //GIVEN
@@ -827,6 +985,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp  when user not exist in DB but field email is blank
+     * then return error in field email
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButFieldEmailIsBlank_thenReturnErrorInFieldsEmail() throws Exception {
         //GIVEN
@@ -853,6 +1017,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp  when user not exist in DB but field confirmEmail is blank
+     * then return error in field confirmEmail
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButFieldConfirmEmailIsBlank_thenReturnErrorInFieldsConfirmEmail() throws Exception {
         //GIVEN
@@ -879,6 +1049,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp  when user not exist in DB but field password is blank
+     * then return error in field password
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsBlank_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
@@ -905,6 +1081,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp  when user not exist in DB but field password is less 8 characters
+     * then return error in field password
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsLess8_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
@@ -931,6 +1113,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp  when user not exist in DB but field password is greater than 100 characters
+     * then return error in field password
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan100_thenReturnErrorInFieldsPassword() throws Exception {
         //GIVEN
@@ -958,6 +1146,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp when user not exist in DB but field confirmPassword is blank
+     * then return error in field confirmPassword
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsBlank_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
@@ -983,6 +1177,13 @@ public class UserControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "NotBlank"))
                 .andDo(print());
     }
+
+    /**
+     * Method that test signUp when user not exist in DB but field confirmPassword is less 8 characters
+     * then return error in field confirmPassword
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsLess8_thenReturnErrorInFieldsConfirmPassword() throws Exception {
@@ -1010,6 +1211,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp when user not exist in DB but field confirmPassword is greater than 100 characters
+     * then return error in field confirmPassword
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan100_thenReturnErrorInFieldsConfirmPassword() throws Exception {
         //GIVEN
@@ -1038,6 +1245,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp when user not exist in DB but field accountBank is null
+     * then return error in field accountBank
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButAccountBankIsNull_thenReturnErrorInFieldsAccountBank() throws Exception {
         //GIVEN
@@ -1065,6 +1278,12 @@ public class UserControllerTest {
     }
 
     //************************************************Test Exceptions view signup**********************************************
+    /**
+     * Method that test signUp when user already exist in DB
+     * then throw a {@link UserAlreadyExistException}
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserAlreadyExistInDB_thenThrowsUserAlreadyExistException() throws Exception {
         //GIVEN
@@ -1099,8 +1318,14 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp when user not exist in DB but email and confirmEmail not match
+     * then throw EmailNotMatcherException
+     *
+     * @throws Exception
+     */
     @Test
-    public void signUpUserViewSignUp_whenUserNotExistInDBButEmailAndConfirmEmailNotMatch_thenThrowsUserEmailNotMatcherException() throws Exception {
+    public void signUpUserViewSignUp_whenUserNotExistInDBButEmailAndConfirmEmailNotMatch_thenThrowsEmailNotMatcherException() throws Exception {
         //GIVEN
         AddUser addUser = new AddUser(
                 "Albert", "Masarin", "passpass", "passpass", "albert@email.fr", "emailNotMatche@email.fr",
@@ -1127,6 +1352,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test signUp when user not exist in DB but password and confirmPassword not match
+     * then throw PasswordNotMatcherException
+     *
+     * @throws Exception
+     */
     @Test
     public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordAndConfirmPasswordNotMatch_thenThrowsUserPasswordNotMatcherException() throws Exception {
         //GIVEN

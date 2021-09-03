@@ -1,7 +1,6 @@
 package com.openclassrooms.paymybuddy.controller;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
-import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.security.MyUserDetailsService;
@@ -35,46 +34,43 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Class of test for {@link TransferController}
+ *
+ * @author Christine Duarte
+ */
 @WebMvcTest(TransferController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 public class TransferControllerTest {
-
+    /**
+     * An instance of {@link MockMvc} that permit simulate a request HTTP
+     */
     @Autowired
     private MockMvc mockMvcTransfer;
 
+    /**
+     * A mock of {@link TransferService}
+     */
     @MockBean
     private TransferService transferServiceMock;
 
+    /**
+     * A mock of {@link MyUserDetailsService}
+     */
     @MockBean
     private MyUserDetailsService myUserDetailsServiceMock;
 
+    /**
+     * An instance of {@link PageImpl}
+     */
     private Page<DisplayingTransfer> displayingTransferPage;
-//
-//    @Autowired
-//    private WebApplicationContext context;
 
-//    @MockBean
-//    private DefaultOidcUser principal;
-
-//    @MockBean
-//    private  Authentication authentication;
-
-//    private SecurityUtilities securityUtilities;
-
-    private SecurityUtilities spySecurityUtilities;
-
-    @Autowired
-    private WebApplicationContext context;
-
-
+    /**
+     * method that create mocks to perform each tests
+     */
     @BeforeEach
     public void setPertest() {
-//        mockMvcTransfer = MockMvcBuilders
-//                .webAppContextSetup(context)
-//                .apply(springSecurity())
-//                .build();
-//         securityUtilities = new SecurityUtilities();
         List<DisplayingTransfer> displayingTransferList = new ArrayList<>();
 
         DisplayingTransfer displayingTransferCredit = new DisplayingTransfer();
@@ -93,12 +89,15 @@ public class TransferControllerTest {
         displayingTransferList.add(displayingTransferDebitBalanceEnough);
 
         displayingTransferPage = new PageImpl<>(displayingTransferList);
-
     }
-
     /*-------------------------------------------------------------------------------------------------------
                                             Tests View transfer
        ---------------------------------------------------------------------------------------------------------*/
+    /**
+     * Method that test get view transfer when the url is correct "/transfer"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsSlashTransfer_thenReturnTwoModelsAndStatusOk() throws Exception {
@@ -114,6 +113,11 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get view transfer when the url is wrong "/trans"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsWrong_thenReturnTwoModelsAndStatusOk() throws Exception {
@@ -125,6 +129,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get transfers of the current user when user is "dada@email.fr"
+     * then return the list of transfer of "dada@email.fr"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnListTransferOfDada() throws Exception {
@@ -152,6 +162,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is CREDIT
+     * then return the balance with the amount credited
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsCredit_thenReturnBalanceCreditedWithAmount() throws Exception {
@@ -179,6 +195,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is DEBIT and balance is enough
+     * then return the balance with the amount debited
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenReturnTransferAddedWithUserWithNewBalanceDebitedfromAmount() throws Exception {
@@ -206,6 +228,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is DEBIT and balance Insufficient
+     * then throw BalanceInsufficientException
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsInsufficient_thenThrowBalanceInsufficientException() throws Exception {
@@ -230,6 +258,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when amount is null
+     * then return field error NotNull
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
@@ -248,6 +282,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when amount is less to 1
+     * then return field error Min
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
@@ -265,6 +305,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when value selector of transfer type is blank
+     * then return field error NotBlank
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlank_thenReturnFieldsErrorsNotBlank() throws Exception {
@@ -283,6 +329,12 @@ public class TransferControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when value selector of transfer type is blank and amount is null
+     * then return field error NotBlank and NotNull
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlankAndAmountIsNull_thenReturnFieldsErrorsNotBlankAndNotNull() throws Exception {

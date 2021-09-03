@@ -1,6 +1,5 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
@@ -24,17 +23,31 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Class of Integration test for {@link com.openclassrooms.paymybuddy.model.Transfer}
+ *
+ * @author Christine Duarte
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 public class TransferIT {
 
+    /**
+     * An instance of {@link MockMvc} that permit simulate a request HTTP
+     */
     @Autowired
     private MockMvc mockMvcTransfer;
 
+    /**
+     * An instance of {@link WebApplicationContext}
+     */
     @Autowired
     private WebApplicationContext context;
 
+    /**
+     * Method that build the mockMvc with the context and springSecurity
+     */
     @Before
     public void setup() {
         mockMvcTransfer = MockMvcBuilders
@@ -42,10 +55,15 @@ public class TransferIT {
                 .apply(springSecurity())
                 .build();
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                        Integration tests View transfer
     ---------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get view transfer when the url is correct "/transfer"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsSlashTransfer_thenReturnTwoModelsAndStatusOk() throws Exception {
@@ -60,6 +78,11 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get view transfer when the url is wrong "/trans"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsWrong_thenReturnTwoModelsAndStatusOk() throws Exception {
@@ -71,6 +94,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get transfers of the current user when user is "dada@email.fr"
+     * then return the list of transfer of "dada@email.fr"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnListTransferOfDada() throws Exception {
@@ -92,6 +121,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is CREDIT
+     * then return the balance with the amount credited
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsCredit_thenReturnBalanceCreditedWithAmount() throws Exception {
@@ -114,6 +149,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is DEBIT and balance is enough
+     * then return the balance with the amount debited
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenReturnTransferAddedWithUserWithNewBalanceDebitedfromAmount() throws Exception {
@@ -138,6 +179,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is DEBIT and balance Insufficient
+     * then throw BalanceInsufficientException
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsInsufficient_thenThrowBalanceInsufficientException() throws Exception {
@@ -160,6 +207,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when amount is null
+     * then return field error NotNull
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
@@ -177,6 +230,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when amount is less to 1
+     * then return field error Min
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
@@ -193,6 +252,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when value selector of transfer type is blank
+     * then return field error NotBlank
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlank_thenReturnFieldsErrorsNotBlank() throws Exception {
@@ -210,6 +275,12 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when value selector of transfer type is blank and amount is null
+     * then return field error NotBlank and NotNull
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlankAndAmountIsNull_thenReturnFieldsErrorsNotBlankAndNotNull() throws Exception {
@@ -227,5 +298,4 @@ public class TransferIT {
                 .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "transferType", "NotNull"))
                 .andDo(print());
     }
-
 }

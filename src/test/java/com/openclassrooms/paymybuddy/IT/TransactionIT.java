@@ -1,6 +1,5 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import org.junit.Before;
@@ -25,18 +24,30 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Class of Integration test for {@link Transaction}
+ *
+ * @author Christine Duarte
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 public class TransactionIT {
-
+    /**
+     * An instance of {@link MockMvc} that permit simulate a request HTTP
+     */
     @Autowired
     private MockMvc mockMvc;
 
+    /**
+     * An instance of {@link WebApplicationContext}
+     */
     @Autowired
     private WebApplicationContext context;
 
-
+    /**
+     * Method that build the mockMvc with the context and springSecurity
+     */
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders
@@ -44,13 +55,18 @@ public class TransactionIT {
                 .apply(springSecurity())
                 .build();
     }
-
     /*--------------------------------------------------------------------------------------------------
                                    Integration tests View transaction
    ----------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test  get view transaction when the url is correct "/transaction"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void getTransactionsViewTransactionTest_whenUrlIsSlashtransferAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsViewTransactionTest_whenUrlIsSlashTransactionAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -65,19 +81,30 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get view transaction when the url is wrong "/transac"
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void getTransactionsViewTransactionTest_whenIsAWrongUrlSlashIndex_thenReturnStatusNotFound() throws Exception {
+    public void getTransactionsViewTransactionTest_whenIsAWrongUrlSlashTransac_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvc.perform(get("/index")
+        mockMvc.perform(get("/transac")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass")))
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
 
+    /**
+     * Method that test get transaction for the current user dada@email.fr
+     * then return a Page of transactions
+     *
+     * @throws Exception
+     */
     @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getTransactionsViewTransactionTest_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
@@ -98,17 +125,22 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding a  transaction when balance is enough
+     * then return the Transaction added
+     *
+     * @throws Exception
+     */
     @Test
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         Transaction transaction = Transaction.builder()
                 .userEmitter(User.builder()
                         .email("dada@email.fr").password("passpasspass").build())
-                        .description("sweet").amount(10.0)
-                        .userReceiver(User.builder()
-                                .email("ggpassain@email.fr").
-                                password("passpasspass").build()
-                )
+                .description("sweet").amount(10.0)
+                .userReceiver(User.builder()
+                        .email("ggpassain@email.fr").
+                        password("passpasspass").build())
                 .build();
         //WHEN
         //THEN
@@ -117,7 +149,7 @@ public class TransactionIT {
                         .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
                         .param("receiverEmail", transaction.getUserReceiver().getEmail())
                         .param("amount", String.valueOf(transaction.getAmount()))
-                        .param("password", transaction.getUserEmitter().getPassword(),transaction.getUserReceiver().getPassword())
+                        .param("password", transaction.getUserEmitter().getPassword(), transaction.getUserReceiver().getPassword())
                         .param("description", transaction.getDescription()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
@@ -128,11 +160,17 @@ public class TransactionIT {
                 .andExpect(model().attribute("sendTransaction", hasProperty("description", is("sweet")))).andDo(print());
     }
 
+    /**
+     * Method that test adding transaction when balance is insufficient
+     * then throw a BalanceInsufficientException
+     *
+     * @throws Exception
+     */
     @Test
     public void addTransactionTest_whenBalanceIsInsufficient_thenReturnFieldErrorBalanceInsufficientException() throws Exception {
         //GIVEN
         Transaction transaction = new Transaction();
-        transaction.setUserEmitter(User.builder().email(SecurityUtilities.getCurrentUser()).build());
+        transaction.setUserEmitter(User.builder().email("dada@email.fr").build());
         transaction.setUserReceiver(User.builder().email("luluM@email.fr").build());
         transaction.setDescription("Movies tickets");
         transaction.setAmount(200.0);
@@ -152,6 +190,12 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transaction when amount is null
+     * then return fields error not null
+     *
+     * @throws Exception
+     */
     @Test
     public void addTransactionTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
@@ -169,6 +213,12 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transaction when amount is greater than 1000
+     * then return fields error max
+     *
+     * @throws Exception
+     */
     @Test
     public void addTransactionTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
@@ -186,6 +236,12 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transaction when amount is less than 1
+     * then return fields error min
+     *
+     * @throws Exception
+     */
     @Test
     public void addTransactionTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
@@ -203,6 +259,12 @@ public class TransactionIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transaction when value of the selector friends email is empty
+     * then return fields error notBlank
+     *
+     * @throws Exception
+     */
     @Test
     public void addTransactionTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
@@ -219,5 +281,4 @@ public class TransactionIT {
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
-
 }
