@@ -6,7 +6,6 @@ package com.openclassrooms.paymybuddy.exception;
  * @author Christine Duarte
  */
 public class UserAlreadyExistException extends RuntimeException {
-
     /**
      * Constructor
      *

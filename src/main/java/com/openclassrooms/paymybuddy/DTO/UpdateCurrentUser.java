@@ -36,14 +36,14 @@ public class UpdateCurrentUser {
      * A String containing the password
      */
     @NotBlank(message = "password cannot be blank")
-    @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     private String password;
 
     /**
      * A String containing the confirm password
      */
     @NotBlank(message = "Confirm password cannot be blank")
-    @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     private String confirmPassword;
 
     /**

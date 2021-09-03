@@ -3,7 +3,8 @@ package com.openclassrooms.paymybuddy.model;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,21 +32,17 @@ public class User {
     /**
      * A String containing the password
      */
-//    @NotBlank(message = "password cannot be blank")
-//    @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters")
     private String password;
 
     /**
      * A String containing the firstName
      */
-//    @NotBlank(message = "First name cannot be blank")
     @Column(name = "first_name")
     private String firstName;
 
     /**
      * A String containing the lastName
      */
-//    @NotBlank(message = "Last name cannot be blank")
     @Column(name = "last_name")
     private String lastName;
 
@@ -65,7 +62,7 @@ public class User {
     /**
      * A list of friends that containing friends of a user,
      * this attribute determines the relationship many to many with the table fiend
-     * and permit join the table friend to the table user in the user email
+     * and permit join the table friend to the table user in the user_email column
      */
     @ManyToMany(
             cascade = CascadeType.ALL,
@@ -86,6 +83,11 @@ public class User {
     @ManyToMany(mappedBy = "friends")
     private List<User> users = new ArrayList<>();
 
+    /**
+     * Method toString
+     *
+     * @return a String of the object User
+     */
     @Override
     public String toString() {
         return "User{" +

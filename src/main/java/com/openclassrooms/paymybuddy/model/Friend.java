@@ -29,14 +29,16 @@ public class Friend {
     @Id
     @Column(name = "user_email")
     private String userEmail;
+
     /**
      * key composite with the friendEmail
      */
     @Id
     @Column(name = "friend_email")
     private String friendEmail;
+
     /**
-     * Date when the friend user was added
+     * Date when the friend user is added
      */
     @Column(name = "date_added")
     private LocalDateTime dateAdded;

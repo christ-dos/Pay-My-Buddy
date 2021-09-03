@@ -3,9 +3,6 @@ package com.openclassrooms.paymybuddy.model;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 /**
@@ -32,9 +29,8 @@ public class Transaction {
 
     /**
      * A Double with the amount of transaction
-     * the value cannot  be null, and it must be between 1 and 1000
      */
-      private Double amount;
+    private Double amount;
 
     /**
      * A String with the description of the transaction
@@ -47,7 +43,7 @@ public class Transaction {
     private Double fees;
 
     /**
-     * A LocaldateTime which containing dote of transaction
+     * A LocalDateTime which containing dote of transaction
      */
     private LocalDateTime date;
 
@@ -69,6 +65,11 @@ public class Transaction {
     @JoinColumn(name = "receiver_email")
     private User userReceiver;
 
+    /**
+     * Method toString
+     *
+     * @return a String of the object Transaction
+     */
     @Override
     public String toString() {
         return "Transaction{" +

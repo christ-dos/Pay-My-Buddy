@@ -18,11 +18,11 @@ import java.io.Serializable;
 @Setter
 public class FriendId implements Serializable {
     /**
-     *Attribute containing a String with the userEmail
+     * Attribute containing a String with the userEmail
      */
     private String userEmail;
     /**
-     *Attribute containing a String with the friendEmail
+     * Attribute containing a String with the friendEmail
      */
     private String friendEmail;
 }
