@@ -15,16 +15,12 @@ import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,29 +33,50 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
-
+/**
+ * Class that test UserService
+ *
+ * @author Christine Duarte
+ */
 @ExtendWith(MockitoExtension.class)
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(SecurityUtilities.class)
 public class UserServiceTest {
+    /**
+     * A mock of {@link IUserRepository}
+     */
     @Mock
     private IUserRepository userRepositoryMock;
 
+    /**
+     * A mock of {@link IFriendRepository}
+     */
     @Mock
     private IFriendRepository friendRepositoryMock;
 
+    /**
+     * An instance of {@link UserService}
+     */
     private UserService userServiceTest;
 
+    /**
+     * An instance of {@link Pageable}
+     */
     private Pageable pageable;
 
-
+    /**
+     * Method that initialise instances to perform each test
+     */
     @BeforeEach
     public void setPerTest() {
-
         userServiceTest = new UserService(userRepositoryMock, friendRepositoryMock);
         pageable = PageRequest.of(1, 5);
     }
 
+    /**
+     * method that test  get all users
+     * then retur a list with 2 elements
+     */
     @Test
     public void getUsersTest_thenReturnListWithTwoElements() {
         //GIVEN
@@ -99,6 +116,12 @@ public class UserServiceTest {
     /*-----------------------------------------------------------------------------------------------------
                                             Tests View addfriend
          ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get user by email
+     * when user is "kikine@email.fr"
+     * then return the {@link User} kikine
+     */
     @Test
     public void getUserByEmailTest_whenUserIsKikineAndExistInDB_thenReturnUserKikine() {
         //GIVEN
@@ -121,6 +144,11 @@ public class UserServiceTest {
         verify(userRepositoryMock, times(1)).findByEmail(userEmail);
     }
 
+    /**
+     * Method that test get user by email
+     * when user not exist in DB
+     * then return null
+     */
     @Test
     public void getUserByEmailTest_whenUserNotExistInDB_thenReturnUserNull() {
         //GIVEN
@@ -132,6 +160,11 @@ public class UserServiceTest {
         assertNull(userResult);
     }
 
+    /**
+     * Method that test addFriendCurrentUserList
+     * when friend added exist in DB but is not present in list of friends of the current user
+     * then return {@link Friend} Added
+     */
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsNotPresentInListFriend_thenVerifyAddFriendIsCalled() {
         //GIVEN
@@ -166,6 +199,11 @@ public class UserServiceTest {
         assertEquals("françois@email.fr", userAdded.getFriendEmail());
     }
 
+    /**
+     * Method that test addFriendCurrentUserList
+     * when friend added exist in DB and is present in list of friends of the current user
+     * then throw {@link UserAlreadyExistException}
+     */
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsPresentInListFriend_thenThrowsUserAlreadyExistException() {
         //GIVEN
@@ -195,6 +233,11 @@ public class UserServiceTest {
         verify(friendRepositoryMock, times(0)).save(isA(Friend.class));
     }
 
+    /**
+     * Method that test addFriendCurrentUserList
+     * when friend added not exist in DB
+     * then throw {@link UserNotFoundException}
+     */
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedNotExistInDB_thenThrowsUserNotFoundException() {
         //GIVEN
@@ -207,14 +250,16 @@ public class UserServiceTest {
         assertThrows(UserNotFoundException.class, () -> userServiceTest.addFriendCurrentUserList(friendEmail));
         verify(friendRepositoryMock, times(0)).save(isA(Friend.class));
     }
-
-
     //******************************Test getFriendListCurrentUserEmailPaged*********************************
-    @Test
-    public void getFriendListByCurrentUserEmailPagedTest_whenUserEmailIsCurrentUser_thenReturnListFriend() {
-        //GIVEN
-//        String userEmail = "dada@email.fr";
 
+    /**
+     * Method that test getFriendListByCurrentUserEmailPaged
+     * when user email is current user
+     * then return a Page of {@link Friend}
+     */
+    @Test
+    public void getFriendListByCurrentUserEmailPagedTest_whenUserEmailIsCurrentUser_thenReturnPageOfFriend() {
+        //GIVEN
         User user1 = User.builder()
                 .email("françois@email.fr")
                 .password("monTropToppassword")
@@ -257,6 +302,12 @@ public class UserServiceTest {
     }
 
     //******************************Test getFriendListCurrentUserEmail************************************
+
+    /**
+     * Method that test getFriendListByCurrentUserEmail not paged
+     * when user email is current user
+     * then return a List of {@link Friend}
+     */
     @Test
     public void getFriendListByCurrentUserEmailTest_whenUserEmailIsCurrentUser_thenReturnListFriend() {
         //GIVEN
@@ -302,13 +353,15 @@ public class UserServiceTest {
         assertEquals("Martin", resultListFriend.get(1).getLastName());
         verify(userRepositoryMock, times(2)).findByEmail(any(String.class));
     }
-
-
-
 /*-----------------------------------------------------------------------------------------------------
                                         Tests View profile
-     ------------------------------------------------------------------------------------------------------*/
+ ------------------------------------------------------------------------------------------------------*/
 
+    /**
+     * Method that test updateProfile
+     * when user email exist in DB
+     * then return {@link User updated}
+     */
     @Test
     public void updateProfileTest_whenUserExistInDB_thenReturnUserUpdated() {
         //GIVEN
@@ -346,9 +399,13 @@ public class UserServiceTest {
         assertEquals("Sanches", userSavedResult.getLastName());
         assertEquals("passpass", userSavedResult.getPassword());
         verify(userRepositoryMock, times(1)).save(isA(User.class));
-
     }
 
+    /**
+     * Method that test updateProfile
+     * when password not match with confirmPassword
+     * then throw {@link PasswordNotMatcherException}
+     */
     @Test
     public void updateProfileTest_whenPasswordNotMatchWithConfirmPassword_thenThrowsPasswordNotMatcherException() {
         //GIVEN
@@ -374,11 +431,17 @@ public class UserServiceTest {
     /*-----------------------------------------------------------------------------------------------------
                                         Tests View signUp
      ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test addUser
+     * when user not exist in DB and Email and password match
+     * then return {@link User} added
+     */
     @Test
-    public void addUserTest_UserNotExistInDBAndEmailAndPasswordMatch_thenReturnUserAdded() {
+    public void addUserTest_whenUserNotExistInDBAndEmailAndPasswordMatch_thenReturnUserAdded() {
         //GIVEN
         AddUser userToAdd = new AddUser(
-                "Leina","Machin","passpass","passpass","emailnotexist@email.fr","emailnotexist@email.fr",123456);
+                "Leina", "Machin", "passpass", "passpass", "emailnotexist@email.fr", "emailnotexist@email.fr", 123456);
 
         User userAdded = User.builder()
                 .firstName("Leina")
@@ -391,20 +454,25 @@ public class UserServiceTest {
         //WHEN
         User useAdded = userServiceTest.addUser(userToAdd);
         //THEN
-        assertEquals("emailnotexist@email.fr",useAdded.getEmail());
-        assertEquals("Leina",useAdded.getFirstName());
-        assertEquals("Machin",useAdded.getLastName());
-        assertEquals("passpass",useAdded.getPassword());
-        verify(userRepositoryMock,times(1)).findByEmail(isA(String.class));
-        verify(userRepositoryMock,times(1)).save(isA(User.class));
+        assertEquals("emailnotexist@email.fr", useAdded.getEmail());
+        assertEquals("Leina", useAdded.getFirstName());
+        assertEquals("Machin", useAdded.getLastName());
+        assertEquals("passpass", useAdded.getPassword());
+        verify(userRepositoryMock, times(1)).findByEmail(isA(String.class));
+        verify(userRepositoryMock, times(1)).save(isA(User.class));
 
     }
 
+    /**
+     * Method that test addUser
+     * when user already  exist in DB
+     * then throw {@link UserAlreadyExistException}
+     */
     @Test
-    public void addUserTest_UserExistInDB_thenThrowsUserAlreadyExistException() {
+    public void addUserTest_whenUserAlreadyExistInDB_thenThrowsUserAlreadyExistException() {
         //GIVEN
         AddUser userToAdd = new AddUser(
-                "Leina","Machin","passpass","passpass","emailnotexist@email.fr","emailnotexist@email.fr",123456);
+                "Leina", "Machin", "passpass", "passpass", "emailnotexist@email.fr", "emailnotexist@email.fr", 123456);
 
         User user = User.builder()
                 .firstName("Leina")
@@ -419,11 +487,16 @@ public class UserServiceTest {
         verify(userRepositoryMock, times(0)).save(isA(User.class));
     }
 
+    /**
+     * Method that test addUser
+     * when user not exist in DB but Email not match with confirmEmail
+     * then throw {@link EmailNotMatcherException}
+     */
     @Test
-    public void addUserTest_UserNotExistInDbButEmailNotMatchConfirmEmail_thenThrowsEmailNotMatcherException() {
+    public void addUserTest_whenUserNotExistInDbButEmailNotMatchConfirmEmail_thenThrowsEmailNotMatcherException() {
         //GIVEN
         AddUser userToAdd = new AddUser(
-                "Leina","Machin","passpass","passpass","emailnotexist@email.fr","emailnotmatch@email.fr",123456);
+                "Leina", "Machin", "passpass", "passpass", "emailnotexist@email.fr", "emailnotmatch@email.fr", 123456);
 
         when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
         //WHEN
@@ -432,11 +505,16 @@ public class UserServiceTest {
         verify(userRepositoryMock, times(0)).save(isA(User.class));
     }
 
+    /**
+     * Method that test addUser
+     * when user not exist in DB but password not match with confirmPassword
+     * then throw {@link PasswordNotMatcherException}
+     */
     @Test
-    public void addUserTest_UserNotExistInDbButPasswordNotMatchConfirmPassword_thenThrowsPasswordNotMatcherException() {
+    public void addUserTest_whenUserNotExistInDbButPasswordNotMatchConfirmPassword_thenThrowsPasswordNotMatcherException() {
         //GIVEN
         AddUser userToAdd = new AddUser(
-                "Leina","Machin","pass","passpass","emailnotexist@email.fr","emailnotexist@email.fr",123456);
+                "Leina", "Machin", "pass", "passpass", "emailnotexist@email.fr", "emailnotexist@email.fr", 123456);
 
         when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
         //WHEN
@@ -444,5 +522,4 @@ public class UserServiceTest {
         assertThrows(PasswordNotMatcherException.class, () -> userServiceTest.addUser(userToAdd));
         verify(userRepositoryMock, times(0)).save(isA(User.class));
     }
-
 }

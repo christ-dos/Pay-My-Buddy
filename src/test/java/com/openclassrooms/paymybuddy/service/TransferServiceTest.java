@@ -6,6 +6,7 @@ import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transfer;
 import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.ITransferRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
 import com.openclassrooms.paymybuddy.security.MyUserDetails;
@@ -32,32 +33,50 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
+/**
+ * Class that test {@link TransferService}
+ *
+ * @author Christine Duarte
+ */
 @ExtendWith(MockitoExtension.class)
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SecurityUtilities.class)
 public class TransferServiceTest {
 
+    /**
+     * A mock of {@link ITransferRepository}
+     */
     @Mock
     private ITransferRepository transferRepositoryMock;
 
+    /**
+     * A mock of {@link IUserRepository}
+     */
     @Mock
     private IUserRepository userRepositoryMock;
 
+    /**
+     * An instance of {@link TransferService}
+     */
     private TransferService transferServiceTest;
 
-    private String username;
-
-
+    /**
+     * Method that initialise instances to perform each test
+     */
     @BeforeEach
     public void setPerTest() {
-
         transferServiceTest = new TransferService(transferRepositoryMock, userRepositoryMock);
     }
 
+    /**
+     * Method that test addTransfer
+     * when user email is "dada@email.fr" and transfer type  is CREDIT
+     * then return the new balance is credited with the amount
+     */
     @Test
     public void addTransferTest_whenUserEmailIsDadaAndTransferTypeIsCredit_thenVerifyBalanceIs120AndUserEmailIsDada() {
         //GIVEN
-        String userEmail = username;
+        String userEmail = "dada@email.fr";
         User user = User.builder()
                 .email(userEmail).firstName("Damien").lastName("Sanchez").balance(20.0).accountBank(589632)
                 .build();
@@ -84,10 +103,14 @@ public class TransferServiceTest {
         verify(transferRepositoryMock, times(1)).save(isA(Transfer.class));
     }
 
+    /**
+     * Method that test addTransfer
+     * when user email is "dada@email.fr" and transfer type  is DEBIT and balance is enough
+     * then return {@link Transfer} added with the balance debited of the amount
+     */
     @Test
     public void addTransferTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenTransferIsSavedAndBalanceUpdatedTo50() {
         //GIVEN
-//        PowerMockito.mockStatic(SecurityUtilities.class);
         when(SecurityUtilities.getCurrentUser()).thenReturn("dada@email.fr");
         String userEmail = SecurityUtilities.getCurrentUser();
         User user = User.builder()
@@ -116,6 +139,11 @@ public class TransferServiceTest {
         verify(transferRepositoryMock, times(1)).save(isA(Transfer.class));
     }
 
+    /**
+     * Method that test addTransfer
+     * when user email is "dada@email.fr" and transfer type is DEBIT and balance is insufficient
+     * then throw {@link BalanceInsufficientException}
+     */
     @Test
     public void addTransferTest_whenTransferTypeIsDebitAndBalanceInsufficient_thenTrowBalanceInsufficientException() {
         //GIVEN
@@ -137,6 +165,12 @@ public class TransferServiceTest {
         verify(transferRepositoryMock, times(0)).save(transferTestDebitBalanceInsufficient);
     }
 
+    /**
+     * Method that test getCurrentUserTransfers
+     * when current user  is "dada@email.fr"
+     * then return a {@link Page} containing {@link Transfer} for the user "dada@email.fr"
+     * with a sign "-" if transfer type is DEBIT
+     */
     @Test
     public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnPageOfDisplayingTransferForDadaWithSignNegativeIfTypeIsDebit() {
         //GIVEN
@@ -177,6 +211,11 @@ public class TransferServiceTest {
         assertEquals(-30, displayingTransfersResult.getContent().get(1).getAmount());
     }
 
+    /**
+     * Method that test getCurrentUserTransfers
+     * when transfer's current user not exist
+     * then return an empty page
+     */
     @Test
     void getCurrentUserTransfersTest_whenCurrentUserTransferNotExist_thenReturnAPageEmpty() {
         //GIVEN
@@ -190,5 +229,4 @@ public class TransferServiceTest {
         //verify that the page is empty
         assertTrue(transfersResult.getContent().isEmpty());
     }
-
 }
