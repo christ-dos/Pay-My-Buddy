@@ -15,13 +15,6 @@ import java.util.List;
 
 public interface IUserService {
     /**
-     * Method that get list of all users
-     *
-     * @return An Iterable of User
-     */
-    Iterable<User> getUsers();
-
-    /**
      * Method which get a user by email
      *
      * @param email item unique that permit identifies the user

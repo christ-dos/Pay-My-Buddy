@@ -79,11 +79,6 @@ public class TransactionControllerTest {
     MyUserDetailsService myUserDetailsServiceMock;
 
     /**
-     * A instance of {@link Pageable}
-     */
-    private Pageable pageable;
-
-    /**
      * A List of  {@link FriendList}
      */
     private List<FriendList> friendListTest;
@@ -98,7 +93,7 @@ public class TransactionControllerTest {
      */
     @BeforeEach
     public void setupPerTest() {
-        pageable = PageRequest.of(0, 5);
+//        pageable = PageRequest.of(0, 5);
 
         friendListTest = new ArrayList<>();
         friendListTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));

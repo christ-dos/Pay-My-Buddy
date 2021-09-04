@@ -16,16 +16,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,8 +44,6 @@ import static org.mockito.Mockito.*;
  * @author Christine Duarte
  */
 @ExtendWith(MockitoExtension.class)
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest(SecurityUtilities.class)
 public class UserServiceTest {
     /**
      * A mock of {@link IUserRepository}
@@ -65,6 +68,18 @@ public class UserServiceTest {
     private Pageable pageable;
 
     /**
+     * A mock of {@link Authentication}
+     */
+    @Mock
+    private Authentication authentication;
+
+    @Mock
+    private UserDetails userDetails;
+
+    @Mock
+    private SecurityContext securityContext;
+
+    /**
      * Method that initialise instances to perform each test
      */
     @BeforeEach
@@ -73,50 +88,9 @@ public class UserServiceTest {
         pageable = PageRequest.of(1, 5);
     }
 
-    /**
-     * method that test  get all users
-     * then retur a list with 2 elements
-     */
-    @Test
-    public void getUsersTest_thenReturnListWithTwoElements() {
-        //GIVEN
-        List<User> usersSetMock = new ArrayList<>(Arrays.asList(
-                User.builder()
-                        .email("vanessa@email.fr").firstName("Vanessa")
-                        .lastName("Paradis").password("vava2020")
-                        .balance(15.58).accountBank(897235)
-                        .build(),
-                User.builder()
-                        .email("kelly@email.fr").firstName("Kelly")
-                        .lastName("Minogue").password("kiki89")
-                        .balance(55.58).accountBank(890365)
-                        .build(),
-                User.builder()
-                        .email("beber@email.fr").firstName("Justine")
-                        .lastName("Biber").password("bebe2896")
-                        .balance(85.98).accountBank(100358)
-                        .build()));
-        int count = 0;
-        when(userRepositoryMock.findAll()).thenReturn(usersSetMock);
-        //WHEN
-        Iterable<User> usersIterable = userServiceTest.getUsers();
-        Iterator<User> it = usersIterable.iterator();
-        //method that count the iterable
-        while (it.hasNext()) {
-            it.next();
-            count++;
-        }
-        //THEN
-        //userIterable contain 3 elements
-        assertEquals(3, count);
-        assertEquals(usersSetMock, usersIterable);
-        verify(userRepositoryMock, times(1)).findAll();
-    }
-
     /*-----------------------------------------------------------------------------------------------------
                                             Tests View addfriend
          ------------------------------------------------------------------------------------------------------*/
-
     /**
      * Method that test get user by email
      * when user is "kikine@email.fr"
@@ -188,6 +162,10 @@ public class UserServiceTest {
 
         Page<Friend> friendsPage = new PageImpl<>(friends);
 
+        SecurityContextHolder.setContext(securityContext);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+        Mockito.when(userDetails.getUsername()).thenReturn("dada@email.fr");
         when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(user);
         when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(userEmail, null)).thenReturn(friendsPage);
         when(friendRepositoryMock.save(isA(Friend.class))).thenReturn(friendToAdd);
@@ -207,7 +185,7 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedFrancoisExistInDBAndIsPresentInListFriend_thenThrowsUserAlreadyExistException() {
         //GIVEN
-        String userEmail = SecurityUtilities.getCurrentUser();
+        String userEmail = "dada@email.fr";
         String friendEmail = "françois@email.fr";
 
         User user = User.builder()
@@ -225,7 +203,11 @@ public class UserServiceTest {
 
         Page<Friend> friendsPage = new PageImpl<>(friends);
 
-        when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(user);
+        SecurityContextHolder.setContext(securityContext);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+        Mockito.when(userDetails.getUsername()).thenReturn("dada@email.fr");
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(user);
         when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(userEmail, null)).thenReturn(friendsPage);
         //WHEN
         //THEN
@@ -241,10 +223,9 @@ public class UserServiceTest {
     @Test
     public void addFriendCurrentUserListTest_whenFriendAddedNotExistInDB_thenThrowsUserNotFoundException() {
         //GIVEN
-        String userEmail = SecurityUtilities.getCurrentUser();
         String friendEmail = "wiwi@email.fr";
 
-        when(userRepositoryMock.findByEmail(friendEmail)).thenReturn(null);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
         //WHEN
         //THEN
         assertThrows(UserNotFoundException.class, () -> userServiceTest.addFriendCurrentUserList(friendEmail));
@@ -260,6 +241,7 @@ public class UserServiceTest {
     @Test
     public void getFriendListByCurrentUserEmailPagedTest_whenUserEmailIsCurrentUser_thenReturnPageOfFriend() {
         //GIVEN
+
         User user1 = User.builder()
                 .email("françois@email.fr")
                 .password("monTropToppassword")
@@ -283,6 +265,10 @@ public class UserServiceTest {
         User userMock = mock(User.class);
         Page<Friend> friendsPage = new PageImpl<>(friends);
 
+        SecurityContextHolder.setContext(securityContext);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+        Mockito.when(userDetails.getUsername()).thenReturn("dada@email.fr");
         when(friendRepositoryMock.findByUserEmailOrderByDateAddedDesc(isA(String.class), isA(Pageable.class))).thenReturn(friendsPage);
         friends.stream().map(friend -> {
             when(userRepositoryMock.findByEmail(anyString())).thenReturn(user1, user2);

@@ -6,24 +6,22 @@ import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transfer;
 import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import com.openclassrooms.paymybuddy.model.User;
-import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
 import com.openclassrooms.paymybuddy.repository.ITransferRepository;
 import com.openclassrooms.paymybuddy.repository.IUserRepository;
-import com.openclassrooms.paymybuddy.security.MyUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,8 +37,6 @@ import static org.mockito.Mockito.*;
  * @author Christine Duarte
  */
 @ExtendWith(MockitoExtension.class)
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(SecurityUtilities.class)
 public class TransferServiceTest {
 
     /**
@@ -61,11 +57,25 @@ public class TransferServiceTest {
     private TransferService transferServiceTest;
 
     /**
+     * A mock of {@link Authentication}
+     */
+    @Mock
+    private Authentication authentication;
+
+    /**
      * Method that initialise instances to perform each test
      */
     @BeforeEach
     public void setPerTest() {
         transferServiceTest = new TransferService(transferRepositoryMock, userRepositoryMock);
+
+        authentication = Mockito.mock(Authentication.class);
+        UserDetails userDetails = Mockito.mock(UserDetails.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+        Mockito.when(userDetails.getUsername()).thenReturn("dada@email.fr");
     }
 
     /**
@@ -219,7 +229,7 @@ public class TransferServiceTest {
     @Test
     void getCurrentUserTransfersTest_whenCurrentUserTransferNotExist_thenReturnAPageEmpty() {
         //GIVEN
-        Pageable pageable = PageRequest.of(0,5);
+        Pageable pageable = PageRequest.of(0, 5);
         List<Transfer> displayingTransferList = new ArrayList<>();
         Page<Transfer> displayingTransferPageEmpty = new PageImpl<>(displayingTransferList);
         when(transferRepositoryMock.findTransfersByUserEmailOrderByDateDesc(isA(String.class), isA(Pageable.class))).thenReturn(displayingTransferPageEmpty);

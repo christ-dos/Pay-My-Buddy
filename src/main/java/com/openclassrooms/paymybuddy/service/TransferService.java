@@ -105,7 +105,6 @@ public class TransferService implements ITransferService {
                     } else {
                         return new DisplayingTransfer(transfer.getDescription(), transfer.getTransferType(), +transfer.getAmount(), transfer.getPostTradeBalance());
                     }
-
                 }).collect(Collectors.toList()), pageable, totalElements);
     }
 }

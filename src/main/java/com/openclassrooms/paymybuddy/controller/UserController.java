@@ -47,15 +47,6 @@ public class UserController {
     @Autowired
     private ITransactionService transactionService;
 
-    /**
-     * Method that get all users
-     *
-     * @return An Iterable of User object
-     */
-    @GetMapping(value = "/users")
-    public Iterable<User> getUserList() {
-        return userService.getUsers();
-    }
 
 /**
  * ------------------------------------------------------------------------------------------------------

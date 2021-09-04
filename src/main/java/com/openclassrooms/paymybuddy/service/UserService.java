@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-
 public class UserService implements IUserService {
     /**
      * An instance of {@link IUserRepository}
@@ -54,17 +53,6 @@ public class UserService implements IUserService {
     public UserService(IUserRepository userRepository, IFriendRepository friendRepository) {
         this.userRepository = userRepository;
         this.friendRepository = friendRepository;
-    }
-
-    /**
-     * Method that get list of all users
-     *
-     * @return An Iterable of User
-     */
-    @Override
-    public Iterable<User> getUsers() {
-        log.info("UserService: Display list of Users");
-        return userRepository.findAll();
     }
 
     /**

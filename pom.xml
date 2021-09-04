@@ -32,11 +32,6 @@
             <artifactId>javax.json</artifactId>
             <version>1.1</version>
         </dependency>
-        <!--********************oAuth2********************-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
-        </dependency>
         <!-- *************Spring Security dependency******************-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -148,12 +143,6 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>21.0.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-core</artifactId>
-            <version>2.0.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

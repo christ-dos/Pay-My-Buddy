@@ -2,7 +2,6 @@ package com.openclassrooms.paymybuddy.service;
 
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.SendTransaction;
-import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
@@ -12,22 +11,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.*;
 
@@ -37,10 +37,6 @@ import static org.mockito.Mockito.*;
  * @author Christine Duarte
  */
 @ExtendWith(MockitoExtension.class)
-//@ContextConfiguration
-//@SuppressStaticInitializationFor("com.openclassrooms.paymybuddy.SecurityUtilities")
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest(SecurityUtilities.class)
 class TransactionServiceTest {
     /**
      * An instance of {@link ITransactionService}
@@ -59,9 +55,6 @@ class TransactionServiceTest {
     @Mock
     private IUserRepository userRepositoryMock;
 
-//    @Mock
-//    private SecurityUtilities securityUtilities;
-
     /**
      * An instance of {@link Pageable}
      */
@@ -73,13 +66,8 @@ class TransactionServiceTest {
     private List<Transaction> transactions;
 
     /**
-     * An {@link Page} of {@link Transaction}
+     * A mock of {@link Authentication}
      */
-    private Page<Transaction> transactionsPage;
-
-    @Mock
-    private SecurityContextImpl securityContextMock;
-
     @Mock
     private Authentication authentication;
 
@@ -88,17 +76,19 @@ class TransactionServiceTest {
      */
     @BeforeEach
     public void setUpPerTest() {
-        securityContextMock = new SecurityContextImpl();
-        authentication.setAuthenticated(true);
-        securityContextMock.setAuthentication(authentication);
-        SecurityContextHolder.setContext(securityContextMock);
-//        securityContextMock.getAuthentication();
-//
-//        PowerMockito.mockStatic(SecurityUtilities.class);
-//        PowerMockito.when(SecurityUtilities.getCurrentUser()).thenReturn("dada@email.fr");
-        pageable = PageRequest.of(0, 5);
         transactionServiceTest = new TransactionService(transactionRepositoryMock, userRepositoryMock);
+
+        authentication = Mockito.mock(Authentication.class);
+        UserDetails userDetails = Mockito.mock(UserDetails.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        Mockito.when(authentication.getPrincipal()).thenReturn(userDetails);
+        Mockito.when(userDetails.getUsername()).thenReturn("dada@email.fr");
+
+        pageable = PageRequest.of(0, 5);
         String emitterEmail = "dada@email.fr";
+
         transactions = new ArrayList<>();
         Transaction transaction1 = Transaction.builder()
                 .transactionId(1).amount(25.0).description("diner paula")
@@ -120,33 +110,6 @@ class TransactionServiceTest {
         transactions.add(transaction1);
         transactions.add(transaction2);
         transactions.add(transaction3);
-
-        transactionsPage = new PageImpl<>(transactions);
-    }
-
-    /**
-     * method that test getTransaction
-     * then return an iterable containing three Transaction
-     */
-    @WithMockUser(username = "dada@email.fr", password = "passpass")
-    @Test
-    public void getTransactionsTest_thenReturnIterableContainingThreeTransactions() {
-        //GIVEN
-        int count = 0;
-        when(transactionRepositoryMock.findAll()).thenReturn(transactions);
-        //WHEN
-        Iterable<Transaction> transactionsResult = transactionServiceTest.getTransactions();
-        Iterator<Transaction> it = transactionsResult.iterator();
-        //method that count the iterable
-        while (it.hasNext()) {
-            it.next();
-            count++;
-        }
-        //THEN
-        //verify that transactionsResult contain 3 elements
-        assertEquals(3, count);
-        assertEquals(transactions, transactionsResult);
-        verify(transactionRepositoryMock, times(1)).findAll();
     }
 
     /**
@@ -155,10 +118,11 @@ class TransactionServiceTest {
      * we want all transactions of user "dada@email.fr emitted or received
      * then return a List with {@link Transaction}, with sign "-" if "dada@email.fr is emitter of transaction
      */
-    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransactionsByEmailTest_whenTransactionWithEmailEmitterIsDadaOrReceiverEmailIsDada_thenReturnListDisplayingTransactionForEmailDadaWithSignNegativeIfEmitterEmailIsDada() {
         //GIVEN
+        Page<Transaction> transactionsPage;
+        transactionsPage = new PageImpl<>(transactions);
         User userLise = User.builder()
                 .email("lisa@email.fr")
                 .password("monTropToppassword")
@@ -184,18 +148,9 @@ class TransactionServiceTest {
      * when emitter email of the transaction not exist
      * then return null
      */
-    @WithMockUser(username = "lisa@email.fr", password = "$2a$10$2K11L/fq6fmlHt3K7Nq.LeBpsNYiaLsb0tCh3z3w/h4MIi2FtB66.")
     @Test
     public void getCurrentUserTransactionsByEmailTest_whenEmitterEmailTransactionNotExist_thenReturnNull() {
         //GIVEN
-        User userLise = User.builder()
-                .email("lisa@email.fr")
-                .password("monTropToppassword")
-                .firstName("Lisette")
-                .lastName("Dumarche")
-                .balance(30.50)
-                .accountBank(170974).build();
-
         List<Transaction> emptyList = new ArrayList<>();
         Page<Transaction> displayingTransactionsPageEmpty = new PageImpl<>(emptyList);
         when(transactionRepositoryMock.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(isA(String.class), isA(String.class), isA(Pageable.class))).thenReturn(displayingTransactionsPageEmpty);
@@ -211,7 +166,6 @@ class TransactionServiceTest {
      * when user's balance is sufficient
      * then return {@link Transaction} added
      */
-    @WithMockUser(username = "kikine@email.fr", password = "$2a$10$2K11L/fq6fmlHt3K7Nq.LeBpsNYiaLsb0tCh3z3w/h4MIi2FtB66.")
     @Test
     public void addTransaction_whenUserBalanceIsSufficient_thenVerifyTransactionAdded() {
         //GIVEN
@@ -236,10 +190,11 @@ class TransactionServiceTest {
         Transaction transactionTest = Transaction.builder().transactionId(1)
                 .userEmitter(userEmitter)
                 .userReceiver(User.builder().email("lisa@email.fr").build())
-                .amount(100.0).fees(0.50)
+                .amount(100.0)
+                .fees(0.50)
                 .date(LocalDateTime.now()).build();
 
-        when(userRepositoryMock.findByEmail(SecurityUtilities.getCurrentUser())).thenReturn(userEmitter, userReceiver);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userEmitter, userReceiver);
         when(transactionRepositoryMock.save(isA(Transaction.class))).thenReturn(transactionTest);
         //WHEN
         Transaction transactionResult = transactionServiceTest.addTransaction(sendTransaction);
@@ -256,7 +211,6 @@ class TransactionServiceTest {
      * when user's balance not enough
      * then throw {@link BalanceInsufficientException}
      */
-    @WithMockUser(username = "dada@email.fr", password = "$2a$10$2K11L/fq6fmlHt3K7Nq.LeBpsNYiaLsb0tCh3z3w/h4MIi2FtB66.")
     @Test
     public void addTransaction_whenUserBalanceNotEnough_thenThrowBalanceInsufficientException() {
         //GIVEN

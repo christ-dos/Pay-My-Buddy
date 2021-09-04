@@ -9,16 +9,9 @@ import org.springframework.data.domain.Pageable;
 /**
  * An Interface for TransactionService
  *
- * @author  Christine Duarte
+ * @author Christine Duarte
  */
 public interface ITransactionService {
-    /**
-     * Method which get all transactions in database
-     *
-     * @return An Iterable of Transaction
-     */
-    Iterable<Transaction> getTransactions();
-
     /**
      * Method which get all transactions for the current user with pagination
      *

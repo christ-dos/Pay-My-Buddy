@@ -52,16 +52,6 @@ public class TransactionService implements ITransactionService {
     }
 
     /**
-     * Method which get all transactions in database
-     *
-     * @return An Iterable of Transaction
-     */
-    @Override
-    public Iterable<Transaction> getTransactions() {
-        return transactionRepository.findAll();
-    }
-
-    /**
      * Method which get all transactions for the current user with pagination
      *
      * @param pageable Abstract interface for pagination information.

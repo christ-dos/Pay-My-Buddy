@@ -95,11 +95,6 @@ public class UserControllerTest {
     private Authentication authentication;
 
     /**
-     * A instance of {@link Pageable}
-     */
-    private Pageable pageable;
-
-    /**
      * An instance of {@link PageImpl}
      */
     private Page<FriendList> displayingFriendsPage;
@@ -117,7 +112,6 @@ public class UserControllerTest {
         friendListPageTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
         friendListPageTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
 
-        pageable = PageRequest.of(0, 5);
         displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
     }
