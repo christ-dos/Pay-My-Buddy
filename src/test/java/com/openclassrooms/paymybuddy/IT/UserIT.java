@@ -18,6 +18,8 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.event.annotation.BeforeTestClass;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,6 +28,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,8 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@ExtendWith(MockitoExtension.class)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@ActiveProfiles("test")
+@Sql(value = {"/schemaTest.sql"},executionPhase = BEFORE_TEST_METHOD)
 public class UserIT {
 
     /**
@@ -581,9 +584,9 @@ public class UserIT {
                 .andExpect(model().attribute("user", hasProperty("email", Matchers.is("dada@email.fr"))))
                 .andExpect(model().attribute("user", hasProperty("balance", Matchers.is(200.0))))
                 .andExpect(model().attribute("user", hasProperty("firstName", Matchers.is("Damien"))))
-                .andExpect(model().attribute("user", hasProperty("lastName", Matchers.is("Sanches"))))
-                .andExpect(model().attribute("lastBuddy", hasProperty("firstName", Matchers.is("Stella"))))
-                .andExpect(model().attribute("lastBuddy", hasProperty("lastName", Matchers.is("Durant"))))
+                .andExpect(model().attribute("user", hasProperty("lastName", Matchers.is("Sanchez"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("firstName", Matchers.is("Geraldine"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("lastName", Matchers.is("Passain"))))
                 .andExpect(model().attribute("lastTransaction", hasProperty("firstName", Matchers.is("Lubin"))))
                 .andExpect(model().attribute("lastTransaction", hasProperty("amount", Matchers.is(-15.0))))
                 .andDo(print());
@@ -779,10 +782,10 @@ public class UserIT {
                 .andExpect(model().attribute("totalPages", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(2L))))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Stella")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Lubin")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Passain")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("ggpassain@email.fr")))))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("tela@email.fr")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("luluM@email.fr")))))
                 .andDo(print());
     }
     /*------------------------------------------------------------------------------------------------------------
@@ -811,7 +814,7 @@ public class UserIT {
                 .andExpect(model().attributeExists("currentUser", "updateCurrentUser"))
                 .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
                 .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
-                .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanches"))))
+                .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanchez"))))
                 .andExpect(model().attribute("currentUser", hasProperty("password", is(containsString("$2a$")))))
                 .andDo(print());
     }

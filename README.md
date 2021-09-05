@@ -1,9 +1,6 @@
-PayMyBuddy 
+# PayMyBuddy
 
-The code is on the branch release.
-
-
-is an application that allowed customers to transfer money to manage their finances or pay their friends
+An application that allowed customers to transfer money to manage their finances or pay their friends
 
 Getting Started
 These instructions will get you a copy of the project up and running on your local machine. See deployment for notes on how to deploy the project on a live system.
@@ -36,6 +33,7 @@ Post installation of MySQL, Java and Maven, you will have to set up the tables a
 
 Finally, you will be ready to import the code into an IDE of your choice and run the PayMyBuddy.java to launch the application.
 
+**The code is located on the branch release.**
 
 **_Modèle Conceptuel de données_**
 
