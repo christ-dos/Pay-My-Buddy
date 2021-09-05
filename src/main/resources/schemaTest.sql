@@ -1,8 +1,8 @@
-DROP DATABASE IF EXISTS paymybuddy;
+DROP DATABASE IF EXISTS paymybuddy_test;
 
-CREATE DATABASE paymybuddy;
+CREATE DATABASE paymybuddy_test;
 
-USE paymybuddy;
+USE paymybuddy_test;
 
 CREATE TABLE user
 (
@@ -37,6 +37,9 @@ CREATE TABLE transaction
 )
     ENGINE = innoDB;
 
+INSERT INTO transaction(transaction_id, date, amount, description, fees, emitter_email, receiver_email)
+VALUES (1, NOW(), 15.0, 'Books',0.075,'dada@email.fr', 'luluM@email.fr');
+
 CREATE TABLE transfer
 (
     transfer_id        TINYINT AUTO_INCREMENT NOT NULL,
@@ -59,6 +62,9 @@ CREATE TABLE friend
     PRIMARY KEY (user_email, friend_email)
 )
     ENGINE = innoDB;
+
+INSERT INTO friend(user_email, friend_email)
+VALUES ('dada@email.fr', 'ggpassain@email.fr');
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk

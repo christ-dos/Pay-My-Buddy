@@ -12,6 +12,7 @@ import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.IUserService;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -246,7 +248,7 @@ public class UserController {
             log.error("Controller: Error in fields");
             return "addfriend";
         }
-        if (result.getRawFieldValue("email").equals(SecurityUtilities.getCurrentUser())) {
+        if (Objects.requireNonNull(result.getRawFieldValue("email")).equals(SecurityUtilities.getCurrentUser())) {
             result.rejectValue("email", "UnableAddingOwnEmail", "Unable add own email in your Connections");
             getModelsAddFriends(model, page, size);
             log.error("Controller: Invalid addition with email: " + SecurityUtilities.getCurrentUser());

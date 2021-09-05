@@ -15,6 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -35,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserIT {
 
     /**
@@ -62,7 +66,6 @@ public class UserIT {
     /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view sign Up
     --------------------------------------------------------------------------------------------------------------*/
-
     /**
      * Method that test signUp in view signup when user email not exist in DB
      * and field email match with  field confirmEmail
@@ -554,11 +557,9 @@ public class UserIT {
                 .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
                 .andDo(print());
     }
-
     /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view home
     --------------------------------------------------------------------------------------------------------------*/
-
     /**
      * Method that test get user information in view home when current user is "dada@email.fr
      * then return current user information in view home
@@ -587,11 +588,9 @@ public class UserIT {
                 .andExpect(model().attribute("lastTransaction", hasProperty("amount", Matchers.is(-15.0))))
                 .andDo(print());
     }
-
  /*------------------------------------------------------------------------------------------------------------
                                     Integration tests view addfriend
     --------------------------------------------------------------------------------------------------------------*/
-
     /**
      * Method that test get list connection when url is correct "/addfriend"
      * then display view addfriend
@@ -786,11 +785,9 @@ public class UserIT {
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("tela@email.fr")))))
                 .andDo(print());
     }
-
     /*------------------------------------------------------------------------------------------------------------
                                   Integration tests  view profile
   --------------------------------------------------------------------------------------------------------------*/
-
     /**
      * Method that test get current user information in view profile when url is correct "/profile"
      * then display view profile
