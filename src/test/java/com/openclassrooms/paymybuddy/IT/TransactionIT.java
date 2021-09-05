@@ -118,10 +118,7 @@ public class TransactionIT {
                 .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "friendListPage", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Lubin")))))
                 .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-15.0)))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("books")))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("firstName", is("Geraldine")))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("amount", is(-5.0)))))
-                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("diner")))))
+                .andExpect(model().attribute("transactions", hasItem(hasProperty("description", is("Books")))))
                 .andDo(print());
     }
 

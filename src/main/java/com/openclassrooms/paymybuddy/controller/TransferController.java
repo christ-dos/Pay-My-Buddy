@@ -84,7 +84,6 @@ public class TransferController {
                                            @RequestParam("size") Optional<Integer> size) {
 
         transferModelsPageable(model, page, size);
-
         log.info("Controller: The View transfer displaying");
 
         return "transfer";
@@ -108,6 +107,5 @@ public class TransferController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("transferTypes", TransferTypeEnum.values());
         model.addAttribute("totalElements", transfers.getTotalElements());
-
     }
 }

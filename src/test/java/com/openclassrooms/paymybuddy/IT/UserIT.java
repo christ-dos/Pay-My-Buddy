@@ -576,13 +576,13 @@ public class UserIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("user", "lastBuddy", "lastTransaction"))
+                .andExpect(model().attributeExists("user", "lastBuddy"))
                 .andExpect(model().attribute("user", hasProperty("email", Matchers.is("dada@email.fr"))))
                 .andExpect(model().attribute("user", hasProperty("balance", Matchers.is(200.0))))
                 .andExpect(model().attribute("user", hasProperty("firstName", Matchers.is("Damien"))))
                 .andExpect(model().attribute("user", hasProperty("lastName", Matchers.is("Sanches"))))
-                .andExpect(model().attribute("lastBuddy", hasProperty("firstName", Matchers.is("Elisabeth"))))
-                .andExpect(model().attribute("lastBuddy", hasProperty("lastName", Matchers.is("Dupond"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("firstName", Matchers.is("Stella"))))
+                .andExpect(model().attribute("lastBuddy", hasProperty("lastName", Matchers.is("Durant"))))
                 .andExpect(model().attribute("lastTransaction", hasProperty("firstName", Matchers.is("Lubin"))))
                 .andExpect(model().attribute("lastTransaction", hasProperty("amount", Matchers.is(-15.0))))
                 .andDo(print());
@@ -646,14 +646,14 @@ public class UserIT {
     @Test
     public void addFriendToListConnectionTest_whenUsersExistAndFriendIsNotInListFriend_thenReturnStatusIsOk() throws Exception {
         //GIVEN
-        String userEmail = "tela@email.fr";
+        String userEmail = "dada@email.fr";
         User userFriendToAdd = User.builder()
-                .email("lili@email.fr").firstName("Elisabeth").lastName("Dupont").build();
+                .email("tela@email.fr").firstName("Stella").lastName("Durant").build();
         //WHEN
         //THEN
         mockMvc.perform(MockMvcRequestBuilders.post("/addfriend")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("pass"))
+                        .with(SecurityMockMvcRequestPostProcessors.user("dada@email.fr").password("passpass"))
                         .param("email", userFriendToAdd.getEmail())
                         .param("userEmail", userEmail))
                 .andExpect(status().isOk())
@@ -721,7 +721,6 @@ public class UserIT {
         String friendEmailAlreadyExist = "ggpassain@email.fr";
         String userEmail = "tela@email.fr";
         //WHEN
-
         //THEN
         mockMvc.perform(MockMvcRequestBuilders.post("/addfriend")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -780,11 +779,11 @@ public class UserIT {
                 .andExpect(model().attributeExists("friendLists", "friendList", "totalPages", "currentPage"))
                 .andExpect(model().attribute("totalPages", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
-                .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(3L))))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Geraldine")))))
+                .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(2L))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Stella")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("lastName", is("Passain")))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("ggpassain@email.fr")))))
-                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("lili@email.fr")))))
+                .andExpect(model().attribute("friendLists", hasItem(hasProperty("email", is("tela@email.fr")))))
                 .andDo(print());
     }
 
@@ -850,8 +849,8 @@ public class UserIT {
         AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Damien");
         updateProfileCurrentUser.setLastName("Sanches");
-        updateProfileCurrentUser.setPassword("passpasspass");
-        updateProfileCurrentUser.setConfirmPassword("passpasspass");
+        updateProfileCurrentUser.setPassword("password");
+        updateProfileCurrentUser.setConfirmPassword("password");
         //WHEN
         //THEN
         mockMvc.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -866,7 +865,7 @@ public class UserIT {
                 .andExpect(model().attribute("updateCurrentUser", hasProperty("email", is("dada@email.fr"))))
                 .andExpect(model().attribute("updateCurrentUser", hasProperty("firstName", is("Damien"))))
                 .andExpect(model().attribute("updateCurrentUser", hasProperty("lastName", is("Sanches"))))
-                .andExpect(model().attribute("updateCurrentUser", hasProperty("password", is("passpasspass"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("password", is("password"))))
                 .andDo(print());
     }
 

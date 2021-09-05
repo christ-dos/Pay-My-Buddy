@@ -25,7 +25,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -73,9 +72,15 @@ public class UserServiceTest {
     @Mock
     private Authentication authentication;
 
+    /**
+     * A mock of {@link UserDetails}
+     */
     @Mock
     private UserDetails userDetails;
 
+    /**
+     * A mock of {@link SecurityContext}
+     */
     @Mock
     private SecurityContext securityContext;
 
@@ -87,10 +92,10 @@ public class UserServiceTest {
         userServiceTest = new UserService(userRepositoryMock, friendRepositoryMock);
         pageable = PageRequest.of(1, 5);
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                             Tests View addfriend
          ------------------------------------------------------------------------------------------------------*/
+
     /**
      * Method that test get user by email
      * when user is "kikine@email.fr"
@@ -231,6 +236,7 @@ public class UserServiceTest {
         assertThrows(UserNotFoundException.class, () -> userServiceTest.addFriendCurrentUserList(friendEmail));
         verify(friendRepositoryMock, times(0)).save(isA(Friend.class));
     }
+
     //******************************Test getFriendListCurrentUserEmailPaged*********************************
 
     /**
@@ -287,7 +293,7 @@ public class UserServiceTest {
         verify(userRepositoryMock, times(2)).findByEmail(any(String.class));
     }
 
-    //******************************Test getFriendListCurrentUserEmail************************************
+    //******************************Test getFriendListCurrentUserEmail not paged************************************
 
     /**
      * Method that test getFriendListByCurrentUserEmail not paged
@@ -446,7 +452,6 @@ public class UserServiceTest {
         assertEquals("passpass", useAdded.getPassword());
         verify(userRepositoryMock, times(1)).findByEmail(isA(String.class));
         verify(userRepositoryMock, times(1)).save(isA(User.class));
-
     }
 
     /**

@@ -115,7 +115,7 @@
                                th:errorclass="error"></p>
                         </div>
                     </div>
-                    <!-***************************** UserName **********************************-->
+                    <!-***************************** Email **********************************-->
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Username</label>
                         <div class="col-lg-9 py-1">
@@ -126,7 +126,7 @@
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Password</label>
                         <div class="col-lg-9 py-1">
-                            <input th:value="${currentUser.password}" id="password" name="password" class="form-control"
+                            <input  id="password" name="password" class="form-control"
                                    type="password" value="1234588555884">
                             <p class="m-1" th:if="${#fields.hasAnyErrors()}"
                                th:errors="*{password}"
@@ -137,7 +137,7 @@
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Confirm</label>
                         <div class="col-lg-9 py-1">
-                            <input th:value="${currentUser.password}" id="confirmPassword" name="confirmPassword"
+                            <input  id="confirmPassword" name="confirmPassword"
                                    class="form-control" type="password" value="1234588555884">
                             <p class="m-1" th:if="${#fields.hasAnyErrors()}"
                                th:errors="*{confirmPassword}"

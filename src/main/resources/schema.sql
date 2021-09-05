@@ -7,7 +7,7 @@ USE paymybuddy;
 CREATE TABLE user
 (
     email        VARCHAR(100) NOT NULL,
-    password     VARCHAR(100)  NOT NULL,
+    password     VARCHAR(100) NOT NULL,
     first_name   VARCHAR(100) NOT NULL,
     last_name    VARCHAR(100) NOT NULL,
     balance      DECIMAL(8, 2),
@@ -37,12 +37,8 @@ CREATE TABLE transaction
 )
     ENGINE = innoDB;
 
-INSERT INTO transaction(amount, description, fees, emitter_email, receiver_email)
-VALUES (15.0, 'books', 0.0, 'dada@email.fr', 'luluM@email.fr'),
-       (5.0, 'diner', 0.0, 'dada@email.fr', 'ggpassain@email.fr'),
-       (25.0, 'cinema', 0.0, 'luluM@email.fr', 'dada@email.fr'),
-       (5.0, 'diner', 0.0, 'lili@email.fr', 'dada@email.fr'),
-       (25.0, 'cinema', 0.0, 'luluM@email.fr', 'lili@email.fr');
+INSERT INTO transaction(transaction_id, date, amount, description, fees, emitter_email, receiver_email)
+VALUES (1, NOW(), 15.0, 'Books',0.075,'dada@email.fr', 'luluM@email.fr');
 
 CREATE TABLE transfer
 (
@@ -57,9 +53,6 @@ CREATE TABLE transfer
 )
     ENGINE = innoDB;
 
-INSERT INTO transfer(amount, description, transfer_type, user_email, post_trade_balance)
-VALUES (100.0, 'account Bank BNP', 'CREDIT', 'dada@email.fr', 200.0);
-
 
 CREATE TABLE friend
 (
@@ -67,13 +60,11 @@ CREATE TABLE friend
     friend_email VARCHAR(100) NOT NULL,
     date_added   TIMESTAMP    NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_email, friend_email)
-
 )
     ENGINE = innoDB;
+
 INSERT INTO friend(user_email, friend_email)
-VALUES ('dada@email.fr', 'ggpassain@email.fr'),
-       ('luluM@email.fr', 'dada@email.fr'),
-       ('dada@email.fr', 'luluM@email.fr');
+VALUES ('dada@email.fr', 'ggpassain@email.fr');
 
 ALTER TABLE friend
     ADD CONSTRAINT user_friend_fk

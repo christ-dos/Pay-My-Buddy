@@ -114,5 +114,4 @@ public class TransactionController {
         model.addAttribute("totalPagesTransaction", displayingTransactionPage.getTotalPages());
         model.addAttribute("currentPage", currentPage);
     }
-
 }
