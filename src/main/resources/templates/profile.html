@@ -9,7 +9,7 @@
     <style>
         .error {
             color: red;
-            font-size: 0.7em;
+            font-size: 0.8em;
             font-weight: bold;
         }
     </style>
@@ -20,7 +20,8 @@
     <div class="container-fluid ">
         <div class="row align-nav">
             <div class="col-4  d-flex flex-row justify-content-start">
-                <a class="navbar-brand btn-success bg-gradient text-light rounded order-1 bold text-center p-2" href="#" id="logo">Pay
+                <a class="navbar-brand btn-success bg-gradient text-light rounded order-1 bold text-center p-2" href="#"
+                   id="logo">Pay
                     My Buddy</a>
                 <button class="navbar-toggler gray" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,26 +33,32 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav p-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="http://localhost:9090/home"><span class="navbar-brand mb-0 h1 ">Home</span>
+                            <a class="nav-link" href="/home"><span class="navbar-brand mb-0 h1 ">Home</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" aria-current="page" href="http://localhost:9090/transaction"><span class="navbar-brand mb-0 h1 ">Transaction</span>
+                            <a class="nav-link" aria-current="page" href="/transaction"><span
+                                    class="navbar-brand mb-0 h1 ">Transaction</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/profile"><span
+                            <a class="nav-link " href="/profile"><span
                                     class="navbar-brand mb-0 h1 current active">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/contact"><span
+                            <a class="nav-link " href="/contact"><span
                                     class="navbar-brand mb-0 h1">Contact</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" href="http://localhost:9090/login"><span class="navbar-brand mb-0 h1">Log off</span>
-                            </a>
+                            <div>
+                                <a class="nav-link" href="javascript: document.logoutForm.submit()"><span class="navbar-brand mb-0 h1">Log off</span>
+                                </a>
+                                <form name="logoutForm" th:action="@{/logout}" method="post" th:hidden="true">
+                                    <input hidden type="submit" value="Sign Out"/>
+                                </form>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -59,11 +66,11 @@
         </div>
     </div>
 </nav>
-<!--************ link profile et Home /************-->
+<!--***************** link profile et Home /*******************************-->
 <div class="container-fluid gray py-2">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" href="http://localhost:9090/home">Home /</a>
+            <a class="nav-link" href="/home">Home /</a>
         </li>
         <li class="nav-item ">
             <a class="nav-link disabled" href="#">Profile</a>
@@ -79,69 +86,74 @@
                 <h3 class="mb-0 text-center">User Information</h3>
             </div>
             <div class="card-body">
-                <form class="form p-2" th:action="@{/profile}" th:object="${updateProfile}" action="#" role="form" autocomplete="off"
+                <form class="form p-2" th:action="@{/profile}" th:object="${updateCurrentUser}" action="#" role="form"
+                      autocomplete="off"
                       method="post">
+                    <p th:text="${message}" class="text-success bold my-2 fs-6">
+                        message updated
+                    </p>
+                    <!-***************************** FirstName **********************************-->
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">FirstName</label>
                         <div class="col-lg-9 py-1">
-                            <input th:label="firstName" th:value="${currentUser.firstName}"  id="firstName" name="firstName"
+                            <input th:label="firstName" th:value="${currentUser.firstName}" id="firstName"
+                                   name="firstName"
                                    class="form-control" type="text" value="Jane">
-                            <p th:if="${#fields.hasErrors()}"
+                            <p class="m-1" th:if="${#fields.hasErrors()}"
                                th:errors="*{firstName}"
                                th:errorclass="error"></p>
                         </div>
                     </div>
+                    <!-***************************** LastName **********************************-->
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">LastName</label>
                         <div class="col-lg-9 py-1">
                             <input th:value="${currentUser.lastName}" id="lastName" name="lastName" class="form-control"
                                    type="text" value="Bishop">
-                            <p th:if="${#fields.hasErrors()}"
+                            <p class="m-1" th:if="${#fields.hasErrors()}"
                                th:errors="*{lastName}"
                                th:errorclass="error"></p>
                         </div>
                     </div>
+                    <!-***************************** Email **********************************-->
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Username</label>
-                        <div class="col-lg-9 py-1" >
-                            <p th:text="${currentUser.email}" name="email">exemple@email.fr</p>
+                        <div class="col-lg-9 py-1">
+                            <p th:text="${currentUser.email}" name="email" id="email">exemple@email.fr</p>
                         </div>
                     </div>
+                    <!-***************************** Password *********************************-->
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Password</label>
                         <div class="col-lg-9 py-1">
-                            <input th:value="${currentUser.password}" id="password" name="password" class="form-control"
+                            <input  id="password" name="password" class="form-control"
                                    type="password" value="1234588555884">
-                            <p th:if="${#fields.hasAnyErrors()}"
+                            <p class="m-1" th:if="${#fields.hasAnyErrors()}"
                                th:errors="*{password}"
                                th:errorclass="error"></p>
                         </div>
-
                     </div>
+                    <!-***************************** ConfirmPassword **********************************-->
                     <div class="form-group row">
                         <label class="col-lg-3 col-form-label form-control-label">Confirm</label>
                         <div class="col-lg-9 py-1">
-                            <input th:value="${currentUser.password}" id="confirmPassword" name="confirmPassword"
+                            <input  id="confirmPassword" name="confirmPassword"
                                    class="form-control" type="password" value="1234588555884">
-                            <p th:if="${#fields.hasAnyErrors()}"
+                            <p class="m-1" th:if="${#fields.hasAnyErrors()}"
                                th:errors="*{confirmPassword}"
                                th:errorclass="error"></p>
                         </div>
                     </div>
-                    <div class="form-group row mt-2">
+                    <!-***************************** Button save Changes **********************************-->
+                    <div class="col-12 col-md-6 col-lg-3 form-group row my-4 mx-auto">
                         <label class="col-lg-3 col-form-label form-control-label"></label>
-                        <div class="col-lg-9 py-1">
-                            <input type="reset" class="btn btn-secondary bg-gradient" value="Cancel">
-                            <input type="submit" class="btn btn-success bg-gradient" value="Save Changes">
-                        </div>
-                        <p th:text="${message}" class="text-success bold my-2 fs-6">
-                            message updated
-                        </p>
+<!--                        <div class="col-lg-9 py-1 ">-->
+                            <input type="submit" class="btn btn-success btn-block bg-gradient" value="Save Changes">
+<!--                        </div>-->
                     </div>
                 </form>
             </div>
         </div>
-
     </div>
     <!--fin container-->
 </div>

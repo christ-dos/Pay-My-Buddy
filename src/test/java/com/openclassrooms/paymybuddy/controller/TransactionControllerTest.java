@@ -3,11 +3,11 @@ package com.openclassrooms.paymybuddy.controller;
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
 import com.openclassrooms.paymybuddy.DTO.SendTransaction;
-import com.openclassrooms.paymybuddy.SecurityUtilities;
 import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.Transaction;
 import com.openclassrooms.paymybuddy.model.User;
 import com.openclassrooms.paymybuddy.repository.ITransactionRepository;
+import com.openclassrooms.paymybuddy.security.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.service.TransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.hamcrest.Matchers;
@@ -29,7 +29,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
@@ -40,32 +39,61 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Class of test for {@link TransactionController}
+ *
+ * @author Christine Duarte
+ */
 @WebMvcTest(TransactionController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
 public class TransactionControllerTest {
-
+    /**
+     * An instance of {@link MockMvc} that permit simulate a request HTTP
+     */
     @Autowired
     private MockMvc mockMvcTransaction;
 
+    /**
+     * A mock of {@link ITransactionRepository}
+     */
     @MockBean
     private ITransactionRepository transactionRepositoryMock;
 
+    /**
+     * A mock of {@link TransactionService}
+     */
     @MockBean
     private TransactionService transactionServiceMock;
 
+    /**
+     * A mock of {@link UserService}
+     */
     @MockBean
     private UserService userService;
 
-    private Pageable pageable;
+    /**
+     * A mock of {@link MyUserDetailsService}
+     */
+    @MockBean
+    MyUserDetailsService myUserDetailsServiceMock;
 
+    /**
+     * A List of  {@link FriendList}
+     */
     private List<FriendList> friendListTest;
 
+    /**
+     * An instance of {@link PageImpl}
+     */
     private PageImpl<DisplayingTransaction> displayingTransactionsPage;
 
+    /**
+     * method that create mocks to perform each tests
+     */
     @BeforeEach
     public void setupPerTest() {
-        pageable = PageRequest.of(0, 5);
+//        pageable = PageRequest.of(0, 5);
 
         friendListTest = new ArrayList<>();
         friendListTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
@@ -75,7 +103,6 @@ public class TransactionControllerTest {
         friendListTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
         friendListTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
 
-//        displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
         List<DisplayingTransaction> displayingTransactionsList = new ArrayList<>();
         displayingTransactionsList.add(new DisplayingTransaction("Lisette", "books", 15.0));
@@ -88,9 +115,15 @@ public class TransactionControllerTest {
     /*-------------------------------------------------------------------------------------------------------
                                          Tests View transaction
     ---------------------------------------------------------------------------------------------------------*/
-    @WithMockUser(value = "spring")
+
+    /**
+     * Method that test  get view transaction when the url is correct "/transaction"
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void getTransactionsTransactionView_whenUrlIsSlashAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getTransactionsTransactionView_whenUrlIsSlashTransactionAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
         when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
@@ -114,38 +147,29 @@ public class TransactionControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test get view transaction when the url is wrong "/transac"
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void getTransactionsTransactionView_whenUrlIsTransactionAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
-        //GIVEN
-        when(userService.getFriendListByCurrentUserEmail()).thenReturn(friendListTest);
-        when(transactionServiceMock.getCurrentUserTransactionsByEmail(isA(Pageable.class))).thenReturn(displayingTransactionsPage);
-        //WHEN
-        //THEN
-        mockMvcTransaction.perform(get("/transaction")
-                        .param("size", String.valueOf(5))
-                        .param("page", String.valueOf(1)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("transaction"))
-                .andExpect(model().size(6))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
-                .andExpect(model().attribute("totalPagesTransaction", is(1)))
-                .andExpect(model().attribute("currentPage", is(1)))
-                .andDo(print());
-    }
-
-    @WithMockUser(value = "spring")
-    @Test
-    public void getTransactionsTransactionView_whenUrlHomeIsWrong_thenReturnStatusNotFound() throws Exception {
+    public void getTransactionsTransactionView_whenUrlTransIsWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcTransaction.perform(get("/home"))
+        mockMvcTransaction.perform(get("/transac"))
                 .andExpect(status().isNotFound())
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test get transaction for the current user dada@email.fr
+     * then return a Page of transactions
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getTransactionsTransactionView_whenCurrentUserIsDada_thenReturnTransactionsOfDada() throws Exception {
         //GIVEN
@@ -181,15 +205,20 @@ public class TransactionControllerTest {
 
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test adding a  transaction when balance is enough
+     * then return the Transaction added
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenBalanceIsEnough_thenReturnTransactionAdded() throws Exception {
         //GIVEN
         String receiverEmail = "fifi@email.com";
-        String emitterEmail = SecurityUtilities.userEmail;
-
+        String emitterEmail = "dada@email.fr";
         User userEmitter = User.builder()
-                .email(SecurityUtilities.userEmail)
+                .email(emitterEmail)
                 .password("monTropToppassword")
                 .firstName("Christine")
                 .lastName("Deldalle")
@@ -236,10 +265,15 @@ public class TransactionControllerTest {
                 .andDo(print());
     }
 
-
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test adding transaction when balance is insufficient
+     * then throw a BalanceInsufficientException
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void addTransactionTest_whenBalanceIsInsufficient_thenReturnBalanceInsufficientException() throws Exception {
+    public void addTransactionTest_whenBalanceIsInsufficient_thenThrowBalanceInsufficientException() throws Exception {
         //GIVEN
         String receiverEmail = "luluM@email.fr";
         String emitterEmail = "dada@email.fr";
@@ -256,7 +290,7 @@ public class TransactionControllerTest {
                         .param("amount", "50"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("transaction"))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().hasErrors())
@@ -265,7 +299,13 @@ public class TransactionControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test adding transaction when amount is null
+     * then return fields error not null
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
@@ -279,14 +319,20 @@ public class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "NotNull"))
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test adding transaction when amount is greater than 1000
+     * then return fields error max
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenAmountIsGreaterTo1000_thenReturnFieldsErrorsMax() throws Exception {
         //GIVEN
@@ -299,14 +345,20 @@ public class TransactionControllerTest {
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "amount", "Max"))
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test adding transaction when amount is less than 1
+     * then return fields error min
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
@@ -318,7 +370,7 @@ public class TransactionControllerTest {
                         .param("amount", "0.5")
                         .param("receiverEmail", "luluM@email.fr"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
                 .andExpect(model().errorCount(1))
@@ -326,7 +378,13 @@ public class TransactionControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test adding transaction when value of the selector friends email is empty
+     * then return fields error notBlank
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransactionTest_whenValueSelectorFriendEmailIsEmpty_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
@@ -338,7 +396,7 @@ public class TransactionControllerTest {
                         .param("amount", "2")
                         .param("receiverEmail", ""))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists","totalPagesTransaction", "currentPage"))
+                .andExpect(model().attributeExists("sendTransaction", "transactions", "friendLists", "totalPagesTransaction", "currentPage"))
                 .andExpect(model().attribute("totalPagesTransaction", is(1)))
                 .andExpect(model().attribute("currentPage", 1))
                 .andExpect(model().errorCount(1))
@@ -346,5 +404,4 @@ public class TransactionControllerTest {
                 .andExpect(model().attributeHasFieldErrorCode("sendTransaction", "receiverEmail", "NotBlank"))
                 .andDo(print());
     }
-
 }

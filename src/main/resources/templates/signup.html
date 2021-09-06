@@ -14,16 +14,22 @@
 
     <!-- Script -->
     <script src="https://kit.fontawesome.com/76ab28ac85.js" crossorigin="anonymous"></script>
-
     <title>Sign Up</title>
+    <style>
+        .error {
+            color: red;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+    </style>
 </head>
-<body>
-<div class="container" id="card-container">
+<body class="gray">
+<div class="container " id="card-container">
     <div class="row">
-        <div class="col-sm-9 col-md-8 col-lg-5 mx-auto">
+        <div class="col-sm-9 col-md-9 col-lg-6 mx-auto">
             <div class="card my-auto">
                 <div class="card-body mx-2">
-                    <div class="container  gray rounded py-2">
+                    <div class="container rounded py-2 px-4">
                         <div class="row justify-content-center pt-4">
                             <!--********Titre Pay My Buddy*******-->
                             <h5 class="card-title btn  btn-success bg-gradient text-light text-center p-2 rounded">Pay My
@@ -31,43 +37,28 @@
                             </h5>
                         </div>
                         <h3 class="mt-0 ">Sign Up</h3>
+                        <p th:text="${message}" class="text-danger bold my-3 fs-6">
+                            message success
+                        </p>
                         <hr>
-                        <form th:action="@{/signup}" th:object="${user}" method="post" class="form"
+                        <form th:action="@{/signup}" th:object="${addUser}" method="post" class="form"
                               action="#">
-                            <!--*********Input firstName*****************-->
-                            <div class="form-label-group py-2">
-                                <input th:field="*{firstName}" type="email" id="firstName"
-                                       class="form-control input-lg inputIcon"
-                                       placeholder="&#xf2bd First Name" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
-                                   th:errors="*{firstName}"
-                                   th:errorclass="error"></p>
-                            </div>
-                            <!--*********Input lastName*****************-->
-                            <div class="form-label-group py-2">
-                                <input th:field="*{email}" type="email" id="lastName"
-                                       class="form-control input-lg inputIcon"
-                                       placeholder="&#xf2bd   Last name" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
-                                   th:errors="*{email}"
-                                   th:errorclass="error"></p>
-                            </div>
                             <!--*********Input Email*****************-->
                             <div class="form-label-group py-2">
                                 <input th:field="*{email}" type="email" id="inputEmail"
                                        class="form-control input-lg inputIcon"
                                        placeholder="&#xf0e0  Email" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{email}"
                                    th:errorclass="error"></p>
                             </div>
                             <!--*********Input ConfirmEmail*****************-->
                             <div class="form-label-group py-2" >
-                                <input th:field="*{email}" type="email" id="inputconfirmEmail"
+                                <input th:field="*{confirmEmail}" type="email" id="inputconfirmEmail"
                                        class="form-control input-lg inputIcon"
                                        placeholder="&#xf0e0  Confirm email" required autofocus>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
-                                   th:errors="*{email}"
+                                <p class="m-1" th:if="${#fields.hasAnyErrors()}"
+                                   th:errors="*{confirmEmail}"
                                    th:errorclass="error"></p>
                             </div>
                             <!--*********Input Password*****************-->
@@ -75,23 +66,53 @@
                                 <input th:field="*{password}" type="password" id="inputPassword"
                                        class="form-control input-lg inputIcon"
                                        placeholder="   Password" required>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
                                    th:errors="*{password}"
                                    th:errorclass="error"></p>
                             </div>
                             <!--*********Input ConfirmPassword*****************-->
                             <div class="form-label-group py-2">
-                                <input th:field="*{password}" type="password" id="confirmPassword"
+                                <input th:field="*{confirmPassword}" type="password" id="confirmPassword"
                                        class="form-control input-lg inputIcon"
                                        placeholder="   Confirm Password" required>
-                                <p class="col-9 col-md-9 col-lg-4 m-2 " th:if="${#fields.hasAnyErrors()}"
-                                   th:errors="*{password}"
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
+                                   th:errors="*{confirmPassword}"
                                    th:errorclass="error"></p>
                             </div>
+                            <hr>
+                            <!--*********Input firstName*****************-->
+                            <div class="form-label-group py-2">
+                                <input th:field="*{firstName}" type="text" id="firstName"
+                                       class="form-control input-lg inputIcon"
+                                       placeholder="&#xf2bd First Name" required autofocus>
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
+                                   th:errors="*{firstName}"
+                                   th:errorclass="error"></p>
+                            </div>
+                            <!--*********Input lastName*****************-->
+                            <div class="form-label-group py-2">
+                                <input th:field="*{lastName}" type="text" id="lastName"
+                                       class="form-control input-lg inputIcon"
+                                       placeholder="&#xf2bd   Last name" required autofocus>
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
+                                   th:errors="*{lastName}"
+                                   th:errorclass="error"></p>
+                            </div>
+                            <!--****************AccountBank****************************-->
+                            <div class="form-label-group py-2">
+                                <input th:field="*{accountBank}" type="number" min="0" id="accountBank"
+                                       class="form-control input-lg inputIcon"
+                                       placeholder="  Account Bank" required>
+                                <p class="m-1"  th:if="${#fields.hasAnyErrors()}"
+                                   th:errors="*{accountBank}"
+                                   th:errorclass="error"></p>
+                            </div>
+                            <hr>
                             <!--**********button Login************-->
                             <button class="col-6 col-md-6 col-lg-8 mx-auto mt-5 btn btn-block btn-primary bg-gradient text-center"
                                     type="submit">Submit
                             </button>
+
                         </form>
                     </div>
                 </div>

@@ -1,8 +1,5 @@
 package com.openclassrooms.paymybuddy.IT;
 
-import com.openclassrooms.paymybuddy.DTO.DisplayingTransfer;
-import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.exception.BalanceInsufficientException;
 import com.openclassrooms.paymybuddy.model.TransferTypeEnum;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
@@ -11,7 +8,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,24 +20,38 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Class of Integration test for {@link com.openclassrooms.paymybuddy.model.Transfer}
+ *
+ * @author Christine Duarte
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
-@ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
+@Sql(value = {"/schemaTest.sql"},executionPhase = BEFORE_TEST_METHOD)
 public class TransferIT {
 
+    /**
+     * An instance of {@link MockMvc} that permit simulate a request HTTP
+     */
     @Autowired
     private MockMvc mockMvcTransfer;
 
+    /**
+     * An instance of {@link WebApplicationContext}
+     */
     @Autowired
     private WebApplicationContext context;
 
+    /**
+     * Method that build the mockMvc with the context and springSecurity
+     */
     @Before
     public void setup() {
         mockMvcTransfer = MockMvcBuilders
@@ -45,10 +59,16 @@ public class TransferIT {
                 .apply(springSecurity())
                 .build();
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                        Integration tests View transfer
     ---------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get view transfer when the url is correct "/transfer"
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsSlashTransfer_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -58,10 +78,16 @@ public class TransferIT {
                 .andExpect(status().isOk())
                 .andExpect(view().name("transfer"))
                 .andExpect(model().size(6))
-                .andExpect(model().attributeExists("displayingTransfer", "transfers","transferTypes","totalPages", "currentPage"))
+                .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes", "totalPages", "currentPage"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test get view transfer when the url is wrong "/trans"
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenUrlIsWrong_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
@@ -72,6 +98,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get transfers of the current user when user is "dada@email.fr"
+     * then return the list of transfer of "dada@email.fr"
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserTransfersTest_whenCurrentUserIsDada_thenReturnListTransferOfDada() throws Exception {
         //GIVEN
@@ -82,22 +115,29 @@ public class TransferIT {
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("displayingTransfer", "transfers", "transferTypes"))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("transferType", is(TransferTypeEnum.CREDIT)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(20.0)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(209.95)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer appli")))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(15.0)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(215.00)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("BNP Bank")))))
                 .andExpect(model().attribute("transfers", hasItem(hasProperty("transferType", is(TransferTypeEnum.DEBIT)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("transfer la Poste")))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(-50.0)))))
-                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(159.95)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("description", is("La Poste Bank")))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("amount", is(-100.0)))))
+                .andExpect(model().attribute("transfers", hasItem(hasProperty("postTradeBalance", is(115.0)))))
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is CREDIT
+     * then return the balance with the amount credited
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsCredit_thenReturnBalanceCreditedWithAmount() throws Exception {
         //WHEN
         //THEN
         mockMvcTransfer.perform(MockMvcRequestBuilders.post("/transfer").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("userEmail", SecurityUtilities.userEmail)
+                        .param("userEmail", "dada@email.fr")
                         .param("amount", String.valueOf(20.0))
                         .param("description", "transfer appli")
                         .param("transferType", TransferTypeEnum.CREDIT.name())
@@ -113,6 +153,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is DEBIT and balance is enough
+     * then return the balance with the amount debited
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsEnough_thenReturnTransferAddedWithUserWithNewBalanceDebitedfromAmount() throws Exception {
         //GIVEN
@@ -136,6 +183,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when transfer type is DEBIT and balance Insufficient
+     * then throw BalanceInsufficientException
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenTransferTypeIsDebitAndBalanceIsInsufficient_thenThrowBalanceInsufficientException() throws Exception {
         //GIVEN
@@ -157,6 +211,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when amount is null
+     * then return field error NotNull
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
         //GIVEN
@@ -173,6 +234,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when amount is less to 1
+     * then return field error Min
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenAmountIsLessTo1_thenReturnFieldsErrorsMin() throws Exception {
         //GIVEN
@@ -188,7 +256,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
-
+    /**
+     * Method that test adding transfer when value selector of transfer type is blank
+     * then return field error NotBlank
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlank_thenReturnFieldsErrorsNotBlank() throws Exception {
         //GIVEN
@@ -205,6 +279,13 @@ public class TransferIT {
                 .andDo(print());
     }
 
+    /**
+     * Method that test adding transfer when value selector of transfer type is blank and amount is null
+     * then return field error NotBlank and NotNull
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addTransferCurrentUserTest_whenValueSelectorTypeIsBlankAndAmountIsNull_thenReturnFieldsErrorsNotBlankAndNotNull() throws Exception {
         //GIVEN
@@ -221,5 +302,4 @@ public class TransferIT {
                 .andExpect(model().attributeHasFieldErrorCode("displayingTransfer", "transferType", "NotNull"))
                 .andDo(print());
     }
-
 }

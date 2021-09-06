@@ -49,7 +49,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav p-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="http://localhost:9090/home"><span class="navbar-brand mb-0 h1 ">Home</span>
+                            <a class="nav-link" href="/home"><span class="navbar-brand mb-0 h1 ">Home</span>
                             </a>
                         </li>
                         <li class="nav-item ">
@@ -58,18 +58,23 @@
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/profile"><span
+                            <a class="nav-link " href="/profile"><span
                                     class="navbar-brand mb-0 h1">Profile</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link " href="http://localhost:9090/contact"><span
+                            <a class="nav-link " href="/contact"><span
                                     class="navbar-brand mb-0 h1">Contact</span>
                             </a>
                         </li>
                         <li class="nav-item ">
-                            <a class="nav-link" href="#"><span class="navbar-brand mb-0 h1">Log off</span>
-                            </a>
+                            <div>
+                                <a class="nav-link" href="javascript: document.logoutForm.submit()"><span class="navbar-brand mb-0 h1">Log off</span>
+                                </a>
+                                <form name="logoutForm" th:action="@{/logout}" method="post" th:hidden="true">
+                                    <input hidden type="submit" value="Sign Out"/>
+                                </form>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -77,12 +82,11 @@
         </div>
     </div>
 </nav>
-
 <!--************ link Transaction et Home /************-->
 <div class="container-fluid gray py-2">
     <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" href="http://localhost:9090/home">Home /</a>
+            <a class="nav-link" href="/home">Home /</a>
         </li>
         <li class="nav-item">
             <a class="nav-link disabled " href="#">Transaction</a>
@@ -123,7 +127,7 @@
                     </div>
                     <!--*************Input Number**************-->
                     <div class="col-12 col-md-2 col-lg-3 mb-3 d-flex flex-column">
-                        <input th:field="*{amount}" class="text-right form-control" type="number"
+                        <input th:field="*{amount}" class="text-right form-control-select" type="number"
                                id="howmuch" step="0.01"
                                placeholder="0€" min="0" max="10000">
                         <p th:if="${#fields.hasAnyErrors()}"

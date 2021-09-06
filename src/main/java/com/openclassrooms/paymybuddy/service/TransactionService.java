@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 /**
  * Class of service that manage Transaction entity
+ * implements {@link ITransactionService}
  *
  * @author Christine Duarte
  */
@@ -31,6 +32,7 @@ public class TransactionService implements ITransactionService {
      * Instance of {@link ITransactionRepository}
      */
     private final ITransactionRepository transactionRepository;
+
 
     /**
      * Instance of {@link IUserRepository}
@@ -50,30 +52,21 @@ public class TransactionService implements ITransactionService {
     }
 
     /**
-     * Method which get all transactions in database
+     * Method which get all transactions for the current user with pagination
      *
-     * @return An Iterable of Transaction
-     */
-    @Override
-    public Iterable<Transaction> getTransactions() {
-        return transactionRepository.findAll();
-    }
-
-    /**
-     * Method which get all transactions for a user email
-     *
-     * @return A list of {@link DisplayingTransaction}, a data transfer object
+     * @param pageable Abstract interface for pagination information.
+     * @return A list of {@link DisplayingTransaction}
      */
     @Override
     public Page<DisplayingTransaction> getCurrentUserTransactionsByEmail(Pageable pageable) {
         Page<Transaction> transactions = transactionRepository.findTransactionsByUserEmitterEmailOrUserReceiverEmailOrderByDateDesc(
-                SecurityUtilities.userEmail, SecurityUtilities.userEmail, pageable);
+                SecurityUtilities.getCurrentUser(), SecurityUtilities.getCurrentUser(), pageable);
         int totalElements = (int) transactions.getTotalElements();
-        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.userEmail);
+        log.debug("Service: displaying list of transaction for userEmail: " + SecurityUtilities.getCurrentUser());
 
-        return new PageImpl<DisplayingTransaction>(transactions.stream()
+        return new PageImpl<>(transactions.stream()
                 .map(transaction -> {
-                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.userEmail)) {
+                    if (transaction.getUserEmitter().getEmail().equals(SecurityUtilities.getCurrentUser())) {
                         User userReceiver = userRepository.findByEmail(transaction.getUserReceiver().getEmail());
                         return new DisplayingTransaction(userReceiver.getFirstName(), transaction.getDescription(), -transaction.getAmount());
                     } else {
@@ -88,17 +81,19 @@ public class TransactionService implements ITransactionService {
      *
      * @param sendTransaction An object {@link SendTransaction}
      * @return A {@link Transaction} object
+     * @throws BalanceInsufficientException when the balance is insufficient to realize the operation
      */
     @Transactional
     @Override
     public Transaction addTransaction(SendTransaction sendTransaction) {
-        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.userEmail);
-        if ((sendTransaction.getAmount() + calculateFees(sendTransaction.getAmount())) > userEmitterTransaction.getBalance()) {
+        Double fees = calculateFees(sendTransaction.getAmount());
+        User userEmitterTransaction = userRepository.findByEmail(SecurityUtilities.getCurrentUser());
+        if ((sendTransaction.getAmount() + fees) > userEmitterTransaction.getBalance()) {
             log.error("Service: account balance is insufficient");
             throw new BalanceInsufficientException("Insufficient account balance, your balance is: " + userEmitterTransaction.getBalance());
         }
         Transaction transaction = new Transaction();
-        transaction.setFees(calculateFees(sendTransaction.getAmount()));
+        transaction.setFees(fees);
         transaction.setDate(LocalDateTime.now());
         transaction.setAmount(sendTransaction.getAmount());
         transaction.setDescription(sendTransaction.getDescription());
@@ -148,5 +143,4 @@ public class TransactionService implements ITransactionService {
 
         return userEmitterTransaction;
     }
-
 }

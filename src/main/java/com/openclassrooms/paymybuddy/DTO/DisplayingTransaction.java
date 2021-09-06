@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Class DTO that permit display data of transactions in view
+ * Class DTO {@link DisplayingTransaction} that displayed data of transactions in view transaction
  *
  * @author Christine Duarte
  */
@@ -14,7 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-public class DisplayingTransaction  {
+public class DisplayingTransaction {
     /**
      * Attribute that containing the first name of the receiver of the transaction
      */
@@ -30,6 +30,11 @@ public class DisplayingTransaction  {
      */
     private Double amount;
 
+    /**
+     * Method toString
+     *
+     * @return a String of the object DisplayingTransaction
+     */
     @Override
     public String toString() {
         return "DisplayingTransaction{" +

@@ -7,8 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * Interface that handles database queries for friend's table
  *
@@ -21,7 +19,9 @@ public interface IFriendRepository extends CrudRepository<Friend, FriendId> {
      * the result is ordered in descending order by date of addition
      *
      * @param userEmail A String containing the email of the user
+     * @param pageable  Abstract interface for pagination information.
      * @return A list of {@link Friend} object
      */
-    Page<Friend> findByUserEmailOrderByDateAddedDesc(String userEmail, Pageable pageable);
+    Page<Friend> findByUserEmailOrderByDateAddedDesc(String userEmail,
+                                                     Pageable pageable);
 }

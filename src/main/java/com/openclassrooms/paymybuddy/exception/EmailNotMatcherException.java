@@ -1,17 +1,17 @@
 package com.openclassrooms.paymybuddy.exception;
 
 /**
- * Class that handles exceptions when the user already exist in list of connections
+ * Class that handles exception email not match with field confirm email
  *
  * @author Christine Duarte
  */
-public class UserAlreadyExistException extends RuntimeException {
+public class EmailNotMatcherException extends RuntimeException {
     /**
      * Constructor
      *
      * @param message A string containing the message that is sent if the exception in handling
      */
-    public UserAlreadyExistException(String message) {
+    public EmailNotMatcherException(String message) {
         super(message);
     }
 }

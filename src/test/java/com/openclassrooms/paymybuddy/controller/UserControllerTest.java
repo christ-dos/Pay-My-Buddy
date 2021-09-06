@@ -1,14 +1,18 @@
 package com.openclassrooms.paymybuddy.controller;
 
+import com.openclassrooms.paymybuddy.DTO.AddUser;
 import com.openclassrooms.paymybuddy.DTO.DisplayingTransaction;
 import com.openclassrooms.paymybuddy.DTO.FriendList;
-import com.openclassrooms.paymybuddy.DTO.UpdateProfile;
+import com.openclassrooms.paymybuddy.DTO.UpdateCurrentUser;
 import com.openclassrooms.paymybuddy.SecurityUtilities;
-import com.openclassrooms.paymybuddy.configuration.MyUserDetails;
+import com.openclassrooms.paymybuddy.exception.EmailNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.PasswordNotMatcherException;
 import com.openclassrooms.paymybuddy.exception.UserAlreadyExistException;
 import com.openclassrooms.paymybuddy.exception.UserNotFoundException;
 import com.openclassrooms.paymybuddy.model.User;
+import com.openclassrooms.paymybuddy.repository.IUserRepository;
+import com.openclassrooms.paymybuddy.security.MyUserDetails;
+import com.openclassrooms.paymybuddy.security.MyUserDetailsService;
 import com.openclassrooms.paymybuddy.service.ITransactionService;
 import com.openclassrooms.paymybuddy.service.UserService;
 import org.hamcrest.Matchers;
@@ -25,11 +29,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,42 +44,66 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Class of test for {@link UserController}
+ *
+ * @author Christine Duarte
+ */
 @WebMvcTest(UserController.class)
 @ExtendWith(MockitoExtension.class)
 @AutoConfigureMockMvc
-//@SpringBootTest
 public class UserControllerTest {
-
+    /**
+     * An instance of {@link MockMvc} that permit simulate a request HTTP
+     */
     @Autowired
     private MockMvc mockMvcUser;
 
+    /**
+     * A mock of {@link UserService}
+     */
     @MockBean
     private UserService userServiceMock;
 
+    /**
+     * A mock of {@link MyUserDetailsService}
+     */
     @MockBean
-    private UserDetailsService userDetailsServiceMock;
+    private MyUserDetailsService myUserDetailsServiceMock;
 
+    /**
+     * A mock of {@link ITransactionService}
+     */
     @MockBean
     private ITransactionService transactionServiceMock;
 
-    private Pageable pageable;
+    /**
+     * A mock of {@link IUserRepository}
+     */
+    @MockBean
+    private IUserRepository userRepositoryMock;
 
+    /**
+     * A mock of {@link Authentication}
+     */
+    @MockBean
+    private Authentication authentication;
+
+    /**
+     * An instance of {@link PageImpl}
+     */
     private Page<FriendList> displayingFriendsPage;
 
-
+    /**
+     * Method that create mocks to perform each tests
+     */
     @BeforeEach
     public void setupPerTest() {
-//        mockMvcUser = MockMvcBuilders
-//                .webAppContextSetup(context)
-//                .apply(springSecurity())
-//                .build();
-        pageable = PageRequest.of(0, 5);
-
         List<FriendList> friendListPageTest = new ArrayList<>();
         friendListPageTest.add(new FriendList("kikine@email.fr", "Christine", "Duhamel"));
         friendListPageTest.add(new FriendList("wiwi@email.fr", "Wiliam", "Desouza"));
@@ -80,29 +111,39 @@ public class UserControllerTest {
         friendListPageTest.add(new FriendList("barnabé@email.fr", "Barnabé", "Vincent"));
         friendListPageTest.add(new FriendList("eve@email.fr", "Eva", "Bernard"));
         friendListPageTest.add(new FriendList("marion@email.fr", "Marion", "Dubois"));
+
         displayingFriendsPage = new PageImpl<>(friendListPageTest);
 
     }
- /*-----------------------------------------------------------------------------------------------------
-                                     Tests View Login
- ------------------------------------------------------------------------------------------------------*/
+    /*-----------------------------------------------------------------------------------------------------
+                                        Tests View Login
+    ------------------------------------------------------------------------------------------------------*/
 
+    /**
+     * Method that test  get view login when the url is correct "/login"
+     *
+     * @throws Exception
+     */
     @Test
-//    @WithMockUser
-    public void showLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
+    public void getLoginViewTest_whenUrlLoginIsGood_thenReturnTwoModelsAndStatusOk() throws Exception {
         //GIVEN
         //WHEN
         //THEN
-        mockMvcUser.perform(get("/customlogin"))
+        mockMvcUser.perform(get("/login"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"))
-                .andExpect(model().attributeExists("userDetails"))
+                .andExpect(model().attributeDoesNotExist())
                 .andDo(print());
     }
 
-    @WithMockUser(value = "@dada@email.fr")
+    /**
+     * Method that test get view login when the url is wrong "/log
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void showLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
+    public void getLoginViewTest_whenUrlLogAndWrong_thenReturnStatusNotFound() throws Exception {
         //GIVEN
         //WHEN
         //THEN
@@ -111,52 +152,87 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test authentication in  view login when username is null
+     * then throw {@link UsernameNotFoundException}
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "wiwi@email.fr", password = "passpass")
     @Test
-    public void submitLoginViewTest_whenUserNameIsNull_thenReturnFieldsErrorsNotNull() throws Exception {
+    public void authenticationLoginView_whenUserNameIsNull_thenThrowsUserNameNotFoundException() throws Exception {
         //GIVEN
-//        MyUserDetails myUserDetails = new MyUserDetails("", "pass");
-//        when(userDetailsServiceMock.loadUserByUsername(isA(String.class))).thenReturn(myUserDetails);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
+        when(myUserDetailsServiceMock.loadUserByUsername(isA(String.class))).thenThrow(new UsernameNotFoundException("User not found"));
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/customlogin")
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/login")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .accept(MediaType.ALL)).andExpect(status().isOk())
-//                .andExpect(redirectedUrl("/customlogin"))
-//                .andExpect(MockMvcResultMatchers.redirectedUrl("/customlogin"))
-//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/customlogin")))
-                .andExpect(model().attributeExists("userDetails"))
-                .andExpect(model().errorCount(1))
-                .andExpect(model().attributeHasFieldErrorCode("userDetails", "username", "NotBlank"))
+                        .accept(MediaType.ALL)
+                        .param("username", "dada@email.fr")
+                        .param("password", "passpass"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error=true"))
+                .andExpect(cookie().exists("remember-me"))
                 .andDo(print());
     }
 
-    @WithMockUser(username = "dada@email.fr", password = "pass")
+    /**
+     * Method that test authentication in view login when username exist and password match
+     * then  redirect view home
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void submitLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlIndex() throws Exception {
+    public void authenticationLoginViewTest_whenUserExistAndPasswordIsGood_thenReturnStatusRedirectUrlHome() throws Exception {
         //GIVEN
-        String username = SecurityUtilities.userEmail;
-        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", "pass");
-        when(userDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String username = "dada@email.fr";
+        MyUserDetails myUserDetails = new MyUserDetails("dada@email.fr", bCryptPasswordEncoder.encode("passpass"));
+        when(myUserDetailsServiceMock.loadUserByUsername(username)).thenReturn(myUserDetails);
         //WHEN
         //THEN
-        mockMvcUser.perform(MockMvcRequestBuilders.post("/authentication/login")
-                        .with(SecurityMockMvcRequestPostProcessors.user(username).password("pass"))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/login").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .with(SecurityMockMvcRequestPostProcessors.user(username).password(bCryptPasswordEncoder.encode("passpass")).roles("USER"))
                         .param("username", username)
-                        .param("password", "pass")
-                        .accept(MediaType.ALL)).andExpect(status().isOk())
-//                .andExpect(redirectedUrl("/index"))
-//                .andExpect(MockMvcResultMatchers.redirectedUrl("/index"))
-//                .andExpect(MockMvcResultMatchers.header().string("Location", Matchers.containsStringIgnoringCase("/index")))
-                .andExpect(view().name("login"))
-                .andExpect(model().attributeExists("userDetails"))
-                .andExpect(model().hasNoErrors())
+                        .param("password", "passpass")
+                        .accept(MediaType.ALL)).andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/home"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test log out
+     * then redirect  view login
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
+    @Test
+    public void logOutTest() throws Exception {
+        //GIVEN
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/logout").with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"))
+
+                .andDo(print());
+
+
+    }
     /*-----------------------------------------------------------------------------------------------------
                                      Tests View home
      ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get user information in view home when current user is "dada@email.fr
+     * then return current user information in view home
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getUserInformationHomeViewTest_whenCurrentUserIsDada_thenReturnFirstNameDamienAndLastNameSanchez() throws Exception {
         //GIVEN
@@ -178,7 +254,6 @@ public class UserControllerTest {
                 "Elisabeth", "books", 5.0);
         displayingTransactions.add(displayingTransaction);
 
-        Page<FriendList> friendListPage = new PageImpl<>(friendLists);
         Page<DisplayingTransaction> displayingTransactionsPage = new PageImpl<>(displayingTransactions);
 
         when(userServiceMock.getFriendListByCurrentUserEmail()).thenReturn(friendLists);
@@ -187,8 +262,8 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")
-                        .param("user", String.valueOf(currentUser)))
-                .andExpect(status().isOk())
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", "dada@email.fr")).andExpect(status().isOk())
                 .andExpect(view().name("home"))
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attributeExists("user", "lastBuddy", "lastTransaction"))
@@ -204,6 +279,13 @@ public class UserControllerTest {
 
     }
 
+    /**
+     * Method that test  get user information in view home when list of friends or list of transaction is empty
+     * then display in view none result found
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getUserInformationHomeViewTest_whenListFriendOrListTransactionIsEmpty_thenDisplayingHomeViewNoneResult() throws Exception {
         //GIVEN
@@ -222,7 +304,7 @@ public class UserControllerTest {
         displayingTransactions.add(null);
 
         Page<FriendList> friendListPage = new PageImpl<>(friendLists);
-        Page<DisplayingTransaction> displayingTransactionPage= new PageImpl<>(displayingTransactions);
+        Page<DisplayingTransaction> displayingTransactionPage = new PageImpl<>(displayingTransactions);
 
         when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(friendListPage);
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
@@ -230,6 +312,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/home")
+                        .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .param("user", String.valueOf(currentUser)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("home"))
@@ -243,12 +326,17 @@ public class UserControllerTest {
                 .andExpect(model().attribute("lastTransaction", nullValue()))
                 .andDo(print());
     }
-
     /*-----------------------------------------------------------------------------------------------------
                                         Tests View addfriend
      ------------------------------------------------------------------------------------------------------*/
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test get list connection when url is correct "/addfriend"
+     * then display view addfriend with pagination
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
@@ -262,6 +350,9 @@ public class UserControllerTest {
                 .andExpect(model().attributeExists("friendLists", "totalPages", "currentPage"))
                 .andExpect(model().attribute("totalPages", is(1)))
                 .andExpect(model().attribute("currentPage", is(1)))
+                .andExpect(view().name("addfriend"))
+                .andExpect(model().size(4))
+                .andExpect(model().attributeExists("friendLists", "friendList"))
                 .andExpect(model().attribute("friendLists", Matchers.isA(Page.class)))
                 .andExpect(model().attribute("friendLists", Matchers.hasProperty("totalElements", equalTo(6L))))
                 .andExpect(model().attribute("friendLists", hasItem(hasProperty("firstName", is("Christine")))))
@@ -270,22 +361,14 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
-    @Test
-    public void getListConnectionsTest_whenUrlIsAddFriendAndGood_thenReturnTwoModelsAndStatusOk() throws Exception {
-        //GIVEN
-        when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
-        //WHEN
-        //THEN
-        mockMvcUser.perform(get("/addfriend"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("addfriend"))
-                .andExpect(model().size(4))
-                .andExpect(model().attributeExists("friendLists", "friendList"))
-                .andDo(print());
-    }
-
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test add friend to list connection when user exist in DB
+     * and friend is not present in list of friends
+     * then the user can be added
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenUserExistInDBAndNotExistInListFriend_thenWeCanAddToFriendInList() throws Exception {
         //GIVEN
@@ -307,7 +390,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test add friend to list connection when friend already exist in list of friends
+     * then throw friendEmailAlreadyExist
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFriendEmailAlreadyExistInListFriend_thenReturnErrorFieldFriendAlreadyExist() throws Exception {
         //GIVEN
@@ -320,7 +409,7 @@ public class UserControllerTest {
                         .param("email", "françois@email.fr")
                         .param("firstName", "François")
                         .param("lastName", "Dujardin")
-                        .param("userEmail", SecurityUtilities.userEmail))
+                        .param("userEmail", SecurityUtilities.getCurrentUser()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("addfriend"))
                 .andExpect(model().attributeExists("friendList", "friendLists"))
@@ -332,22 +421,24 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
-    @WithMockUser(value = "spring")
+    /**
+     * Method that test add friend to list connection when friend to add not exist in DB
+     * then display message error in form "user not exist in DB"
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFriendToAddedNotExistInDB_thenCanNotBeAddedErrorMessageInFieldEmailUserNotExist() throws Exception {
         //GIVEN
-//        String springToken = "org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository.CSRF_TOKEN";
-//        HttpSessionCsrfTokenRepository httpSessionCsrfTokenRepository = new HttpSessionCsrfTokenRepository();
-//        CsrfToken csrfToken = httpSessionCsrfTokenRepository.generateToken(new MockHttpServletRequest());
-
         String friendEmailNotExist = "wiwi@email.fr";
         when(userServiceMock.addFriendCurrentUserList(friendEmailNotExist)).thenThrow(new UserNotFoundException("User's email not exist"));
         when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("userEmail", SecurityUtilities.userEmail)
-                        .param("email", friendEmailNotExist)//.sessionAttr(springToken, csrfToken))
+                        .param("userEmail", "dada@email.fr")
+                        .param("email", friendEmailNotExist)
                 ).andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList", "friendLists"))
                 .andExpect(model().attributeHasErrors())
@@ -355,11 +446,17 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test add friend to list connection when field email is empty
+     * then return error in fields NotBlank
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenFieldEmailIsEmpty_thenReturnErrorFieldCanNotBlank() throws Exception {
         //GIVEN
         when(userServiceMock.getFriendListByCurrentUserEmailPaged(isA(Pageable.class))).thenReturn(displayingFriendsPage);
-
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -371,6 +468,13 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test add friend to list connection when friend email is equal to the current user
+     * then return error in field unableAddingOwnEmail
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void addFriendToListConnectionTest_whenEmailToAddAndEmailCurrentUserIsEquals_thenReturnErrorFieldUnableAddingOwnEmail() throws Exception {
         //GIVEN
@@ -378,7 +482,7 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/addfriend").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.userEmail))
+                        .param("email", SecurityUtilities.getCurrentUser()))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("friendList"))
                 .andExpect(model().errorCount(1))
@@ -389,6 +493,14 @@ public class UserControllerTest {
     /*-----------------------------------------------------------------------------------------------------
                                       Tests View profile
    ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test get current user information in view profile when url is correct "/profile"
+     * then display view profile
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfileAndGood_thenReturnStatusOK() throws Exception {
         //GIVEN
@@ -402,12 +514,12 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(get("/profile")
-                        .param("email", SecurityUtilities.userEmail))
+                        .param("email", SecurityUtilities.getCurrentUser()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("profile"))
                 .andExpect(model().size(2))
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("currentUser", "updateProfile"))
+                .andExpect(model().attributeExists("currentUser", "updateCurrentUser"))
                 .andExpect(model().attribute("currentUser", hasProperty("email", is("dada@email.fr"))))
                 .andExpect(model().attribute("currentUser", hasProperty("firstName", is("Damien"))))
                 .andExpect(model().attribute("currentUser", hasProperty("lastName", is("Sanchez"))))
@@ -415,6 +527,12 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test get current user information in view profile when url is wong "/prof"
+     * then return status not found
+     *
+     * @throws Exception
+     */
     @WithMockUser(value = "spring")
     @Test
     public void getCurrentUserInformationInProfileViewTest_whenUrlIsSlashProfAndWrong_thenReturnStatusNotFound() throws Exception {
@@ -426,7 +544,14 @@ public class UserControllerTest {
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when current user is "dada@email.fr
+     * then return user updated
+     *
+     * @throws Exception
+     */
     @Test
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     public void updateCurrentUserInformationTest_whenCurrentUserIsDada_thenReturnUserDadaUpdated() throws Exception {
         //GIVEN
         User currentUser = User.builder()
@@ -436,7 +561,7 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Damien");
         updateProfileCurrentUser.setLastName("Sanchez");
         updateProfileCurrentUser.setPassword("passpasspass");
@@ -446,22 +571,29 @@ public class UserControllerTest {
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
-                        .param("email", SecurityUtilities.userEmail)
+                        .param("email", SecurityUtilities.getCurrentUser())
                         .param("firstName", updateProfileCurrentUser.getFirstName())
                         .param("lastName", updateProfileCurrentUser.getLastName())
                         .param("password", updateProfileCurrentUser.getPassword())
                         .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attributeExists("updateProfile", "currentUser","message"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser", "message"))
                 .andExpect(model().size(3))
-                .andExpect(model().attribute("updateProfile", hasProperty("email", is("dada@email.fr"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("firstName", is("Damien"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("lastName", is("Sanchez"))))
-                .andExpect(model().attribute("updateProfile", hasProperty("password", is("passpasspass"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("email", is("dada@email.fr"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("firstName", is("Damien"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("lastName", is("Sanchez"))))
+                .andExpect(model().attribute("updateCurrentUser", hasProperty("password", is("passpasspass"))))
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when firstName is blank
+     * then return error NotBlank in field firstname
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenFirstNameIsBlank_thenReturnFieldErrorNotBlankInFieldFirstName() throws Exception {
         //GIVEN
@@ -472,7 +604,7 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("");
         updateProfileCurrentUser.setLastName("Duhamel");
         updateProfileCurrentUser.setPassword("passpasspass");
@@ -490,11 +622,18 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "firstName", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "firstName", "NotBlank"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when lastName is blank
+     * then return error in fields NotBlank in field lastname
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenLastNameIsBlank_thenReturnFieldErrorNotBlankInFieldLastName() throws Exception {
         //GIVEN
@@ -505,7 +644,7 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("");
         updateProfileCurrentUser.setPassword("passpasspass");
@@ -523,11 +662,18 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "lastName", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "lastName", "NotBlank"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when password is less 8 characters
+     * then return error in fields size in field password
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsLess8_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
@@ -538,7 +684,7 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
         updateProfileCurrentUser.setPassword("pass");
@@ -556,14 +702,21 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(2))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "Size"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "Size"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "password", "Size"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "Size"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when password is greater than 100 characters
+     * then return error in fields Size in field password
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
-    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan30_thenReturnErrorSizeInFieldPassWord() throws Exception {
+    public void updateCurrentUserInformationTest_whenCurrentUserIsDadaAndPassWordIsGreaterThan100_thenReturnErrorSizeInFieldPassWord() throws Exception {
         //GIVEN
         User currentUser = User.builder()
                 .email("dada@email.fr")
@@ -572,11 +725,11 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
-        updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspass");
-        updateProfileCurrentUser.setConfirmPassword("passpasspasspasspasspasspasspass");
+        updateProfileCurrentUser.setPassword("passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass");
+        updateProfileCurrentUser.setConfirmPassword("passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass");
 
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
         //WHEN
@@ -590,12 +743,19 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(2))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "Size"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "Size"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "password", "Size"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "Size"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when password is blank
+     * then return error in fields NotBlank in field password
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
@@ -606,7 +766,7 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Christine");
         updateProfileCurrentUser.setLastName("Duhamel");
         updateProfileCurrentUser.setPassword("        ");
@@ -623,11 +783,18 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(2))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "password", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "password", "NotBlank"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when confirmPassword is blank
+     * then return error in fields NotBlank in field confirmPassword
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_whenConfirmPassWordIsBlank_thenReturnErrorInFieldPassWordNotBlank() throws Exception {
         //GIVEN
@@ -638,7 +805,7 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Damien");
         updateProfileCurrentUser.setLastName("Sanchez");
         updateProfileCurrentUser.setPassword("passpass");
@@ -656,11 +823,18 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "NotBlank"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "NotBlank"))
                 .andDo(print());
     }
 
+    /**
+     * Method that test update current user information when confirmPassword not match with password
+     * then throw PasswordNotMatcherException
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
     @Test
     public void updateCurrentUserInformationTest_ConfirmPassWordNotMatchWithPassword_thenThrowsPasswordNotMatcherException() throws Exception {
         //GIVEN
@@ -671,14 +845,14 @@ public class UserControllerTest {
                 .password("pass")
                 .build();
 
-        UpdateProfile updateProfileCurrentUser = new UpdateProfile();
+        AddUser updateProfileCurrentUser = new AddUser();
         updateProfileCurrentUser.setFirstName("Damien");
         updateProfileCurrentUser.setLastName("Sanchez");
         updateProfileCurrentUser.setPassword("password");
         updateProfileCurrentUser.setConfirmPassword("passwordnotmatch");
 
         when(userServiceMock.getUserByEmail(isA(String.class))).thenReturn(currentUser);
-        when(userServiceMock.addUser(isA(UpdateProfile.class))).thenThrow(new PasswordNotMatcherException("confirmPassword not match with password"));
+        when(userServiceMock.updateProfile(isA(UpdateCurrentUser.class))).thenThrow(new PasswordNotMatcherException("confirmPassword not match with password"));
         //WHEN
         //THEN
         mockMvcUser.perform(MockMvcRequestBuilders.post("/profile").with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -686,15 +860,525 @@ public class UserControllerTest {
                         .param("firstName", updateProfileCurrentUser.getFirstName())
                         .param("lastName", updateProfileCurrentUser.getLastName())
                         .param("password", updateProfileCurrentUser.getPassword())
+                        .param("confirmEmail", updateProfileCurrentUser.getEmail())
                         .param("confirmPassword", updateProfileCurrentUser.getConfirmPassword()))
                 .andExpect(status().isOk())
                 .andExpect(model().hasErrors())
                 .andExpect(model().errorCount(1))
-                .andExpect(model().attributeExists("updateProfile", "currentUser"))
-                .andExpect(model().attributeHasFieldErrorCode("updateProfile", "confirmPassword", "ConfirmPasswordNotMatch"))
+                .andExpect(model().attributeExists("updateCurrentUser", "currentUser"))
+                .andExpect(model().attributeHasFieldErrorCode("updateCurrentUser", "confirmPassword", "ConfirmPasswordNotMatch"))
                 .andDo(print());
     }
 
+    /*-----------------------------------------------------------------------------------------------------
+                                     Tests View signup
+  ------------------------------------------------------------------------------------------------------*/
+
+    /**
+     * Method that test signUp in view signup when user email not exist in DB
+     * and field email match with  field confirmEmail
+     * and field password match with  field confirmPassword
+     * then return user added and view login
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBAndEmailMatchConfirmEmailAndPasswordMatchConfirmPassword_thenReturnUserAddedAndMessageSuccess() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("login"))
+                .andExpect(model().hasNoErrors())
+                .andExpect(model().size(2))
+                .andExpect(model().attributeExists("addUser", "message"))
+                .andExpect(model().attribute("message", is("Account registered with success!")))
+                .andExpect(model().attribute("addUser", hasProperty("firstName", is("Ines"))))
+                .andExpect(model().attribute("addUser", hasProperty("lastName", is("Martin"))))
+                .andExpect(model().attribute("addUser", hasProperty("email", is("inim@email.fr"))))
+                .andExpect(model().attribute("addUser", hasProperty("confirmEmail", is("inim@email.fr"))))
+                .andExpect(model().attribute("addUser", hasProperty("password", is("passpass"))))
+                .andExpect(model().attribute("addUser", hasProperty("confirmPassword", is("passpass"))))
+                .andDo(print());
+    }
+
+    //******************************Tests Errors in fields*************************************
+
+    /**
+     * Method that test signUp  when user not exist in DB but field firstName is blank
+     * then return error in field firstName
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldFirstNameIsBlank_thenReturnErrorInFieldsFirstName() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "", "Martin", "passpass", "passpass", "inim@email.fr", "inim@email.fr"
+                , 123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "firstName", "NotBlank"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp  when user not exist in DB but field lastName is blank
+     * then return error in field lastName
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldLastNameIsBlank_thenReturnErrorInFieldsLastName() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "lastName", "NotBlank"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp  when user not exist in DB but field email is blank
+     * then return error in field email
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldEmailIsBlank_thenReturnErrorInFieldsEmail() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "email", "NotBlank"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp  when user not exist in DB but field confirmEmail is blank
+     * then return error in field confirmEmail
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButFieldConfirmEmailIsBlank_thenReturnErrorInFieldsConfirmEmail() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "",
+                123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmEmail", "NotBlank"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp  when user not exist in DB but field password is blank
+     * then return error in field password
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsBlank_thenReturnErrorInFieldsPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "        ", "passpass", "inim@email.fr",
+                "inim@email.fr", 123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "password", "NotBlank"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp  when user not exist in DB but field password is less 8 characters
+     * then return error in field password
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsLess8_thenReturnErrorInFieldsPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "pass", "passpass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "password", "Size"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp  when user not exist in DB but field password is greater than 100 characters
+     * then return error in field password
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordIsGreaterThan100_thenReturnErrorInFieldsPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin",
+                "passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass", "passpass", "inim@email.fr",
+                "inim@email.fr", 123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "password", "Size"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp when user not exist in DB but field confirmPassword is blank
+     * then return error in field confirmPassword
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsBlank_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "        ", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "NotBlank"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp when user not exist in DB but field confirmPassword is less 8 characters
+     * then return error in field confirmPassword
+     *
+     * @throws Exception
+     */
+    @WithMockUser(username = "dada@email.fr", password = "passpass")
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsLess8_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "pass", "inim@email.fr", "inim@email.fr",
+                123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "Size"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp when user not exist in DB but field confirmPassword is greater than 100 characters
+     * then return error in field confirmPassword
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButConfirmPasswordIsGreaterThan100_thenReturnErrorInFieldsConfirmPassword() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass",
+                "passpasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspasspass",
+                "inim@email.fr",
+                "inim@email.fr", 123456);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "Size"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp when user not exist in DB but field accountBank is null
+     * then return error in field accountBank
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButAccountBankIsNull_thenReturnErrorInFieldsAccountBank() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Ines", "Martin", "passpass", "passpass", "inim@email.fr", "inim@email.fr",
+                null);
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "accountBank", "NotNull"))
+                .andDo(print());
+    }
+
+    //************************************************Test Exceptions view signup**********************************************
+    /**
+     * Method that test signUp when user already exist in DB
+     * then throw a {@link UserAlreadyExistException}
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserAlreadyExistInDB_thenThrowsUserAlreadyExistException() throws Exception {
+        //GIVEN
+        User userAlreadyExist = User.builder()
+                .email("dada@email.fr")
+                .firstName("Damien")
+                .lastName("Sanchez")
+                .password("passpass")
+                .build();
+        AddUser addUser = new AddUser(
+                "Damien", "Sanchez", "passpass", "passpass", "dada@email.fr", "dada@email.fr",
+                123456);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(userAlreadyExist);
+        when(userServiceMock.addUser(isA(AddUser.class))).thenThrow(new UserAlreadyExistException("This email already exist"));
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmPassword())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "email", "EmailAlreadyExist"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp when user not exist in DB but email and confirmEmail not match
+     * then throw EmailNotMatcherException
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButEmailAndConfirmEmailNotMatch_thenThrowsEmailNotMatcherException() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Albert", "Masarin", "passpass", "passpass", "albert@email.fr", "emailNotMatche@email.fr",
+                0123654);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
+        when(userServiceMock.addUser(isA(AddUser.class))).thenThrow(new EmailNotMatcherException("Field confirm email not match with email"));
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmEmail())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmEmail", "ConfirmEmailNotMatcher"))
+                .andDo(print());
+    }
+
+    /**
+     * Method that test signUp when user not exist in DB but password and confirmPassword not match
+     * then throw PasswordNotMatcherException
+     *
+     * @throws Exception
+     */
+    @Test
+    public void signUpUserViewSignUp_whenUserNotExistInDBButPasswordAndConfirmPasswordNotMatch_thenThrowsUserPasswordNotMatcherException() throws Exception {
+        //GIVEN
+        AddUser addUser = new AddUser(
+                "Albert", "Masarin", "passpass", "notmatch", "albert@email.fr", "albert@email.fr",
+                0123654);
+        when(userRepositoryMock.findByEmail(isA(String.class))).thenReturn(null);
+        when(userServiceMock.addUser(isA(AddUser.class))).thenThrow(new PasswordNotMatcherException("Field confirm password not match with password"));
+        //WHEN
+        //THEN
+        mockMvcUser.perform(MockMvcRequestBuilders.post("/signup").with(SecurityMockMvcRequestPostProcessors.csrf())
+                        .param("email", addUser.getEmail())
+                        .param("confirmEmail", addUser.getConfirmEmail())
+                        .param("firstName", addUser.getFirstName())
+                        .param("lastName", addUser.getLastName())
+                        .param("password", addUser.getPassword())
+                        .param("confirmPassword", addUser.getConfirmEmail())
+                        .param("accountBank", String.valueOf(addUser.getAccountBank())))
+                .andExpect(status().isOk())
+                .andExpect(view().name("signup"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().errorCount(1))
+                .andExpect(model().size(1))
+                .andExpect(model().attributeExists("addUser"))
+                .andExpect(model().attributeHasFieldErrorCode("addUser", "confirmPassword", "ConfirmPasswordNotMatcher"))
+                .andDo(print());
+    }
 }
 
 
