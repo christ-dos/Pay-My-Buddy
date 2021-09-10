@@ -1,0 +1,60 @@
+body{
+	margin: auto;
+	font-size: 1.2em
+}
+
+.gray{
+	background-color:rgba(196,196,196,0.2);
+}
+
+.disabled{
+	color:rgb(196,196,196);
+}
+
+.bold{ 
+font-weight: bold; 
+}
+
+/************** navBar****************/
+.navbar-nav>.nav-item>.nav-link>.active {
+	color: blue;
+}
+
+.align-nav {
+    display: flex;
+    justify-content: space-between;
+    flex: 1 1 auto;
+    padding: 0px;
+}
+
+#logo{
+	padding:2px;
+	vertical-align: center;
+	margin-left: 4px;
+}
+
+/************Items Select Add Connection, input number and btn Pay*********/
+#howmuch{
+	text-align: right;
+}
+/* ************table*********/
+table{
+	font-size: 0.8em;
+	border-collapse: collapse;
+	border: 2px solid black;
+}
+
+.borderless td, .borderless th {
+    border: none;
+    text-align: center
+}
+
+
+
+
+
+
+
+
+
+
