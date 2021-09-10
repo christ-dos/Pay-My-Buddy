@@ -88,7 +88,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login")
-                .deleteCookies("dummyCookie")
+                .deleteCookies("JSESSIONID")
                 .invalidateHttpSession(true);
     }
 }

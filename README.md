@@ -29,7 +29,7 @@ https://dev.mysql.com/downloads/mysql/
 After downloading the mysql 8 installer and installing it, you will be asked to configure the password for the default root account. This code uses the default root account to connect and the password can be set as rootroot.
 
 Running App
-Post installation of MySQL, Java and Maven, you will have to set up the tables and data in the data base. For this, please run the sql commands present in the schema.sql and schemaTest.sql(database for tests) file under the resources folder in the code base.
+Post installation of MySQL, Java and Maven, you will have to set up the tables and data in the database. For this, please run the sql commands present in the schema.sql and schemaTest.sql(database for tests) file in path _src/main/resources_ in the code base.
 
 Finally, you will be ready to import the code into an IDE of your choice and run the PayMyBuddy.java to launch the application.
 
